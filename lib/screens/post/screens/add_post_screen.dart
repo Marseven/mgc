@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:appinio_video_player/appinio_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:giphy_get/giphy_get.dart';
@@ -7,39 +6,39 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/file_picker_dialog_component.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/common_models.dart';
 import 'package:socialv/models/common_models/post_mdeia_model.dart';
+import 'package:socialv/models/members/member_response.dart';
 import 'package:socialv/models/posts/media_model.dart';
 import 'package:socialv/models/posts/post_in_list_model.dart';
 import 'package:socialv/models/posts/post_model.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/post/components/add_post_media_component.dart';
 import 'package:socialv/screens/post/components/edit_post_media_component.dart';
+import 'package:flutter_mentions/flutter_mentions.dart';
 import 'package:socialv/screens/post/components/show_selected_media_component.dart';
-
+import 'package:socialv/screens/post/screens/post_in_groups_screen.dart';
 import '../../../utils/app_constants.dart';
+import '../../../utils/cached_network_image.dart';
 
 // ignore: must_be_immutable
 class AddPostScreen extends StatefulWidget {
   final String? component;
+  final String? groupName;
   final int? groupId;
   PostModel? post;
   final VoidCallback? callback;
   final bool showMediaOptions;
   final String? parentPostId;
 
-  AddPostScreen(
-      {this.component,
-      this.groupId,
-      this.post,
-      this.callback,
-      this.showMediaOptions = true,
-      this.parentPostId});
+  AddPostScreen({this.component, this.post, this.callback, this.showMediaOptions = true, this.parentPostId, this.groupName, this.groupId});
 
   @override
   State<AddPostScreen> createState() => _AddPostScreenState();
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
-  List<File> mediaList = [];
+  List<PostMedia> mediaList = [];
   List<PostMediaModel> postMedia = [];
 
   MediaModel? selectedMedia;
@@ -48,16 +47,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   List<MediaModel> mediaTypeList = [];
   List<PostInListModel> postInList = [];
-
   bool enableSelectMedia = true;
-
-  TextEditingController postContentTextEditController = TextEditingController();
-
+  List<MemberResponse> mentionsMemberList = [];
+  List<Map<String, dynamic>> userNameForMention = [];
   PostInListModel dropdownValue = PostInListModel();
+  GlobalKey<FlutterMentionsState> postContentTextKey = GlobalKey<FlutterMentionsState>();
 
   @override
   void initState() {
     super.initState();
+    getMentionsMembers();
     afterBuildCreated(() async {
       setStatusBarColor(context.cardColor);
       if (widget.showMediaOptions.validate()) {
@@ -71,8 +70,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   Future<void> init() async {
     if (widget.post != null) {
       if (mediaTypeList.isNotEmpty && widget.post!.mediaType != null) {
-        selectedMedia = mediaTypeList
-            .firstWhere((element) => element.type == widget.post!.mediaType);
+        selectedMedia = mediaTypeList.firstWhere((element) => element.type == widget.post!.mediaType);
         enableSelectMedia = false;
       } else {
         enableSelectMedia = true;
@@ -82,8 +80,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         postMedia.addAll(widget.post!.medias.validate());
       }
 
-      postContentTextEditController.text =
-          parseHtmlString(widget.post!.content.validate());
+      postContentTextKey.currentState!.controller!.text = parseHtmlString(widget.post!.content.validate());
       setState(() {});
     }
   }
@@ -92,6 +89,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     appStore.setLoading(true);
     await getMediaTypes(type: widget.component.validate()).then((value) {
       mediaTypeList.addAll(value);
+
       appStore.setLoading(false);
     }).catchError((e) {
       appStore.setLoading(false);
@@ -101,24 +99,15 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   Future<void> postIn() async {
-    appStore.setLoading(true);
-    await getPostInList().then((value) {
-      postInList.addAll(value);
+    postInList.add(PostInListModel(id: 0, title: language.myProfile));
+    postInList.add(PostInListModel(title: language.selectGroups));
 
-      if (widget.groupId != null) {
-        value.forEach((element) {
-          if (element.id == widget.groupId) {
-            dropdownValue = element;
-          }
-        });
-      } else {
-        dropdownValue = value.first;
-      }
-      appStore.setLoading(false);
-    }).catchError((e) {
-      appStore.setLoading(false);
-      toast(e.toString(), print: true);
-    });
+    if (widget.groupId != null && widget.parentPostId == null) {
+      postInList.insert(postInList.length - 1, PostInListModel(id: widget.groupId, title: widget.groupName));
+      dropdownValue = postInList.firstWhere((element) => element.id == widget.groupId.validate());
+    } else {
+      dropdownValue = postInList.first;
+    }
 
     setState(() {});
   }
@@ -136,12 +125,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
     if (file != null) {
       if (file == FileTypes.CAMERA) {
         appStore.setLoading(true);
-        await getImageSource(
-                isCamera: true,
-                isVideo: selectedMedia!.type == MediaTypes.video)
-            .then((value) {
+        await getImageSource(isCamera: true, isVideo: selectedMedia!.type == MediaTypes.video).then((value) {
           appStore.setLoading(false);
-          mediaList.add(value!);
+          mediaList.add(PostMedia(file: value));
           setState(() {});
         }).catchError((e) {
           log('Error: ${e.toString()}');
@@ -149,15 +135,32 @@ class _AddPostScreenState extends State<AddPostScreen> {
         });
       } else {
         appStore.setLoading(true);
-        mediaList.addAll(
-          await getMultipleFiles(mediaType: selectedMedia!)
-              .whenComplete(() => appStore.setLoading(false)),
-        );
-        setState(() {});
 
+        getMultipleFiles(mediaType: selectedMedia!).then((value) {
+          value.forEach((element) {
+            mediaList.add(PostMedia(file: element));
+          });
+        }).catchError((e) {
+          log('Error: ${e.toString()}');
+        }).whenComplete(() {
+          setState(() {});
+          appStore.setLoading(false);
+        });
         log('MediaList: ${mediaList.length}');
       }
     }
+  }
+
+  Future<List<MemberResponse>> getMentionsMembers({String? mentionText}) async {
+    await getAllMembers(searchText: mentionText).then((value) {
+      mentionsMemberList = value;
+      mentionsMemberList.forEach((element) {
+        userNameForMention.add({"full_name": element.name, "display": element.userLogin, "photo": element.avatarUrls!.full});
+      });
+    }).catchError((e) {
+      toast(e.toString(), print: true);
+    });
+    return mentionsMemberList;
   }
 
   @override
@@ -178,8 +181,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       backgroundColor: context.cardColor,
       appBar: AppBar(
         backgroundColor: context.cardColor,
-        title: Text(widget.post != null ? language.editPost : language.newPost,
-            style: boldTextStyle(size: 20)),
+        title: Text(widget.post != null ? language.editPost : language.newPost, style: boldTextStyle(size: 20)),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -192,32 +194,25 @@ class _AddPostScreenState extends State<AddPostScreen> {
           AppButton(
             enabled: true,
             shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
-            text: widget.post != null ? language.edit : "Publier",
+            text: widget.post != null ? language.edit : language.post,
             textStyle: primaryTextStyle(color: Colors.white, size: 12),
             onTap: () async {
               hideKeyboard(context);
               ifNotTester(() async {
-                if (mediaList.isEmpty &&
-                    postContentTextEditController.text.trim().isEmpty &&
-                    gif == null) {
+                if (mediaList.isEmpty && postContentTextKey.currentState!.controller!.text.isEmpty && gif == null) {
                   toast(language.addPostContent);
                 } else {
                   appStore.setLoading(true);
                   await uploadPost(
                     id: widget.post != null ? widget.post!.activityId : null,
-                    files: mediaList,
-                    content: postContentTextEditController.text,
-                    mediaType:
-                        selectedMedia != null ? selectedMedia!.type : null,
+                    postMedia: mediaList,
+                    content:postContentTextKey.currentState!.controller!.text.replaceAll("\n", "</br>"),
+                    mediaType: selectedMedia != null ? selectedMedia!.type : null,
                     isMedia: selectedMedia == null ? false : true,
                     postIn: dropdownValue.id.validate().toString(),
-                    gif: gif != null
-                        ? gif!.images!.original!.url.validate()
-                        : null,
+                    gif: gif != null ? gif!.images!.original!.url.validate() : null,
                     parentPostId: widget.parentPostId,
-                    type: widget.parentPostId != null
-                        ? PostActivityType.activityShare
-                        : null,
+                    type: widget.parentPostId != null ? PostActivityType.activityShare : null,
                     mediaId: gif != null ? gif!.id.validate() : "",
                   ).then((value) async {
                     appStore.setLoading(false);
@@ -232,7 +227,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 }
               });
             },
-            color: appColorPrimary,
+            color: context.primaryColor,
             width: 60,
             padding: EdgeInsets.all(0),
             elevation: 0,
@@ -248,10 +243,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 if (widget.showMediaOptions.validate())
                   Container(
                     width: context.width(),
-                    margin: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                        borderRadius: radius(),
-                        color: context.scaffoldBackgroundColor),
+                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(borderRadius: radius(), color: context.scaffoldBackgroundColor),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,18 +253,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
                           return Container(
                             padding: EdgeInsets.symmetric(vertical: 16),
                             decoration: BoxDecoration(
-                              color: selectedMedia == e
-                                  ? appColorPrimary
-                                  : Colors.transparent,
+                              color: selectedMedia == e ? context.primaryColor : Colors.transparent,
                               borderRadius: radius(defaultRadius),
                             ),
                             child: Text(
                               e.title.validate(),
-                              style: boldTextStyle(
-                                  size: 12,
-                                  color: selectedMedia == e
-                                      ? white
-                                      : Colors.grey.shade500),
+                              style: boldTextStyle(size: 12, color: selectedMedia == e ? white : Colors.grey.shade500),
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -295,101 +282,100 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             } else {
                               toast(language.youCanNotSelect);
                             }
-                          },
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent).expand();
+                          }, splashColor: Colors.transparent, highlightColor: Colors.transparent).expand();
                         } else {
                           return Offstage();
                         }
                       }).toList(),
                     ),
                   ),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                      color: context.scaffoldBackgroundColor,
-                      borderRadius: radius(defaultRadius)),
-                  child: TextField(
-                    enabled: !appStore.isLoading,
-                    controller: postContentTextEditController,
-                    autofocus: false,
-                    maxLines: 10,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: language.whatsOnYourMind,
-                      hintStyle: secondaryTextStyle(size: 12),
-                    ),
+                FlutterMentions(
+                  key: postContentTextKey,
+                  suggestionPosition: SuggestionPosition.Top,
+                  maxLines: 10,
+                  decoration: inputDecorationFilled(
+                    context,
+                    fillColor: context.scaffoldBackgroundColor,
+                    label: language.whatsOnYourMind,
                   ),
-                ),
-                if (selectedMedia != null &&
-                    selectedMedia!.type != MediaTypes.gif)
-                  Stack(
-                    children: [
-                      DottedBorderWidget(
-                        padding: EdgeInsets.symmetric(vertical: 32),
-                        radius: defaultAppButtonRadius,
-                        dotsWidth: 8,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AppButton(
-                              elevation: 0,
-                              color: appColorPrimary,
-                              text: language.selectFiles,
-                              textStyle: boldTextStyle(color: Colors.white),
-                              onTap: () async {
-                                if (selectedMedia!.type == MediaTypes.photo ||
-                                    selectedMedia!.type == MediaTypes.video) {
-                                  onSelectMedia();
-                                } else {
-                                  appStore.setLoading(true);
-                                  mediaList.addAll(
-                                    await getMultipleFiles(
-                                            mediaType: selectedMedia!)
-                                        .whenComplete(
-                                            () => appStore.setLoading(false)),
-                                  );
-                                  setState(() {});
+                  suggestionListDecoration: BoxDecoration(color: context.cardColor, border: Border.all(color: context.dividerColor)),
+                  mentions: [
+                    Mention(
+                      trigger: "@",
+                      matchAll: true,
+                      data: userNameForMention,
+                      suggestionBuilder: (data) {
+                        return Container(
+                          constraints: BoxConstraints(maxHeight: 200),
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
+                          child: Row(
+                            children: [
+                              Text('@' + data["display"], style: boldTextStyle(size: 14, color: context.primaryColor), maxLines: 1, overflow: TextOverflow.ellipsis).expand(),
+                              TextIcon(
+                                text: data["full_name"],
+                                textStyle: secondaryTextStyle(),
+                                suffix: cachedImage(data["photo"], height: 20, width: 20, fit: BoxFit.cover).cornerRadiusWithClipRRect(4),
+                                maxLine: 1,
+                                expandedText: true,
+                              ).expand(),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ).paddingSymmetric(horizontal: 16, vertical: 8),
+                if (selectedMedia != null && selectedMedia!.type != MediaTypes.gif)
+                  AddPostMediaComponent(
+                    enableSelectMedia: enableSelectMedia,
+                    selectedMedia: selectedMedia!,
+                    onSelectMedia: () {
+                      onSelectMedia();
+                    },
+                    mediaListAdd: () async {
+                      appStore.setLoading(true);
+                      getMultipleFiles(mediaType: selectedMedia!).then((value) {
+                        value.forEach((element) {
+                          mediaList.add(PostMedia(file: element));
+                        });
+                      }).catchError((e) {
+                        log('Error: ${e.toString()}');
+                      });
 
-                                  log('MediaList: ${mediaList.length}');
-                                }
-                              },
-                            ),
-                            16.height,
-                            Text(
-                              '${language.addPost} ${selectedMedia!.title.capitalizeFirstLetter()}',
-                              style: secondaryTextStyle(size: 16),
-                            ).center(),
-                            8.height,
-                            Text(
-                              '${language.pleaseSelectOnly} ${selectedMedia!.type} ${language.files} ',
-                              style: secondaryTextStyle(),
-                            ).center(),
-                          ],
-                        ),
-                      ),
-                      if (enableSelectMedia)
-                        Positioned(
-                          child: Icon(Icons.cancel_outlined,
-                                  color: appColorPrimary, size: 18)
-                              .onTap(() {
-                            if (!appStore.isLoading) {
-                              mediaList.clear();
-                              selectedMedia = null;
-                              setState(() {});
-                            }
-                          },
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent),
-                          right: 6,
-                          top: 6,
-                        ),
-                    ],
-                  ).paddingSymmetric(horizontal: 16, vertical: 16),
+                      setState(() {});
+                      log('MediaList: ${mediaList.length}');
+                    },
+                    clearMediaList: () {
+                      mediaList.clear();
+                      selectedMedia = null;
+                      setState(() {});
+                    },
+                    linkListAdd: (link) {
+                      if (link.isNotEmpty) {
+                        mediaList.add(PostMedia(isLink: true, link: link));
+                      } else {
+                        toast(language.enterValidUrl);
+                      }
+                      FocusScope.of(context).unfocus();
+                    },
+                  ).paddingAll(16),
                 if (mediaList.isNotEmpty)
                   ShowSelectedMediaComponent(
-                      mediaList: mediaList, mediaType: selectedMedia!),
+                    mediaList: mediaList,
+                    mediaType: selectedMedia!,
+                    videoController: List.generate(
+                      mediaList.length,
+                      (index) {
+                        PostMedia media = mediaList[index];
+                        if (media.isLink)
+                          return VideoPlayerController.network(mediaList[index].link.validate());
+                        else
+                          return VideoPlayerController.network(mediaList[index].file!.path.validate());
+                      },
+                    ),
+                  ),
                 if (postMedia.isNotEmpty)
                   EditPostMediaComponent(
                     mediaList: postMedia,
@@ -412,12 +398,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       Positioned(
                         right: 0,
                         child: IconButton(
-                            onPressed: () {
-                              gif = null;
-                              setState(() {});
-                            },
-                            icon: Icon(Icons.cancel_outlined,
-                                color: appColorPrimary)),
+                          onPressed: () {
+                            gif = null;
+                            setState(() {});
+                          },
+                          icon: Icon(Icons.cancel_outlined, color: context.primaryColor),
+                        ),
                       ),
                     ],
                   ).paddingSymmetric(horizontal: 16),
@@ -425,14 +411,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(language.postIn, style: boldTextStyle())
-                        .paddingSymmetric(horizontal: 16),
+                    Text(language.postIn, style: boldTextStyle()).paddingSymmetric(horizontal: 16),
                     if (dropdownValue.id != null)
                       Container(
                         height: 40,
-                        decoration: BoxDecoration(
-                            color: context.scaffoldBackgroundColor,
-                            borderRadius: radius(commonRadius)),
+                        decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
                         margin: EdgeInsets.symmetric(horizontal: 16),
                         child: DropdownButtonHideUnderline(
                           child: ButtonTheme(
@@ -440,42 +423,44 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             child: DropdownButton<PostInListModel>(
                               borderRadius: BorderRadius.circular(commonRadius),
                               value: dropdownValue,
-                              icon: Icon(Icons.arrow_drop_down,
-                                  color: appStore.isDarkMode
-                                      ? bodyDark
-                                      : bodyWhite),
+                              icon: Icon(Icons.arrow_drop_down, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                               elevation: 8,
+                              isExpanded: true,
                               style: primaryTextStyle(),
-                              underline:
-                                  Container(height: 2, color: appColorPrimary),
+                              underline: Container(height: 2, color: appColorPrimary),
                               alignment: Alignment.bottomCenter,
                               onChanged: (PostInListModel? newValue) {
-                                setState(() {
-                                  dropdownValue = newValue!;
-                                });
+                                if (newValue!.id == null) {
+                                  PostInGroupsScreen().launch(context).then((value) {
+                                    if (value != null) {
+                                      dropdownValue = value;
+                                      postInList.insert(postInList.length - 1, value);
+                                      setState(() {});
+                                    }
+                                  });
+                                } else {
+                                  setState(() {
+                                    dropdownValue = newValue;
+                                  });
+                                }
                               },
-                              items: postInList
-                                  .map<DropdownMenuItem<PostInListModel>>((e) {
+                              items: postInList.map<DropdownMenuItem<PostInListModel>>((e) {
                                 return DropdownMenuItem<PostInListModel>(
                                   value: e,
-                                  child: Text('${e.title.validate()}',
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1),
+                                  child: Text('${e.title.validate()}', overflow: TextOverflow.ellipsis, maxLines: 1),
                                 );
                               }).toList(),
                             ),
                           ),
                         ),
-                      ),
+                      ).expand(),
                   ],
                 ),
                 50.height,
               ],
             ),
           ),
-          Observer(
-              builder: (_) =>
-                  LoadingWidget().center().visible(appStore.isLoading))
+          Observer(builder: (_) => LoadingWidget().center().visible(appStore.isLoading))
         ],
       ),
     );

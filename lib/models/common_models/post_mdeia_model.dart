@@ -2,14 +2,16 @@ class PostMediaModel {
   int? id;
   String? type;
   String? url;
+  String? source;
 
-  PostMediaModel({this.id, this.type, this.url});
+  PostMediaModel({this.id, this.type, this.url, this.source});
 
   factory PostMediaModel.fromJson(Map<String, dynamic> json) {
     return PostMediaModel(
       id: json['id'],
       type: json['type'],
       url: json['url'],
+      source: json['source'],
     );
   }
 
@@ -18,6 +20,7 @@ class PostMediaModel {
     data['id'] = this.id;
     data['type'] = this.type;
     data['url'] = this.url;
+    data['source'] = this.source;
     return data;
   }
 }

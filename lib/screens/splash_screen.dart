@@ -23,28 +23,15 @@ class _SplashScreenState extends State<SplashScreen> {
     setStatusBarColor(Colors.transparent);
     super.initState();
     init();
-
-    if (isMobile) {
-      getPackageName().then((value) {
-        currentPackageName = value;
-      }).catchError((e) {
-        //
-      });
-    }
   }
 
   Future<void> init() async {
     afterBuildCreated(() {
-      appStore.setLanguage(getStringAsync(SharePreferencesKey.LANGUAGE,
-          defaultValue: Constants.defaultLanguage));
+      appStore.setLanguage(getStringAsync(SharePreferencesKey.LANGUAGE, defaultValue: Constants.defaultLanguage));
 
-      int themeModeIndex = getIntAsync(SharePreferencesKey.APP_THEME,
-          defaultValue: AppThemeMode.ThemeModeSystem);
+      int themeModeIndex = getIntAsync(SharePreferencesKey.APP_THEME, defaultValue: AppThemeMode.ThemeModeSystem);
       if (themeModeIndex == AppThemeMode.ThemeModeSystem) {
-        appStore.toggleDarkMode(
-            value:
-                MediaQuery.of(context).platformBrightness != Brightness.light,
-            isFromMain: true);
+        appStore.toggleDarkMode(value: MediaQuery.of(context).platformBrightness != Brightness.light, isFromMain: true);
       }
     });
 
@@ -56,11 +43,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (widget.activityId != null) {
       if (appStore.isLoggedIn) {
-        SinglePostScreen(postId: widget.activityId.validate())
-            .launch(context, isNewTask: true);
+        SinglePostScreen(postId: widget.activityId.validate()).launch(context, isNewTask: true);
       } else {
-        SignInScreen(activityId: widget.activityId.validate())
-            .launch(context, isNewTask: true);
+        SignInScreen(activityId: widget.activityId.validate()).launch(context, isNewTask: true);
       }
     } else if (appStore.isLoggedIn && !isTokenExpire) {
       DashboardScreen().launch(context, isNewTask: true);
@@ -83,27 +68,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Stack(
         alignment: Alignment.center,
         children: [
-          //Image.asset(SPLASH_SCREEN_IMAGE, height: context.height(), width: context.width(), fit: BoxFit.cover),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                50.height,
-                Image.asset(
-                  APP_ICON,
-                  height: 100,
-                  width: 104,
-                  fit: BoxFit.cover,
-                ),
-                10.width,
-                Text(APP_NAME,
-                    style: boldTextStyle(color: appColorSecondary, size: 40)),
-              ],
-            ),
+          Image.asset(SPLASH_SCREEN_IMAGE, height: context.height(), width: context.width(), fit: BoxFit.cover),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(APP_ICON, height: 50, width: 52, fit: BoxFit.cover, color: Colors.white),
+              8.width,
+              Text(APP_NAME, style: boldTextStyle(color: Colors.white, size: 40)),
+            ],
           ),
         ],
       ),

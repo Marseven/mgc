@@ -51,8 +51,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     await getPaymentMethods().then((value) {
       paymentGateways.addAll(value);
-      selectedPaymentMethod =
-          value.firstWhere((element) => element.id == 'ebilling');
+      selectedPaymentMethod = value.firstWhere((element) => element.id == 'cod');
       isPaymentGatewayLoading = false;
       setState(() {});
     }).catchError((e) {
@@ -92,11 +91,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           return {"product_id": e.id, "quantity": e.quantity};
         }).toList(),
         "shipping_lines": [
-          {
-            "method_id": "flat_rate",
-            "method_title": "Flat Rate",
-            "total": getPrice(cart.totals!.totalPrice.validate())
-          }
+          {"method_id": "flat_rate", "method_title": "Flat Rate", "total": getPrice(cart.totals!.totalPrice.validate())}
         ]
       };
 
@@ -104,14 +99,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       await createOrder(request: request).then((value) async {
         if (orderNotesController.text.isNotEmpty) {
-          Map noteRequest = {
-            "note": orderNotesController.text.trim(),
-            "customer_note": true
-          };
-          await createOrderNotes(
-                  request: noteRequest, orderId: value.id.validate())
-              .then((value) {})
-              .catchError((e) {
+          Map noteRequest = {"note": orderNotesController.text.trim(), "customer_note": true};
+          await createOrderNotes(request: noteRequest, orderId: value.id.validate()).then((value) {}).catchError((e) {
             log('Order Note Error: ${e.toString()}');
           });
         }
@@ -133,8 +122,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         });
 
         appStore.setLoading(false);
-        finish(context, true);
-        finish(context, true);
+        finish(context);
+        finish(context);
         OrderDetailScreen(orderDetails: value).launch(context);
       }).catchError((e) {
         appStore.setLoading(false);
@@ -193,9 +182,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             cachedImage(
-                              cartItem.images.validate().isNotEmpty
-                                  ? cartItem.images!.first.src.validate()
-                                  : '',
+                              cartItem.images.validate().isNotEmpty ? cartItem.images!.first.src.validate() : '',
                               height: 50,
                               width: 50,
                               fit: BoxFit.cover,
@@ -204,32 +191,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(cartItem.name.validate(),
-                                    style: primaryTextStyle()),
-                                Text(
-                                    '${cartItem.quantity.validate()} x ${getPrice(cartItem.prices!.price.validate())} ${getPrice(cartItem.prices!.currencySymbol.validate())}',
+                                Text(cartItem.name.validate(), style: primaryTextStyle()),
+                                Text('${cartItem.quantity.validate()}*${getPrice(cartItem.prices!.currencySymbol.validate())}${getPrice(cartItem.prices!.price.validate())}',
                                     style: secondaryTextStyle()),
                               ],
                             ).expand(),
-                            PriceWidget(
-                                price: getPrice(
-                                        cartItem.totals!.lineTotal.validate())
-                                    .toString(),
-                                size: 16),
+                            PriceWidget(price: getPrice(cartItem.totals!.lineTotal.validate()).toString(), size: 16),
                             16.width,
-                            Image.asset(ic_delete,
-                                    color: Colors.red,
-                                    height: 18,
-                                    width: 18,
-                                    fit: BoxFit.cover)
-                                .onTap(() {
+                            Image.asset(ic_delete, color: Colors.red, height: 18, width: 18, fit: BoxFit.cover).onTap(() {
                               showConfirmDialogCustom(
                                 context,
                                 onAccept: (c) {
                                   appStore.setLoading(true);
-                                  removeCartItem(
-                                          productKey: cartItem.key.validate())
-                                      .then((value) {
+                                  removeCartItem(productKey: cartItem.key.validate()).then((value) {
                                     toast(language.itemRemovedSuccessfully);
                                     getCart();
                                     isChange = true;
@@ -243,32 +217,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 title: language.removeFromCartConfirmation,
                                 positiveText: language.remove,
                               );
-                            },
-                                    splashColor: Colors.transparent,
-                                    highlightColor:
-                                        Colors.transparent).paddingSymmetric(
-                                    vertical: 4),
+                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent).paddingSymmetric(vertical: 4),
                           ],
                         ).paddingSymmetric(vertical: 8);
                       },
                     )
                   else
-                    Text(language.yourCartIsCurrentlyEmpty,
-                        style: secondaryTextStyle()),
+                    Text(language.yourCartIsCurrentlyEmpty, style: secondaryTextStyle()),
                   16.height,
                   Container(
-                    decoration: BoxDecoration(
-                        color: context.cardColor,
-                        borderRadius: radius(commonRadius)),
-                    padding: EdgeInsets.only(
-                        left: 16, right: 8, bottom: 16, top: 16),
+                    decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(commonRadius)),
+                    padding: EdgeInsets.only(left: 16, right: 8, bottom: 16, top: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('${language.total}: ', style: boldTextStyle()),
-                        PriceWidget(
-                            price:
-                                getPrice(cart.totals!.totalPrice.validate())),
+                        PriceWidget(price: getPrice(cart.totals!.totalPrice.validate())),
                       ],
                     ),
                   ),
@@ -277,12 +241,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(language.billingAddress, style: boldTextStyle()),
-                      Image.asset(ic_edit,
-                              width: 18,
-                              height: 18,
-                              fit: BoxFit.cover,
-                              color: appColorPrimary)
-                          .onTap(() {
+                      Image.asset(ic_edit, width: 18, height: 18, fit: BoxFit.cover, color: context.primaryColor).onTap(() {
                         EditShopDetailsScreen().launch(context).then((value) {
                           if (value ?? false) getCart();
                         });
@@ -292,47 +251,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   10.height,
                   Wrap(
                     children: [
-                      Text('${billingAddress.company}, ',
-                              style: secondaryTextStyle())
-                          .visible(
-                              billingAddress.company.validate().isNotEmpty),
-                      Text('${billingAddress.address_1}, ',
-                              style: secondaryTextStyle())
-                          .visible(
-                              billingAddress.address_1.validate().isNotEmpty),
-                      Text('${billingAddress.address_2}, ',
-                              style: secondaryTextStyle())
-                          .visible(
-                              billingAddress.address_2.validate().isNotEmpty),
-                      Text('${billingAddress.city}, ',
-                              style: secondaryTextStyle())
-                          .visible(billingAddress.city.validate().isNotEmpty),
-                      Text('${billingAddress.state}, ',
-                              style: secondaryTextStyle())
-                          .visible(billingAddress.state.validate().isNotEmpty),
-                      Text('${billingAddress.country}',
-                              style: secondaryTextStyle())
-                          .visible(
-                              billingAddress.country.validate().isNotEmpty),
+                      Text('${billingAddress.company}, ', style: secondaryTextStyle()).visible(billingAddress.company.validate().isNotEmpty),
+                      Text('${billingAddress.address_1}, ', style: secondaryTextStyle()).visible(billingAddress.address_1.validate().isNotEmpty),
+                      Text('${billingAddress.address_2}, ', style: secondaryTextStyle()).visible(billingAddress.address_2.validate().isNotEmpty),
+                      Text('${billingAddress.city}, ', style: secondaryTextStyle()).visible(billingAddress.city.validate().isNotEmpty),
+                      Text('${billingAddress.state}, ', style: secondaryTextStyle()).visible(billingAddress.state.validate().isNotEmpty),
+                      Text('${billingAddress.country}', style: secondaryTextStyle()).visible(billingAddress.country.validate().isNotEmpty),
                     ],
                   ),
-                  Text('${language.postCode}: ${billingAddress.postcode}',
-                          style: secondaryTextStyle())
-                      .visible(billingAddress.postcode.validate().isNotEmpty),
-                  Text('${language.phone}: ${billingAddress.phone}',
-                          style: secondaryTextStyle())
-                      .visible(billingAddress.phone.validate().isNotEmpty),
-                  Text('${language.email}: ${billingAddress.email}',
-                          style: secondaryTextStyle())
-                      .visible(billingAddress.email.validate().isNotEmpty),
+                  Text('${language.postCode}: ${billingAddress.postcode}', style: secondaryTextStyle()).visible(billingAddress.postcode.validate().isNotEmpty),
+                  Text('${language.phone}: ${billingAddress.phone}', style: secondaryTextStyle()).visible(billingAddress.phone.validate().isNotEmpty),
+                  Text('${language.email}: ${billingAddress.email}', style: secondaryTextStyle()).visible(billingAddress.email.validate().isNotEmpty),
                   16.height,
                   Text(language.selectPaymentMethod, style: boldTextStyle()),
                   !isPaymentGatewayLoading
                       ? paymentGateways.isNotEmpty
                           ? Container(
-                              decoration: BoxDecoration(
-                                  color: context.cardColor,
-                                  borderRadius: radius(defaultAppButtonRadius)),
+                              decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultAppButtonRadius)),
                               margin: EdgeInsets.symmetric(vertical: 16),
                               padding: EdgeInsets.all(16),
                               child: ListView.builder(
@@ -340,61 +275,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount: paymentGateways.length,
                                 itemBuilder: (ctx, index) {
-                                  if (paymentGateways[index].id.validate() ==
-                                      'ebilling') {
+                                  if (paymentGateways[index].id.validate() == 'cod') {
                                     return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                            Icon(
-                                                selectedPaymentMethod ==
-                                                        paymentGateways[index]
-                                                    ? Icons.radio_button_checked
-                                                    : Icons.radio_button_off,
-                                                color: appColorPrimary,
-                                                size: 20),
+                                            Icon(selectedPaymentMethod == paymentGateways[index] ? Icons.radio_button_checked : Icons.radio_button_off, color: context.primaryColor, size: 20),
                                             8.width,
-                                            Text(
-                                                paymentGateways[index]
-                                                    .title
-                                                    .validate(),
-                                                style: primaryTextStyle()),
+                                            Text(paymentGateways[index].title.validate(), style: primaryTextStyle()),
                                           ],
                                         ),
                                         Container(
-                                          child: Text(
-                                              paymentGateways[index]
-                                                  .description
-                                                  .validate(),
-                                              style:
-                                                  secondaryTextStyle(size: 12)),
-                                          decoration: BoxDecoration(
-                                              color: context
-                                                  .scaffoldBackgroundColor,
-                                              borderRadius:
-                                                  radius(commonRadius)),
+                                          child: Text(paymentGateways[index].description.validate(), style: secondaryTextStyle(size: 12)),
+                                          decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
                                           padding: EdgeInsets.all(8),
                                           margin: EdgeInsets.only(top: 4),
-                                        ).visible(selectedPaymentMethod ==
-                                            paymentGateways[index])
+                                        ).visible(selectedPaymentMethod == paymentGateways[index])
                                       ],
                                     ).onTap(() {
-                                      selectedPaymentMethod =
-                                          paymentGateways[index];
+                                      selectedPaymentMethod = paymentGateways[index];
                                       setState(() {});
-                                    },
-                                        splashColor: Colors.transparent,
-                                        highlightColor: Colors.transparent);
+                                    }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
                                   } else {
                                     return Offstage();
                                   }
                                 },
                               ),
                             )
-                          : Text(language.paymentGatewaysNotFound,
-                              style: secondaryTextStyle())
+                          : Text(language.paymentGatewaysNotFound, style: secondaryTextStyle())
                       : ThreeBounceLoadingWidget(),
                   16.height,
                   Text(language.placeOrderText, style: secondaryTextStyle()),
@@ -404,15 +313,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       text: '${language.addOrderNotes} ',
                       style: boldTextStyle(),
                       children: <TextSpan>[
-                        TextSpan(
-                            text: '(${language.optional})',
-                            style: secondaryTextStyle(size: 12)),
+                        TextSpan(text: '(${language.optional})', style: secondaryTextStyle(size: 12)),
                       ],
                     ),
                   ),
                   10.height,
-                  Text(language.notesAboutYourOrder,
-                      style: secondaryTextStyle()),
+                  Text(language.notesAboutYourOrder, style: secondaryTextStyle()),
                   16.height,
                   AppTextField(
                     controller: orderNotesController,
@@ -422,8 +328,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     textStyle: boldTextStyle(),
                     minLines: 3,
                     maxLines: 3,
-                    decoration: inputDecorationFilled(context,
-                        fillColor: context.cardColor, label: 'Notes'),
+                    decoration: inputDecorationFilled(context, fillColor: context.cardColor, label: 'Notes'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return language.pleaseEnterDescription;
@@ -437,11 +342,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     text: language.placeOrder,
                     onTap: () async {
                       if (cart.items.validate().isNotEmpty) {
-                        if (cart.billingAddress!.address_1.validate().isNotEmpty ||
-                            cart.billingAddress!.address_2
-                                .validate()
-                                .isNotEmpty ||
-                            cart.billingAddress!.city.validate().isNotEmpty) {
+                        if (cart.billingAddress!.address_1.validate().isNotEmpty || cart.billingAddress!.address_2.validate().isNotEmpty || cart.billingAddress!.city.validate().isNotEmpty) {
                           placeOrder();
                         } else {
                           toast(language.pleaseEnterValidBilling);
@@ -455,12 +356,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
               ).paddingSymmetric(horizontal: 16),
             ),
-            Observer(
-                builder: (_) =>
-                    LoadingWidget().center().visible(appStore.isLoading)),
+            Observer(builder: (_) => LoadingWidget().center().visible(appStore.isLoading)),
           ],
         ),
       ),
     );
   }
 }
+//     .catchError((e) {
+// isPaymentGatewayLoading = false;
+// toast(e.toString(), print: true);
+// setState(() {});
+// });

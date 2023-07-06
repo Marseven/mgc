@@ -184,7 +184,7 @@ class _UserStoryScreenState extends State<UserStoryScreen> with SingleTickerProv
                     value: 1,
                     child: Text(language.myStories, style: primaryTextStyle()),
                   ),
-                if (currentValue != 2 && appStore.showStoryHighlight)
+                if (currentValue != 2 && appStore.showStoryHighlight==1)
                   PopupMenuItem(
                     value: 2,
                     child: Text(language.highlightStories, style: primaryTextStyle()),

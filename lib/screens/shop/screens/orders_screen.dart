@@ -39,8 +39,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Future<List<OrderModel>> getOrders({String? status}) async {
     appStore.setLoading(true);
 
-    await getOrderList(status: status == null ? OrderStatus.any : status)
-        .then((value) {
+    await getOrderList(status: status == null ? OrderStatus.any : status).then((value) {
       if (mPage == 1) orderList.clear();
 
       value.forEach((element) {
@@ -87,7 +86,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -109,9 +108,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       onRefresh();
                     },
@@ -123,9 +120,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         onRefresh();
                       },
@@ -146,9 +141,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           onTap: () {
-                            OrderDetailScreen(orderDetails: orderList[index])
-                                .launch(context)
-                                .then((value) {
+                            OrderDetailScreen(orderDetails: orderList[index]).launch(context).then((value) {
                               if (value ?? false) {
                                 mPage = 1;
                                 getOrders();
@@ -156,9 +149,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             });
                           },
                           child: Container(
-                            decoration: BoxDecoration(
-                                color: context.cardColor,
-                                borderRadius: radius(defaultAppButtonRadius)),
+                            decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultAppButtonRadius)),
                             padding: EdgeInsets.all(16),
                             margin: EdgeInsets.symmetric(vertical: 8),
                             child: Stack(
@@ -168,39 +159,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text('${language.orderNumber}: ',
-                                            style: boldTextStyle(size: 14)),
-                                        Text(
-                                            orderList[index]
-                                                .id
-                                                .validate()
-                                                .toString(),
-                                            style: secondaryTextStyle()),
+                                        Text('${language.orderNumber}: ', style: boldTextStyle(size: 14)),
+                                        Text(orderList[index].id.validate().toString(), style: secondaryTextStyle()),
                                       ],
                                     ),
                                     Row(
                                       children: [
-                                        Text('${language.date}: ',
-                                            style: boldTextStyle(size: 14)),
-                                        Text(
-                                            formatDate(orderList[index]
-                                                .dateCreated
-                                                .validate()),
-                                            style: secondaryTextStyle()),
+                                        Text('${language.date}: ', style: boldTextStyle(size: 14)),
+                                        Text(formatDate(orderList[index].dateCreated.validate()), style: secondaryTextStyle()),
                                       ],
                                     ),
                                     10.height,
                                     ListView.builder(
                                       shrinkWrap: true,
                                       physics: NeverScrollableScrollPhysics(),
-                                      itemCount: orderList[index]
-                                          .lineItems
-                                          .validate()
-                                          .length,
+                                      itemCount: orderList[index].lineItems.validate().length,
                                       itemBuilder: (ctx, i) {
-                                        LineItem orderItem = orderList[index]
-                                            .lineItems
-                                            .validate()[i];
+                                        LineItem orderItem = orderList[index].lineItems.validate()[i];
                                         return Row(
                                           children: [
                                             cachedImage(
@@ -208,12 +183,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                               height: 30,
                                               width: 30,
                                               fit: BoxFit.cover,
-                                            ).cornerRadiusWithClipRRect(
-                                                commonRadius),
+                                            ).cornerRadiusWithClipRRect(commonRadius),
                                             10.width,
-                                            Text('${orderItem.name.validate()}*${orderItem.quantity.validate()}',
-                                                    style: secondaryTextStyle())
-                                                .expand(),
+                                            Text('${orderItem.name.validate()}*${orderItem.quantity.validate()}', style: secondaryTextStyle()).expand(),
                                           ],
                                         ).paddingSymmetric(vertical: 4);
                                       },
@@ -221,28 +193,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     Divider(height: 28),
                                     Row(
                                       children: [
-                                        Text('${language.total}: ',
-                                            style: boldTextStyle()),
-                                        PriceWidget(
-                                            price: orderList[index].total),
+                                        Text('${language.total}: ', style: boldTextStyle()),
+                                        PriceWidget(price: orderList[index].total),
                                       ],
                                     ),
                                   ],
                                 ),
                                 Align(
                                   child: Container(
-                                    decoration: BoxDecoration(
-                                        color: appColorPrimary,
-                                        borderRadius: radius(4)),
-                                    child: Text(
-                                        orderList[index]
-                                            .status
-                                            .validate()
-                                            .capitalizeFirstLetter(),
-                                        style: secondaryTextStyle(
-                                            color: Colors.white)),
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: context.primaryColor, borderRadius: radius(4)),
+                                    child: Text(orderList[index].status.validate().capitalizeFirstLetter(), style: secondaryTextStyle(color: Colors.white)),
+                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   ),
                                   alignment: Alignment.topRight,
                                 ),
@@ -265,16 +226,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             Align(
               child: Container(
-                decoration: BoxDecoration(
-                    color: context.cardColor,
-                    borderRadius: radius(commonRadius)),
+                decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(commonRadius)),
                 child: DropdownButtonHideUnderline(
                   child: ButtonTheme(
                     alignedDropdown: true,
                     child: DropdownButton<FilterModel>(
                       borderRadius: BorderRadius.circular(commonRadius),
-                      icon: Icon(Icons.arrow_drop_down,
-                          color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                      icon: Icon(Icons.arrow_drop_down, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                       elevation: 8,
                       style: primaryTextStyle(),
                       onChanged: (FilterModel? newValue) {
@@ -285,16 +243,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                         setState(() {});
                       },
-                      hint: Text(language.orderStatus,
-                          style: primaryTextStyle(
-                              color:
-                                  appStore.isDarkMode ? bodyDark : bodyWhite)),
-                      items: filterOptions.map<DropdownMenuItem<FilterModel>>(
-                          (FilterModel value) {
+                      hint: Text(language.orderStatus, style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                      items: filterOptions.map<DropdownMenuItem<FilterModel>>((FilterModel value) {
                         return DropdownMenuItem<FilterModel>(
                           value: value,
-                          child: Text(value.title.validate(),
-                              style: primaryTextStyle()),
+                          child: Text(value.title.validate(), style: primaryTextStyle()),
                         );
                       }).toList(),
                       value: dropDownValue,
@@ -310,8 +263,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 if (appStore.isLoading) {
                   return Positioned(
                     bottom: mPage != 1 ? 10 : null,
-                    child: LoadingWidget(
-                        isBlurBackground: mPage == 1 ? true : false),
+                    child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
                   );
                 } else {
                   return Offstage();

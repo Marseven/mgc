@@ -274,7 +274,7 @@ class HighlightStoryPageState extends State<HighlightStoryPage> {
                       if (story.mediaType == MediaTypes.video)
                         TextButton(
                           onPressed: () {
-                            VideoPostScreen(story.storyMedia.validate(), user.categoryName.validate()).launch(context);
+                            VideoPostScreen(story.storyMedia.validate()).launch(context);
                           },
                           child: Text(language.viewVideo, style: boldTextStyle(color: Colors.white)),
                         ),

@@ -52,8 +52,6 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
         if (widget.controller.position.pixels == widget.controller.position.maxScrollExtent) {
           if (!mIsLastPage) {
             mPage++;
-            setState(() {});
-
             future = getPostList();
           }
         }
@@ -81,7 +79,6 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
       isError = true;
       appStore.setLoading(false);
       toast(e.toString(), print: true);
-
       setState(() {});
     });
 
@@ -139,7 +136,7 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
             ),
           ],
         ),
-        if (!appStore.isLoading && isError)
+        if (!appStore.isLoading && isError && postList.isEmpty)
           SizedBox(
             height: context.height() * 0.8,
             child: NoDataWidget(
@@ -158,7 +155,7 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
             child: InitialHomeComponent().center(),
           ),
         Positioned(
-          bottom: mPage != 1 ? 8 : null,
+          bottom: postList.isNotEmpty||mPage != 1 ? 8 : null,
           child: Observer(builder: (_) => LoadingWidget(isBlurBackground: mPage == 1 ? true : false).center().visible(appStore.isLoading)),
         ),
       ],

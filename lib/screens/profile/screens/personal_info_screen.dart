@@ -31,10 +31,7 @@ class PersonalInfoScreen extends StatelessWidget {
               shrinkWrap: true,
               itemCount: profileInfo.validate().length,
               itemBuilder: (ctx, index) {
-                if (profileInfo![index]
-                    .fields
-                    .validate()
-                    .any((element) => element.value!.isNotEmpty)) {
+                if (profileInfo![index].fields.validate().any((element) => element.value!.isNotEmpty)) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -42,46 +39,26 @@ class PersonalInfoScreen extends StatelessWidget {
                         width: context.width(),
                         color: context.cardColor,
                         padding: EdgeInsets.all(16),
-                        child: Text(profileInfo![index].name.validate(),
-                            style: boldTextStyle(color: appColorPrimary)),
+                        child: Text(profileInfo![index].name.validate(), style: boldTextStyle(color: context.primaryColor)),
                       ),
                       ListView.builder(
                         physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: profileInfo![index].fields.validate().length,
                         itemBuilder: (ctx, i) {
-                          if (profileInfo![index]
-                              .fields![i]
-                              .value
-                              .validate()
-                              .isNotEmpty) {
+                          if (profileInfo![index].fields![i].value.validate().isNotEmpty) {
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  profileInfo![index]
-                                      .fields![i]
-                                      .name
-                                      .validate(),
-                                  style: boldTextStyle(
-                                      color: appStore.isDarkMode
-                                          ? bodyDark
-                                          : bodyWhite,
-                                      size: 14),
+                                  profileInfo![index].fields![i].name.validate(),
+                                  style: boldTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: 14),
                                 ).expand(),
                                 Text(
-                                  profileInfo![index].fields![i].name ==
-                                          ProfileFields.birthDate
-                                      ? parseHtmlString(profileInfo![index]
-                                          .fields![i]
-                                          .value
-                                          .validate()
-                                          .substring(0, 10))
-                                      : parseHtmlString(profileInfo![index]
-                                          .fields![i]
-                                          .value
-                                          .validate()),
+                                  profileInfo![index].fields![i].name == ProfileFields.birthDate
+                                      ? parseHtmlString(profileInfo![index].fields![i].value.validate().substring(0, 10))
+                                      : parseHtmlString(profileInfo![index].fields![i].value.validate()),
                                   style: secondaryTextStyle(),
                                 ).expand(),
                               ],
@@ -90,8 +67,7 @@ class PersonalInfoScreen extends StatelessWidget {
                             return Offstage();
                           }
                         },
-                        padding:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       )
                     ],
                   );
@@ -99,8 +75,7 @@ class PersonalInfoScreen extends StatelessWidget {
                 return Offstage();
               },
             )
-          : NoDataWidget(
-              imageWidget: NoDataLottieWidget(), title: language.noDataFound),
+          : NoDataWidget(imageWidget: NoDataLottieWidget(), title: language.noDataFound),
     );
   }
 }

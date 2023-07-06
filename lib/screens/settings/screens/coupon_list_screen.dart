@@ -72,7 +72,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
         mPage = 1;
         future = couponssList();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -95,9 +95,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       isError = false;
                       mPage = 1;
@@ -111,9 +109,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         isError = false;
                         mPage = 1;
@@ -135,53 +131,34 @@ class _CouponListScreenState extends State<CouponListScreen> {
                         return Container(
                           padding: EdgeInsets.all(16),
                           margin: EdgeInsets.symmetric(vertical: 8),
-                          decoration: boxDecorationDefault(
-                              color: context.cardColor,
-                              borderRadius: radius(commonRadius)),
+                          decoration: boxDecorationDefault(color: context.cardColor, borderRadius: radius(commonRadius)),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                      '\$${couponsList[index].amount.toDouble().round()} ${language.off}',
-                                      style: boldTextStyle(
-                                          size: 18, color: appColorPrimary)),
+                                  Text('\$${couponsList[index].amount.toDouble().round()} ${language.off}', style: boldTextStyle(size: 18, color: context.primaryColor)),
                                   InkWell(
                                     child: DottedBorderWidget(
                                       child: Container(
-                                        decoration: BoxDecoration(
-                                            color:
-                                                appColorPrimary.withAlpha(30),
-                                            borderRadius: radius(commonRadius)),
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 4, horizontal: 10),
-                                        child: Text(
-                                            couponsList[index].code.validate(),
-                                            style: boldTextStyle(
-                                                color: appColorPrimary)),
+                                        decoration: BoxDecoration(color: context.primaryColor.withAlpha(30), borderRadius: radius(commonRadius)),
+                                        padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                                        child: Text(couponsList[index].code.validate(), style: boldTextStyle(color: context.primaryColor)),
                                       ),
                                       radius: commonRadius,
-                                      color: appColorPrimary,
+                                      color: context.primaryColor,
                                     ),
                                     onTap: () {
                                       toast(language.copiedToClipboard);
-                                      Clipboard.setData(new ClipboardData(
-                                          text: couponsList[index]
-                                              .code
-                                              .validate()));
+                                      Clipboard.setData(new ClipboardData(text: couponsList[index].code.validate()));
                                     },
                                   ),
                                 ],
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               ),
-                              Text(couponsList[index].description.validate(),
-                                  style: primaryTextStyle()),
+                              Text(couponsList[index].description.validate(), style: primaryTextStyle()),
                               8.height,
-                              Text(
-                                  '${language.expiresOn} ${formatDate(couponsList[index].dateExpires.validate())}',
-                                  style: secondaryTextStyle())
+                              Text('${language.expiresOn} ${formatDate(couponsList[index].dateExpires.validate())}', style: secondaryTextStyle())
                             ],
                           ),
                         );
@@ -203,8 +180,7 @@ class _CouponListScreenState extends State<CouponListScreen> {
                 if (appStore.isLoading) {
                   return Positioned(
                     bottom: mPage != 1 ? 10 : null,
-                    child: LoadingWidget(
-                        isBlurBackground: mPage == 1 ? true : false),
+                    child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
                   );
                 } else {
                   return Offstage();

@@ -92,6 +92,9 @@ class _GroupMemberRequestScreenState extends State<GroupMemberRequestScreen> wit
                     creatorId: widget.creatorId,
                     isAdmin: widget.isAdmin,
                     groupId: widget.groupId,
+                    callback: () {
+                      isCallback = true;
+                    },
                   ),
                   RequestComponent(
                     groupId: widget.groupId,

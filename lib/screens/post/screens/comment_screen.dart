@@ -15,6 +15,8 @@ import 'package:socialv/screens/post/screens/comment_reply_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 
+import '../../fragments/home_fragment.dart';
+
 class CommentScreen extends StatefulWidget {
   final int postId;
 
@@ -77,8 +79,7 @@ class _CommentScreenState extends State<CommentScreen> {
   void deleteComment(int commentId) async {
     ifNotTester(() async {
       appStore.setLoading(true);
-      await deletePostComment(postId: widget.postId, commentId: commentId)
-          .then((value) {
+      await deletePostComment(postId: widget.postId, commentId: commentId).then((value) {
         mPage = 1;
         future = getCommentsList();
       }).catchError((e) {
@@ -95,16 +96,13 @@ class _CommentScreenState extends State<CommentScreen> {
         userImage: appStore.loginAvatarUrl,
         dateRecorded: DateFormat(DATE_FORMAT_1).format(DateTime.now()),
         userName: appStore.loginFullName,
-        medias: gif != null
-            ? [PostMediaModel(url: gif!.images!.original!.url.validate())]
-            : [],
+        medias: gif != null ? [PostMediaModel(url: gif!.images!.original!.url.validate())] : [],
       );
 
       if (parentId == null) {
         commentList.add(comment);
       } else if (commentList.any((element) => element.id.toInt() == parentId)) {
-        var temp =
-            commentList.firstWhere((element) => element.id.toInt() == parentId);
+        var temp = commentList.firstWhere((element) => element.id.toInt() == parentId);
 
         if (temp.children == null) temp.children = [];
         temp.children!.add(comment);
@@ -126,10 +124,9 @@ class _CommentScreenState extends State<CommentScreen> {
         appStore.setLoading(false);
         toast(e.toString());
       });
+      gif = null;
+      setState(() {});
     });
-
-    gif = null;
-    setState(() {});
   }
 
   Future<void> onRefresh() async {
@@ -156,7 +153,7 @@ class _CommentScreenState extends State<CommentScreen> {
         onRefresh: () async {
           onRefresh();
         },
-        color: appColorPrimary,
+        color: context.primaryColor,
         child: Scaffold(
           backgroundColor: context.cardColor,
           appBar: AppBar(
@@ -182,9 +179,7 @@ class _CommentScreenState extends State<CommentScreen> {
                     if (snap.hasError) {
                       return NoDataWidget(
                         imageWidget: NoDataLottieWidget(),
-                        title: isError
-                            ? language.somethingWentWrong
-                            : language.noDataFound,
+                        title: isError ? language.somethingWentWrong : language.noDataFound,
                         onRetry: () {
                           onRefresh();
                         },
@@ -196,9 +191,7 @@ class _CommentScreenState extends State<CommentScreen> {
                       if (snap.data.validate().isEmpty) {
                         return NoDataWidget(
                           imageWidget: NoDataLottieWidget(),
-                          title: isError
-                              ? language.somethingWentWrong
-                              : language.noDataFound,
+                          title: isError ? language.somethingWentWrong : language.noDataFound,
                           onRetry: () {
                             onRefresh();
                           },
@@ -231,16 +224,13 @@ class _CommentScreenState extends State<CommentScreen> {
                                       context,
                                       dialogType: DialogType.DELETE,
                                       onAccept: (c) {
-                                        deleteComment(
-                                            _comment.id.validate().toInt());
+                                        deleteComment(_comment.id.validate().toInt());
                                       },
                                     );
                                   },
                                   onReply: () async {
-                                    FocusScope.of(context)
-                                        .requestFocus(commentFocus);
-                                    commentParentId =
-                                        _comment.id.validate().toInt();
+                                    FocusScope.of(context).requestFocus(commentFocus);
+                                    commentParentId = _comment.id.validate().toInt();
                                   },
                                   onEdit: () {
                                     showInDialog(
@@ -249,9 +239,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                       builder: (p0) {
                                         return UpdateCommentComponent(
                                           id: _comment.id.validate().toInt(),
-                                          activityId: _comment.itemId
-                                              .validate()
-                                              .toInt(),
+                                          activityId: _comment.itemId.validate().toInt(),
                                           comment: _comment.content,
                                           medias: _comment.medias.validate(),
                                           callback: (x) {
@@ -266,8 +254,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                 if (_comment.children.validate().isNotEmpty)
                                   ListView.separated(
                                     itemBuilder: (context, i) {
-                                      CommentModel childComment =
-                                          _comment.children.validate()[i];
+                                      CommentModel childComment = _comment.children.validate()[i];
 
                                       return CommentComponent(
                                         callback: () {
@@ -279,8 +266,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                         comment: childComment,
                                         postId: widget.postId,
                                         onDelete: () {
-                                          deleteComment(
-                                              childComment.id.toInt());
+                                          deleteComment(childComment.id.toInt());
                                         },
                                         onReply: () async {
                                           CommentReplyScreen(
@@ -305,19 +291,11 @@ class _CommentScreenState extends State<CommentScreen> {
                                             contentPadding: EdgeInsets.zero,
                                             builder: (p0) {
                                               return UpdateCommentComponent(
-                                                id: childComment.id
-                                                    .validate()
-                                                    .toInt(),
-                                                activityId: childComment.itemId
-                                                    .validate()
-                                                    .toInt(),
+                                                id: childComment.id.validate().toInt(),
+                                                activityId: childComment.itemId.validate().toInt(),
                                                 comment: childComment.content,
-                                                parentId: childComment
-                                                    .secondaryItemId
-                                                    .validate()
-                                                    .toInt(),
-                                                medias: childComment.medias
-                                                    .validate(),
+                                                parentId: childComment.secondaryItemId.validate().toInt(),
+                                                medias: childComment.medias.validate(),
                                                 callback: (x) {
                                                   mPage = 1;
                                                   future = getCommentsList();
@@ -328,13 +306,11 @@ class _CommentScreenState extends State<CommentScreen> {
                                         },
                                       );
                                     },
-                                    itemCount:
-                                        _comment.children.validate().length,
+                                    itemCount: _comment.children.validate().length,
                                     physics: NeverScrollableScrollPhysics(),
                                     shrinkWrap: true,
                                     padding: EdgeInsets.only(left: 16, top: 8),
-                                    separatorBuilder: (c, i) =>
-                                        Divider(height: 0),
+                                    separatorBuilder: (c, i) => Divider(height: 0),
                                   ),
                                 Divider(),
                               ],
@@ -357,8 +333,7 @@ class _CommentScreenState extends State<CommentScreen> {
                     if (appStore.isLoading) {
                       return Positioned(
                         bottom: mPage != 1 ? 10 : null,
-                        child: LoadingWidget(
-                            isBlurBackground: mPage == 1 ? true : false),
+                        child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
                       );
                     } else {
                       return Offstage();
@@ -375,9 +350,7 @@ class _CommentScreenState extends State<CommentScreen> {
                       children: [
                         Row(
                           children: [
-                            cachedImage(appStore.loginAvatarUrl,
-                                    height: 36, width: 36, fit: BoxFit.cover)
-                                .cornerRadiusWithClipRRect(100),
+                            cachedImage(appStore.loginAvatarUrl, height: 36, width: 36, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
                             10.width,
                             AppTextField(
                               focus: commentFocus,
@@ -406,40 +379,23 @@ class _CommentScreenState extends State<CommentScreen> {
                                     }
                                   });
                                 },
-                                icon: cachedImage(ic_gif,
-                                    color: appStore.isDarkMode
-                                        ? bodyDark
-                                        : bodyWhite,
-                                    width: 30,
-                                    height: 24,
-                                    fit: BoxFit.contain),
+                                icon: cachedImage(ic_gif, color: appStore.isDarkMode ? bodyDark : bodyWhite, width: 30, height: 24, fit: BoxFit.contain),
                               ),
                             InkWell(
                               onTap: () {
-                                if (commentController.text.isNotEmpty ||
-                                    gif != null) {
+                                if (commentController.text.isNotEmpty || gif != null) {
                                   hideKeyboard(context);
 
-                                  String content =
-                                      commentController.text.trim();
+                                  String content = commentController.text.trim();
                                   commentController.clear();
 
                                   setState(() {});
-                                  postComment(content,
-                                      parentId: commentParentId == -1
-                                          ? null
-                                          : commentParentId);
+                                  postComment(content, parentId: commentParentId == -1 ? null : commentParentId);
                                 } else {
                                   toast(language.writeComment);
                                 }
                               },
-                              child: cachedImage(ic_send,
-                                  color: appStore.isDarkMode
-                                      ? bodyDark
-                                      : bodyWhite,
-                                  width: 24,
-                                  height: 24,
-                                  fit: BoxFit.cover),
+                              child: cachedImage(ic_send, color: appStore.isDarkMode ? bodyDark : bodyWhite, width: 24, height: 24, fit: BoxFit.cover),
                             ),
                           ],
                         ),
@@ -447,13 +403,8 @@ class _CommentScreenState extends State<CommentScreen> {
                           Stack(
                             alignment: Alignment.center,
                             children: [
-                              LoadingWidget(isBlurBackground: false)
-                                  .paddingSymmetric(vertical: 16),
-                              cachedImage(gif!.images!.original!.url.validate(),
-                                      height: 200)
-                                  .cornerRadiusWithClipRRect(
-                                      defaultAppButtonRadius)
-                                  .paddingSymmetric(vertical: 8),
+                              LoadingWidget(isBlurBackground: false).paddingSymmetric(vertical: 16),
+                              cachedImage(gif!.images!.original!.url.validate(), height: 200).cornerRadiusWithClipRRect(defaultAppButtonRadius).paddingSymmetric(vertical: 8),
                             ],
                           )
                       ],

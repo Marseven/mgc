@@ -168,7 +168,6 @@ class _GroupScreenState extends State<GroupScreen> {
                               groupId: data.id.validate(),
                               groupAvatarImage: data.groupAvatarImage,
                               groupCoverImage: data.groupCoverImage,
-                              groupMemberCount: data.memberCount.validate().toInt(),
                             ).launch(context).then((value) {
                               if (value ?? false) {
                                 isChange = value;

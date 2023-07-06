@@ -12,8 +12,7 @@ class ProfileFriendsScreen extends StatefulWidget {
   State<ProfileFriendsScreen> createState() => _ProfileFriendsScreenState();
 }
 
-class _ProfileFriendsScreenState extends State<ProfileFriendsScreen>
-    with SingleTickerProviderStateMixin {
+class _ProfileFriendsScreenState extends State<ProfileFriendsScreen> with SingleTickerProviderStateMixin {
   late TabController tabController;
 
   bool isCallback = false;
@@ -65,9 +64,8 @@ class _ProfileFriendsScreenState extends State<ProfileFriendsScreen>
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: appColorPrimary,
-                  borderRadius: radiusOnly(
-                      topLeft: defaultRadius, topRight: defaultRadius),
+                  color: context.primaryColor,
+                  borderRadius: radiusOnly(topLeft: defaultRadius, topRight: defaultRadius),
                 ),
                 padding: EdgeInsets.fromLTRB(22, 12, 22, 0),
                 child: TabBar(
@@ -79,20 +77,14 @@ class _ProfileFriendsScreenState extends State<ProfileFriendsScreen>
                   indicatorSize: TabBarIndicatorSize.label,
                   indicator: TabIndicator(),
                   tabs: [
-                    Text(language.friends,
-                            maxLines: 1, overflow: TextOverflow.ellipsis)
-                        .paddingSymmetric(vertical: 12),
-                    Text(language.sent,
-                            maxLines: 1, overflow: TextOverflow.ellipsis)
-                        .paddingSymmetric(vertical: 12),
-                    Text(language.requests,
-                            maxLines: 1, overflow: TextOverflow.ellipsis)
-                        .paddingSymmetric(vertical: 12),
+                    Text(language.friends, maxLines: 1, overflow: TextOverflow.ellipsis).paddingSymmetric(vertical: 12),
+                    Text(language.sent, maxLines: 1, overflow: TextOverflow.ellipsis).paddingSymmetric(vertical: 12),
+                    Text(language.requests, maxLines: 1, overflow: TextOverflow.ellipsis).paddingSymmetric(vertical: 12),
                   ],
                 ),
               ),
               Container(
-                color: appColorPrimary,
+                color: context.primaryColor,
                 child: TabBarView(
                   controller: tabController,
                   children: [

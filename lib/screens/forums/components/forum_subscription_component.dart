@@ -13,18 +13,15 @@ import 'package:socialv/screens/forums/screens/forum_detail_screen.dart';
 import 'package:socialv/screens/forums/screens/forums_screen.dart';
 import 'package:socialv/screens/forums/screens/topic_detail_screen.dart';
 import 'package:socialv/screens/forums/screens/topics_screen.dart';
-import 'package:socialv/utils/app_constants.dart';
 
 class ForumSubscriptionComponent extends StatefulWidget {
   const ForumSubscriptionComponent({Key? key}) : super(key: key);
 
   @override
-  State<ForumSubscriptionComponent> createState() =>
-      _ForumSubscriptionComponentState();
+  State<ForumSubscriptionComponent> createState() => _ForumSubscriptionComponentState();
 }
 
-class _ForumSubscriptionComponentState
-    extends State<ForumSubscriptionComponent> {
+class _ForumSubscriptionComponentState extends State<ForumSubscriptionComponent> {
   List<ForumModel> forumList = [];
   List<TopicModel> topicList = [];
 
@@ -69,19 +66,13 @@ class _ForumSubscriptionComponentState
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(language.forums, style: boldTextStyle()),
-                  Text(language.viewAll,
-                          style: primaryTextStyle(color: appColorPrimary))
-                      .onTap(() {
+                  Text(language.viewAll, style: primaryTextStyle(color: context.primaryColor)).onTap(() {
                     ForumsScreen().launch(context).then((value) {
                       if (value ?? false) {
                         getList();
                       }
                     });
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor:
-                              Colors.transparent).visible(
-                          forumList.validate().length > 2),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent).visible(forumList.validate().length > 2),
                 ],
               ).visible(forumList.isNotEmpty),
               AnimatedListView(
@@ -120,19 +111,13 @@ class _ForumSubscriptionComponentState
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(language.topics, style: boldTextStyle()),
-                  Text(language.viewAll,
-                          style: primaryTextStyle(color: appColorPrimary))
-                      .onTap(() {
+                  Text(language.viewAll, style: primaryTextStyle(color: context.primaryColor)).onTap(() {
                     TopicsScreen().launch(context).then((value) {
                       if (value ?? false) {
                         getList();
                       }
                     });
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor:
-                              Colors.transparent).visible(
-                          topicList.validate().length > 2),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent).visible(topicList.validate().length > 2),
                 ],
               ).visible(topicList.isNotEmpty),
               AnimatedListView(
@@ -146,16 +131,13 @@ class _ForumSubscriptionComponentState
                     splashColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () {
-                      TopicDetailScreen(topicId: topic.id.validate())
-                          .launch(context)
-                          .then((value) {
+                      TopicDetailScreen(topicId: topic.id.validate()).launch(context).then((value) {
                         if (value ?? false) {
                           getList();
                         }
                       });
                     },
-                    child: TopicCardComponent(
-                        topic: topic, isFavTab: false, showForums: false),
+                    child: TopicCardComponent(topic: topic, isFavTab: false, showForums: false),
                   );
                 },
               ).visible(topicList.isNotEmpty),

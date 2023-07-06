@@ -10,11 +10,7 @@ class UnblockMemberDialog extends StatelessWidget {
   final int id;
   final VoidCallback? callback;
 
-  const UnblockMemberDialog(
-      {required this.mentionName,
-      required this.id,
-      required this.name,
-      this.callback});
+  const UnblockMemberDialog({required this.mentionName, required this.id, required this.name, this.callback});
 
   @override
   Widget build(BuildContext context) {
@@ -50,22 +46,20 @@ class UnblockMemberDialog extends StatelessWidget {
               16.width,
               AppButton(
                 elevation: 0,
-                color: appColorPrimary,
+                color: context.primaryColor,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.check, color: Colors.white, size: 20),
                     6.width,
-                    Text(language.unblock,
-                        style: boldTextStyle(color: Colors.white)),
+                    Text(language.unblock, style: boldTextStyle(color: Colors.white)),
                   ],
                 ).fit(),
                 onTap: () {
                   ifNotTester(() {
                     appStore.setLoading(true);
 
-                    blockUser(userId: id, key: BlockUserKey.unblock)
-                        .then((value) {
+                    blockUser(userId: id, key: BlockUserKey.unblock).then((value) {
                       appStore.setLoading(false);
 
                       callback?.call();

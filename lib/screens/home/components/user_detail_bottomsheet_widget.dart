@@ -15,12 +15,10 @@ class UserDetailBottomSheetWidget extends StatefulWidget {
   UserDetailBottomSheetWidget({this.callback});
 
   @override
-  State<UserDetailBottomSheetWidget> createState() =>
-      _UserDetailBottomSheetWidgetState();
+  State<UserDetailBottomSheetWidget> createState() => _UserDetailBottomSheetWidgetState();
 }
 
-class _UserDetailBottomSheetWidgetState
-    extends State<UserDetailBottomSheetWidget> {
+class _UserDetailBottomSheetWidgetState extends State<UserDetailBottomSheetWidget> {
   List<DrawerModel> options = getDrawerOptions();
 
   int selectedIndex = -1;
@@ -60,30 +58,20 @@ class _UserDetailBottomSheetWidgetState
                   children: [
                     Row(
                       children: [
-                        cachedImage(appStore.loginAvatarUrl,
-                                height: 62, width: 62, fit: BoxFit.cover)
-                            .cornerRadiusWithClipRRect(100),
+                        cachedImage(appStore.loginAvatarUrl, height: 62, width: 62, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
                         16.width,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(appStore.loginFullName,
-                                style: boldTextStyle(size: 18)),
+                            Text(appStore.loginFullName, style: boldTextStyle(size: 18)),
                             8.height,
-                            Text(appStore.loginEmail,
-                                style: secondaryTextStyle(),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1),
+                            Text(appStore.loginEmail, style: secondaryTextStyle(), overflow: TextOverflow.ellipsis, maxLines: 1),
                           ],
                         ).expand(),
                         IconButton(
-                          icon: Image.asset(ic_edit,
-                              height: 16,
-                              width: 16,
-                              fit: BoxFit.cover,
-                              color: context.iconColor),
+                          icon: Image.asset(ic_edit, height: 16, width: 16, fit: BoxFit.cover, color: context.iconColor),
                           onPressed: () {
                             finish(context);
                             EditProfileScreen().launch(context);
@@ -97,17 +85,17 @@ class _UserDetailBottomSheetWidgetState
                         int index = options.indexOf(e);
 
                         return SettingItemWidget(
-                          decoration: BoxDecoration(
-                              color: selectedIndex == index
-                                  ? appColorPrimary.withAlpha(30)
-                                  : context.cardColor),
+                          decoration: BoxDecoration(color: selectedIndex == index ? context.primaryColor.withAlpha(30) : context.cardColor),
                           title: e.title.validate(),
                           titleTextStyle: boldTextStyle(size: 14),
-                          leading: Image.asset(e.image.validate(),
-                              height: 22,
-                              width: 22,
-                              fit: BoxFit.fill,
-                              color: appColorPrimary),
+                          leading: Image.asset(e.image.validate(), height: 22, width: 22, fit: BoxFit.fill, color: appColorPrimary),
+                          trailing: e.isNew
+                              ? Container(
+                                  decoration: BoxDecoration(color: appGreenColor.withAlpha(30), borderRadius: radius()),
+                                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                                  child: Text(language.lblNew, style: boldTextStyle(color: appGreenColor, size: 12)),
+                                )
+                              : Offstage(),
                           onTap: () async {
                             selectedIndex = index;
                             setState(() {});
@@ -128,7 +116,7 @@ class _UserDetailBottomSheetWidgetState
               ).expand(),
               Column(
                 children: [
-                  //VersionInfoWidget(prefixText: 'v'),
+                  VersionInfoWidget(prefixText: 'v'),
                   16.height,
                   TextButton(
                     onPressed: () {
@@ -141,8 +129,7 @@ class _UserDetailBottomSheetWidgetState
                         },
                       );
                     },
-                    child: Text(language.logout,
-                        style: boldTextStyle(color: appColorPrimary)),
+                    child: Text(language.logout, style: boldTextStyle(color: context.primaryColor)),
                   ),
                   20.height,
                 ],

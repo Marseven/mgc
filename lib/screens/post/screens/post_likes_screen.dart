@@ -78,7 +78,7 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           title: Text(language.likes, style: boldTextStyle(size: 20)),
@@ -100,9 +100,7 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       onRefresh();
                     },
@@ -114,9 +112,7 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         onRefresh();
                       },
@@ -149,39 +145,22 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
                                 RichText(
                                   text: TextSpan(
                                     children: [
-                                      TextSpan(
-                                          text: '${user.userName.validate()} ',
-                                          style: boldTextStyle(
-                                              size: 14,
-                                              fontFamily: fontFamily)),
-                                      if (user.isUserVerified.validate())
-                                        WidgetSpan(
-                                            child: Image.asset(ic_tick_filled,
-                                                height: 18,
-                                                width: 18,
-                                                color: blueTickColor,
-                                                fit: BoxFit.cover)),
+                                      TextSpan(text: user.userName.validate(), style: boldTextStyle(size: 14, fontFamily: fontFamily)),
+                                      if (user.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
                                     ],
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.start,
                                 ),
-                                Text(user.userMentionName.validate(),
-                                    style: secondaryTextStyle()),
+                                if (user.userMentionName.validate().isNotEmpty) Text(user.userMentionName.validate(), style: secondaryTextStyle()),
                               ],
                               crossAxisAlignment: CrossAxisAlignment.start,
                             ).expand(),
                           ],
                         ).onTap(() async {
-                          MemberProfileScreen(
-                                  memberId:
-                                      list[index].userId.validate().toInt())
-                              .launch(context);
-                        },
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors
-                                .transparent).paddingSymmetric(vertical: 8);
+                          MemberProfileScreen(memberId: list[index].userId.validate().toInt()).launch(context);
+                        }, splashColor: Colors.transparent, highlightColor: Colors.transparent).paddingSymmetric(vertical: 8);
                       },
                       onNextPage: () {
                         if (!mIsLastPage) {
@@ -200,8 +179,7 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
                 if (appStore.isLoading) {
                   return Positioned(
                     bottom: mPage != 1 ? 10 : null,
-                    child: LoadingWidget(
-                        isBlurBackground: mPage == 1 ? true : false),
+                    child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
                   );
                 } else {
                   return Offstage();

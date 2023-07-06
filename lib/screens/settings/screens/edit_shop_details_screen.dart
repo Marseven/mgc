@@ -94,8 +94,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                 ExpansionTile(
                   title: Text(language.billingAddress, style: boldTextStyle()),
                   children: <Widget>[
-                    BillingAddressComponent(
-                        data: billingAddress, isBilling: true),
+                    BillingAddressComponent(data: billingAddress, isBilling: true),
                   ],
                   backgroundColor: context.cardColor,
                   collapsedBackgroundColor: context.cardColor,
@@ -107,8 +106,8 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                   children: [
                     Checkbox(
                       shape: RoundedRectangleBorder(borderRadius: radius(4)),
-                      activeColor: appColorPrimary,
-                      side: BorderSide(color: appColorPrimary),
+                      activeColor: context.primaryColor,
+                      side: BorderSide(color: context.primaryColor),
                       value: isSame,
                       onChanged: (val) {
                         isSame = val.validate();
@@ -120,17 +119,18 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                         setState(() {});
                       },
                     ),
-                    Text(language.billingAndShippingAddresses,
-                            style: secondaryTextStyle())
-                        .onTap(() {
-                      isSame = !isSame;
-                      if (isSame) {
-                        shippingAddress = billingAddress;
-                      } else {
-                        shippingAddress = BillingAddressModel();
-                      }
-                      setState(() {});
-                    }),
+                    GestureDetector(
+                      onTap: () {
+                        isSame = !isSame;
+                        if (isSame) {
+                          shippingAddress = billingAddress;
+                        } else {
+                          shippingAddress = BillingAddressModel();
+                        }
+                        setState(() {});
+                      },
+                      child: Text(language.billingAndShippingAddresses, style: secondaryTextStyle()),
+                    ),
                   ],
                 ),
                 16.height,
@@ -147,9 +147,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
               ],
             ),
           ),
-          Observer(
-              builder: (_) =>
-                  LoadingWidget().center().visible(appStore.isLoading))
+          Observer(builder: (_) => LoadingWidget().center().visible(appStore.isLoading))
         ],
       ),
       bottomNavigationBar: Observer(
@@ -158,10 +156,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
           text: language.update,
           onTap: () async {
             appStore.setLoading(true);
-            Map request = {
-              "billing": billingAddress,
-              "shipping": shippingAddress
-            };
+            Map request = {"billing": billingAddress, "shipping": shippingAddress};
 
             updateCustomer(request: request).then((value) {
               details = value;

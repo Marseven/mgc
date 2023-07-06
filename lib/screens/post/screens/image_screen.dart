@@ -34,7 +34,6 @@ class _ImageScreenState extends State<ImageScreen> {
         backgroundColor: cardDarkColor,
         leading: BackButton(color: Colors.white),
         elevation: 0,
-        centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: cardDarkColor,
           statusBarIconBrightness: Brightness.light,

@@ -36,19 +36,16 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
     _scrollController.addListener(() {
       /// scroll down
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
         if (appStore.showShopBottom) appStore.setShopBottom(false);
       }
 
       /// scroll up
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
         if (!appStore.showShopBottom) appStore.setShopBottom(true);
       }
 
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         if (!mIsLastPage) {
           mPage++;
           setState(() {});
@@ -104,7 +101,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -126,9 +123,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       onRefresh();
                     },
@@ -140,9 +135,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         onRefresh();
                       },
@@ -150,24 +143,19 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     ).center();
                   } else {
                     return SingleChildScrollView(
-                      padding: EdgeInsets.only(
-                          left: 16, right: 16, top: 16, bottom: 100),
+                      padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
                       controller: _scrollController,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                              '${language.products}: (${orderList.length.validate()})'
-                                  .toString(),
-                              style: boldTextStyle(size: 12)),
+                          Text('${language.products}: (${orderList.length.validate()})'.toString(), style: boldTextStyle(size: 12)),
                           16.height,
                           AnimatedWrap(
                             alignment: WrapAlignment.start,
                             itemCount: orderList.length,
                             spacing: 16,
                             runSpacing: 16,
-                            slideConfiguration:
-                                SlideConfiguration(delay: 120.milliseconds),
+                            slideConfiguration: SlideConfiguration(delay: 120.milliseconds),
                             itemBuilder: (ctx, index) {
                               WishlistModel product = orderList[index];
 
@@ -175,15 +163,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                 splashColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  ProductDetailScreen(
-                                          id: product.proId.validate())
-                                      .launch(context);
+                                  ProductDetailScreen(id: product.proId.validate()).launch(context);
                                 },
                                 child: Container(
-                                  decoration: BoxDecoration(
-                                      color: context.cardColor,
-                                      borderRadius:
-                                          radius(defaultAppButtonRadius)),
+                                  decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultAppButtonRadius)),
                                   width: context.width() / 2 - 24,
                                   child: Column(
                                     children: [
@@ -194,28 +177,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                             height: 150,
                                             width: context.width() / 2 - 24,
                                             fit: BoxFit.cover,
-                                          ).cornerRadiusWithClipRRectOnly(
-                                              topRight: defaultAppButtonRadius
-                                                  .toInt(),
-                                              topLeft: defaultAppButtonRadius
-                                                  .toInt()),
+                                          ).cornerRadiusWithClipRRectOnly(topRight: defaultAppButtonRadius.toInt(), topLeft: defaultAppButtonRadius.toInt()),
                                           Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 6),
-                                            decoration: BoxDecoration(
-                                                color: appColorPrimary,
-                                                borderRadius: radiusOnly(
-                                                    topLeft:
-                                                        defaultAppButtonRadius,
-                                                    bottomRight:
-                                                        defaultAppButtonRadius)),
-                                            child: Text(language.sale,
-                                                style: secondaryTextStyle(
-                                                    size: 10,
-                                                    color: Colors.white)),
-                                          ).visible(product.salePrice
-                                              .validate()
-                                              .isNotEmpty),
+                                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                            decoration: BoxDecoration(color: context.primaryColor, borderRadius: radiusOnly(topLeft: defaultAppButtonRadius, bottomRight: defaultAppButtonRadius)),
+                                            child: Text(language.sale, style: secondaryTextStyle(size: 10, color: Colors.white)),
+                                          ).visible(product.salePrice.validate().isNotEmpty),
 
                                           ///TODO Check wishlist icon
                                           Positioned(
@@ -223,24 +190,19 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                             top: 8,
                                             child: InkWell(
                                               onTap: () {
-                                                orderList.removeWhere(
-                                                    (element) =>
-                                                        element.proId ==
-                                                        product.proId);
-                                                setState(() {});
-
-                                                removeFromWishlist(
-                                                        productId: product.proId
-                                                            .validate())
-                                                    .then((value) {
-                                                  //
-                                                }).catchError((e) {
-                                                  toast(e.toString());
+                                                ifNotTester(() {
+                                                  orderList.removeWhere((element) => element.proId == product.proId);
+                                                  setState(() {});
+                                                  removeFromWishlist(productId: product.proId.validate()).then((value) {
+                                                    //
+                                                  }).catchError((e) {
+                                                    toast(e.toString());
+                                                  });
                                                 });
                                               },
                                               child: Image.asset(
                                                 ic_close_square,
-                                                color: appColorPrimary,
+                                                color: context.primaryColor,
                                                 height: 22,
                                                 width: 22,
                                                 fit: BoxFit.fill,
@@ -250,12 +212,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                         ],
                                       ),
                                       14.height,
-                                      Text(
-                                              product.name
-                                                  .validate()
-                                                  .capitalizeFirstLetter(),
-                                              style: boldTextStyle())
-                                          .paddingSymmetric(horizontal: 10),
+                                      Text(product.name.validate().capitalizeFirstLetter(), style: boldTextStyle()).paddingSymmetric(horizontal: 10),
                                       4.height,
                                       PriceWidget(
                                         price: product.price,
@@ -264,34 +221,22 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                         showDiscountPercentage: false,
                                       ),
                                       8.height,
-                                      if (product.proType !=
-                                              ProductTypes.variable &&
-                                          product.proType !=
-                                              ProductTypes.grouped)
+                                      if (product.proType != ProductTypes.variable && product.proType != ProductTypes.grouped)
                                         AppButton(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 16),
+                                          padding: EdgeInsets.symmetric(horizontal: 16),
                                           margin: EdgeInsets.only(bottom: 16),
                                           text: language.addToCart,
-                                          textStyle: boldTextStyle(
-                                              color: appColorPrimary, size: 14),
+                                          textStyle: boldTextStyle(color: context.primaryColor, size: 14),
                                           onTap: () async {
-                                            toast(language
-                                                .successfullyAddedToCart);
-
-                                            addItemToCart(
-                                                    productId: product.proId
-                                                        .validate(),
-                                                    quantity: 1)
-                                                .then((value) {
-                                              // toast(language.successfullyAddedToCart);
-                                            }).catchError((e) {
-                                              log(e.toString());
+                                            ifNotTester(() {
+                                              toast(language.successfullyAddedToCart);
+                                              addItemToCart(productId: product.proId.validate(), quantity: 1).catchError((e) {
+                                                log(e.toString());
+                                              });
                                             });
                                           },
                                           elevation: 0,
-                                          color:
-                                              appColorPrimary.withOpacity(0.1),
+                                          color: context.primaryColor.withOpacity(0.1),
                                         ),
                                     ],
                                   ),
@@ -304,9 +249,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     );
                   }
                 }
-                return Observer(
-                    builder: (_) =>
-                        LoadingWidget().visible(!appStore.isLoading));
+                return Observer(builder: (_) => LoadingWidget().visible(!appStore.isLoading));
               },
             ),
             Observer(
@@ -314,8 +257,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 if (appStore.isLoading) {
                   return Positioned(
                     bottom: mPage != 1 ? 10 : null,
-                    child: LoadingWidget(
-                        isBlurBackground: mPage == 1 ? true : false),
+                    child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
                   );
                 } else {
                   return Offstage();

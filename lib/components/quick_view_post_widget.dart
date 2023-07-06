@@ -4,22 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/like_button_widget.dart';
 import 'package:socialv/models/posts/post_model.dart';
-import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/post/components/post_content_component.dart';
 import 'package:socialv/screens/post/components/post_component.dart';
 import 'package:socialv/screens/post/components/post_media_component.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
-import 'package:socialv/utils/html_widget.dart';
 
 import '../main.dart';
+import '../screens/dashboard_screen.dart';
+import '../screens/post/components/reaction_button_widget.dart';
 
 class QuickViewPostWidget extends StatefulWidget {
   final PostModel postModel;
-  final bool isPostLied;
+  final bool isPostLiked;
   final Function()? onPostLike;
+  final Function(int)? onPostReacted;
+  final Function()? onReactionRemoved;
   final int? pageIndex;
+  final bool isPostReacted;
 
-  QuickViewPostWidget({this.pageIndex, required this.postModel, this.isPostLied = false, this.onPostLike});
+  QuickViewPostWidget({this.pageIndex, required this.postModel, this.isPostLiked = false, this.onPostLike, this.onPostReacted, required this.isPostReacted, this.onReactionRemoved});
 
   @override
   State<QuickViewPostWidget> createState() => _QuickViewPostWidgetState();
@@ -92,41 +96,14 @@ class _QuickViewPostWidgetState extends State<QuickViewPostWidget> with SingleTi
                       ],
                     ).paddingOnly(left: 8, top: 8, right: 8),
                     Divider(),
-                    if (widget.postModel.content.validate().isNotEmpty)
-                      if (widget.postModel.type == PostActivityType.newBlogPost)
-                        InkWell(
-                          onTap: () async {
-                            if (widget.postModel.blogId != null) {
-                              appStore.setLoading(true);
-                              await wpPostById(postId: widget.postModel.blogId.validate()).then((value) {
-                                appStore.setLoading(false);
-                                openWebPage(context, url: value.link.validate());
-                              }).catchError((e) {
-                                toast(language.canNotViewPost);
-                                appStore.setLoading(false);
-                              });
-                            } else {
-                              toast(language.canNotViewPost);
-                            }
-                          },
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          child: HtmlWidget(postContent: widget.postModel.content.validate()).paddingSymmetric(horizontal: 8),
-                        )
-                      else
-                        Text(
-                          parseHtmlString(widget.postModel.content.validate().replaceAll("\n", '')),
-                          style: primaryTextStyle(),
-                          maxLines: 5,
-                          overflow: TextOverflow.ellipsis,
-                        ).paddingSymmetric(horizontal: 8, vertical: 8),
+                    PostContentComponent(blogId: widget.postModel.blogId,postType: widget.postModel.type, hasMentions: widget.postModel.hasMentions == 1, postContent: widget.postModel.content),
                     PostMediaComponent(
                       mediaTitle: widget.postModel.userName.validate(),
                       mediaType: widget.postModel.mediaType.validate(),
                       mediaList: widget.postModel.medias.validate(),
                       isFromPostDetail: true,
                       initialPageIndex: widget.pageIndex.validate(),
-                    ),
+                    ).paddingSymmetric(horizontal: 8),
                     if (widget.postModel.childPost != null)
                       PostComponent(
                         post: widget.postModel.childPost!,
@@ -135,12 +112,27 @@ class _QuickViewPostWidgetState extends State<QuickViewPostWidget> with SingleTi
                       ),
                     Row(
                       children: [
-                        LikeButtonWidget(
-                          onPostLike: () {
-                            widget.onPostLike?.call();
-                          },
-                          isPostLiked: widget.isPostLied,
-                        ),
+                        if (appStore.isReactionEnable==1)
+                          if (reactions.validate().isNotEmpty)
+                            ReactionButton(
+                              isComments: false,
+                              currentUserReaction: widget.postModel.curUserReaction,
+                              onReacted: (id) {
+                                widget.onPostReacted?.call(id);
+                              },
+                              onReactionRemoved: () {
+                                widget.onReactionRemoved?.call();
+                              },
+                            )
+                          else
+                            Offstage()
+                        else
+                          LikeButtonWidget(
+                            onPostLike: () {
+                              widget.onPostLike?.call();
+                            },
+                            isPostLiked: widget.isPostLiked,
+                          ),
                         IconButton(
                           onPressed: () {},
                           icon: Image.asset(

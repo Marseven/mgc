@@ -28,7 +28,7 @@ class LatestActivityComponent extends StatelessWidget {
                 return AnimatedListView(
                   shrinkWrap: true,
                   slideConfiguration: SlideConfiguration(delay: 80.milliseconds, verticalOffset: 300),
-                  physics: AlwaysScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   padding: EdgeInsets.only(left: 0, right: 0, bottom: 16),
                   itemCount: snap.length,
                   itemBuilder: (ctx, index) {

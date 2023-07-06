@@ -68,7 +68,6 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
   @override
   Widget build(BuildContext context) {
     init();
-
     return Column(
       children: [
         16.height,
@@ -89,7 +88,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
                 textFieldType: TextFieldType.NAME,
                 textStyle: primaryTextStyle(),
                 maxLines: 1,
-                decoration: inputDecorationFilled(context, label: language.firstName,fillColor: context.scaffoldBackgroundColor),
+                decoration: inputDecorationFilled(context, label: language.firstName, fillColor: context.scaffoldBackgroundColor),
                 onChanged: (text) {
                   if (widget.isBilling) {
                     billingAddress.firstName = text;
@@ -119,7 +118,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
                 textFieldType: TextFieldType.NAME,
                 textStyle: primaryTextStyle(),
                 maxLines: 1,
-                decoration: inputDecorationFilled(context, label: language.lastName,fillColor: context.scaffoldBackgroundColor),
+                decoration: inputDecorationFilled(context, label: language.lastName, fillColor: context.scaffoldBackgroundColor),
                 onChanged: (text) {
                   if (widget.isBilling) {
                     billingAddress.lastName = text;
@@ -151,7 +150,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
             textFieldType: TextFieldType.NAME,
             textStyle: primaryTextStyle(),
             maxLines: 1,
-            decoration: inputDecorationFilled(context, label: language.company,fillColor: context.scaffoldBackgroundColor),
+            decoration: inputDecorationFilled(context, label: language.company, fillColor: context.scaffoldBackgroundColor),
             onChanged: (text) {
               if (widget.isBilling) {
                 billingAddress.company = text;
@@ -181,7 +180,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
             textFieldType: TextFieldType.NAME,
             textStyle: primaryTextStyle(),
             maxLines: 1,
-            decoration: inputDecorationFilled(context, label: '${language.address} 1',fillColor: context.scaffoldBackgroundColor),
+            decoration: inputDecorationFilled(context, label: '${language.address} 1', fillColor: context.scaffoldBackgroundColor),
             onChanged: (text) {
               if (widget.isBilling) {
                 billingAddress.address_1 = text;
@@ -211,7 +210,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
             textFieldType: TextFieldType.NAME,
             textStyle: primaryTextStyle(),
             maxLines: 1,
-            decoration: inputDecorationFilled(context, label: '${language.address} 2',fillColor: context.scaffoldBackgroundColor),
+            decoration: inputDecorationFilled(context, label: '${language.address} 2', fillColor: context.scaffoldBackgroundColor),
             onChanged: (text) {
               if (widget.isBilling) {
                 billingAddress.address_2 = text;
@@ -246,7 +245,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
                 textFieldType: TextFieldType.NAME,
                 textStyle: primaryTextStyle(),
                 maxLines: 1,
-                decoration: inputDecorationFilled(context, label: language.city,fillColor: context.scaffoldBackgroundColor),
+                decoration: inputDecorationFilled(context, label: language.city, fillColor: context.scaffoldBackgroundColor),
                 onChanged: (text) {
                   if (widget.isBilling) {
                     billingAddress.city = text;
@@ -270,12 +269,12 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
                 enabled: !appStore.isLoading,
                 controller: postCode,
                 focus: postCodeFocus,
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                textFieldType: TextFieldType.NAME,
+                textFieldType: TextFieldType.NUMBER,
                 textStyle: primaryTextStyle(),
                 maxLines: 1,
-                decoration: inputDecorationFilled(context, label: language.postCode,fillColor: context.scaffoldBackgroundColor),
+                decoration: inputDecorationFilled(context, label: language.postCode, fillColor: context.scaffoldBackgroundColor),
                 onChanged: (text) {
                   if (widget.isBilling) {
                     billingAddress.postcode = text;
@@ -343,7 +342,6 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
                 borderRadius: BorderRadius.circular(commonRadius),
                 icon: Icon(Icons.arrow_drop_down, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                 elevation: 8,
-                //style: primaryTextStyle(),
                 isExpanded: true,
                 onChanged: (StateModel? newValue) {
                   selectedState = newValue!;
@@ -378,13 +376,14 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
             enabled: !appStore.isLoading,
             controller: phone,
             focus: phoneFocus,
+            readOnly: false,
             nextFocus: emailFocus,
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.next,
             textFieldType: TextFieldType.PHONE,
             textStyle: primaryTextStyle(),
             maxLines: 1,
-            decoration: inputDecorationFilled(context, label: language.phone,fillColor: context.scaffoldBackgroundColor),
+            decoration: inputDecorationFilled(context, label: language.phone, fillColor: context.scaffoldBackgroundColor),
             onChanged: (text) {
               if (widget.isBilling) {
                 billingAddress.phone = text;
@@ -413,7 +412,7 @@ class _BillingAddressComponentState extends State<BillingAddressComponent> {
             textFieldType: TextFieldType.EMAIL,
             textStyle: primaryTextStyle(),
             maxLines: 1,
-            decoration: inputDecorationFilled(context, label: language.email,fillColor: context.scaffoldBackgroundColor),
+            decoration: inputDecorationFilled(context, label: language.email, fillColor: context.scaffoldBackgroundColor),
             onChanged: (text) {
               if (widget.isBilling) {
                 billingAddress.email = text;

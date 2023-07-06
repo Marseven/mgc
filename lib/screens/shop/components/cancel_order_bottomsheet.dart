@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
-import 'package:socialv/utils/app_constants.dart';
 
 class CancelOrderBottomSheet extends StatefulWidget {
   final int orderId;
@@ -14,14 +13,7 @@ class CancelOrderBottomSheet extends StatefulWidget {
 }
 
 class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
-  List<String> cancelOrderList = [
-    language.cancelOrderMessageOne,
-    language.cancelOrderMessageTwo,
-    language.cancelOrderMessageThree,
-    language.cancelOrderMessageFour,
-    language.cancelOrderMessageFive,
-    language.cancelOrderMessageSix
-  ];
+  List<String> cancelOrderList = [language.cancelOrderMessageOne, language.cancelOrderMessageTwo, language.cancelOrderMessageThree, language.cancelOrderMessageFour, language.cancelOrderMessageFive, language.cancelOrderMessageSix];
 
   String cancelOrderReason = "";
   int cancelOrderIndex = 0;
@@ -47,15 +39,13 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
           Container(
             width: 45,
             height: 5,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16), color: Colors.white),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
           ),
           8.height,
           Container(
             decoration: BoxDecoration(
               color: context.cardColor,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
             ),
             padding: EdgeInsets.all(16),
             child: Column(
@@ -65,8 +55,7 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(language.reasonForCancellation, style: boldTextStyle())
-                        .expand(),
+                    Text(language.reasonForCancellation, style: boldTextStyle()).expand(),
                     Icon(Icons.close).onTap(() {
                       finish(context);
                     })
@@ -92,22 +81,16 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                           Container(
                             decoration: boxDecorationWithRoundedCorners(
                               borderRadius: radius(4),
-                              border: Border.all(color: appColorPrimary),
-                              backgroundColor: cancelOrderIndex == index
-                                  ? appColorPrimary
-                                  : context.cardColor,
+                              border: Border.all(color: context.primaryColor),
+                              backgroundColor: cancelOrderIndex == index ? context.primaryColor : context.cardColor,
                             ),
                             width: 16,
                             height: 16,
-                            child: Icon(Icons.done,
-                                size: 12, color: context.cardColor),
+                            child: Icon(Icons.done, size: 12, color: context.cardColor),
                             margin: EdgeInsets.only(top: 4),
                           ),
                           4.width,
-                          Text(cancelOrderList[index],
-                                  style: primaryTextStyle())
-                              .paddingLeft(8)
-                              .expand(),
+                          Text(cancelOrderList[index], style: primaryTextStyle()).paddingLeft(8).expand(),
                         ],
                       ).paddingSymmetric(vertical: 8),
                     );
@@ -118,7 +101,7 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                   width: context.width(),
                   textStyle: primaryTextStyle(color: white),
                   text: language.cancelOrder,
-                  color: appColorPrimary,
+                  color: context.primaryColor,
                   onTap: () {
                     finish(context);
 

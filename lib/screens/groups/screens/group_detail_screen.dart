@@ -19,14 +19,14 @@ import 'package:socialv/screens/profile/components/profile_header_component.dart
 import 'package:socialv/utils/cached_network_image.dart';
 
 import '../../../utils/app_constants.dart';
+import '../../gallery/screens/gallery_screen.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final int? groupId;
-  final int? groupMemberCount;
   final String? groupAvatarImage;
   final String? groupCoverImage;
 
-  GroupDetailScreen({this.groupId, this.groupMemberCount, this.groupAvatarImage, this.groupCoverImage});
+  GroupDetailScreen({this.groupId, this.groupAvatarImage, this.groupCoverImage});
 
   @override
   State<GroupDetailScreen> createState() => _GroupDetailScreenState();
@@ -79,7 +79,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
     }).catchError((e) {
       isError = true;
       appStore.setLoading(false);
-
+      setState(() {});
       toast(e.toString(), print: true);
     });
   }
@@ -156,8 +156,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     fit: BoxFit.cover,
                     color: context.primaryColor,
                   ),
-                ),
-              if (group.groupType == AccountType.public || group.isGroupMember.validate())
+                )
+              else
                 Theme(
                   data: Theme.of(context).copyWith(useMaterial3: false),
                   child: PopupMenuButton(
@@ -188,6 +188,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                         await showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
+                          elevation: 0,
                           backgroundColor: Colors.transparent,
                           builder: (context) {
                             return FractionallySizedBox(
@@ -221,12 +222,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                     },
                     icon: Icon(Icons.more_horiz),
                     itemBuilder: (context) => <PopupMenuEntry>[
-                      if (group.isGroupMember.validate() && group.groupCreatedById.validate().toString() != appStore.loginUserId)
-                        PopupMenuItem(
-                          value: 1,
-                          child: Text(language.leaveGroup),
-                          textStyle: primaryTextStyle(),
-                        ),
+                      PopupMenuItem(
+                        value: 1,
+                        child: Text(language.leaveGroup),
+                        textStyle: primaryTextStyle(),
+                      ),
                       PopupMenuItem(
                         value: 2,
                         child: Text(language.report),
@@ -371,7 +371,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                                 ),
                                               6.width,
                                               Text(
-                                                '${widget.groupMemberCount == null ? group.memberCount.validate().toInt() : widget.groupMemberCount.validate()} ${language.members}',
+                                                '${group.memberCount.validate().toInt()} ${language.members}',
                                                 style: boldTextStyle(color: context.primaryColor),
                                               ),
                                             ],
@@ -399,7 +399,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                       ],
                                       mainAxisAlignment: group.isGroupMember.validate() ? MainAxisAlignment.spaceBetween : MainAxisAlignment.center,
                                     ),
-                                    if (!group.isGroupMember.validate())
+                                    if (!group.isGroupMember.validate() && group.isBanned == 0)
                                       JoinGroupWidget(
                                         hasInvite: group.hasInvite.validate(),
                                         isRequestSent: group.isRequestSent.validate(),
@@ -415,7 +415,18 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                   ],
                                 ),
                               ).paddingSymmetric(horizontal: 16),
-                              16.height,
+                              8.height,
+                              if (group.isGalleryEnabled == 1)
+                                if (group.groupType == AccountType.public || group.isGroupMember.validate())
+                                  TextIcon(
+                                    onTap: () {
+                                      GalleryScreen(groupId: group.id, canEdit: group.isGroupMember.validate()).launch(context);
+                                    },
+                                    text: language.viewGallery,
+                                    textStyle: primaryTextStyle(color: appColorPrimary),
+                                    prefix: Image.asset(ic_image, width: 18, height: 18, color: appColorPrimary),
+                                  ),
+                              8.height,
                               if (!appStore.isLoading)
                                 group.groupType == AccountType.public || group.isGroupMember.validate()
                                     ? Column(
@@ -423,7 +434,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                         children: [
                                           if (postList.isNotEmpty)
                                             Text(
-                                              '${language.post} (${group.postCount})',
+                                              (appStore.displayPostCount == 1) ? '${language.post} (${group.postCount})' : language.post,
                                               style: boldTextStyle(color: context.primaryColor),
                                             ).paddingSymmetric(horizontal: 16),
                                           FutureBuilder<List<PostModel>>(
@@ -502,7 +513,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
               ? FloatingActionButton(
                   backgroundColor: appColorPrimary,
                   onPressed: () {
-                    AddPostScreen(component: Component.groups, groupId: widget.groupId).launch(context).then((value) {
+                    AddPostScreen(
+                      component: Component.groups,
+                      groupId: widget.groupId,
+                      groupName: group.name.validate(),
+                    ).launch(context).then((value) {
                       if (value ?? false) {
                         groupDetail();
                         mPage = 1;

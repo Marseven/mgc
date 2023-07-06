@@ -11,10 +11,10 @@ class AppTheme {
     scaffoldBackgroundColor: appLayoutBackground,
     primaryColor: appColorPrimary,
     primaryColorDark: appColorPrimary,
-    useMaterial3: true,
+    useMaterial3: false,
     errorColor: Colors.red,
     hoverColor: Colors.white54,
-    dividerColor: bodyWhite.withOpacity(0.2),
+    dividerColor: bodyWhite.withOpacity(0.4),
     fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
     appBarTheme: AppBarTheme(
       surfaceTintColor: appLayoutBackground,
@@ -38,19 +38,13 @@ class AppTheme {
     radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.all(appColorPrimary),
     ),
-    pageTransitionsTheme: PageTransitionsTheme(builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: OpenUpwardsPageTransitionsBuilder(),
-    }),
   ).copyWith(
     colorScheme: ColorScheme.fromSwatch().copyWith(secondary: appColorPrimary),
   );
 
   static final ThemeData darkTheme = ThemeData(
     scaffoldBackgroundColor: appBackgroundColorDark,
-    useMaterial3: true,
+    useMaterial3: false,
     highlightColor: appBackgroundColorDark,
     errorColor: Color(0xFFCF6676),
     appBarTheme: AppBarTheme(
@@ -60,7 +54,7 @@ class AppTheme {
       systemOverlayStyle: SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
     ),
     primaryColor: appColorPrimary,
-    dividerColor: Color(0xFFDADADA).withOpacity(0.3),
+    dividerColor: bodyDark.withOpacity(0.4),
     primaryColorDark: appColorPrimary,
     textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.white),
     hoverColor: Colors.black12,
@@ -81,12 +75,6 @@ class AppTheme {
     radioTheme: RadioThemeData(
       fillColor: MaterialStateProperty.all(appColorPrimary),
     ),
-    pageTransitionsTheme: PageTransitionsTheme(builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: OpenUpwardsPageTransitionsBuilder(),
-    }),
   ).copyWith(
     colorScheme: ColorScheme.fromSwatch().copyWith(secondary: appColorPrimary),
   );

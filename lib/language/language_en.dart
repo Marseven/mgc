@@ -2,6 +2,556 @@ import 'package:socialv/language/languages.dart';
 
 class LanguageEn extends BaseLanguage {
   @override
+  String get deleteCommentConfirmation => "Are you sure do you want to delete this comment?";
+
+  @override
+  String get protectedPostText => "This content is password protected. To view it please enter your password below:";
+
+  @override
+  String get courseOrders => "Course Orders";
+
+  @override
+  String get invitations => "Invitations";
+
+  @override
+  String get apply => "Apply";
+
+  @override
+  String get selectAll => "Select All";
+
+  @override
+  String get resend => "Resend";
+
+  @override
+  String get bulkAction => "Bulk Action";
+
+  @override
+  String get pendingInvites => "Pending Invites";
+
+  @override
+  String get sendInvites => "Send Invites";
+
+  @override
+  String get pleaseEnterValidEmailId => "Please enter valid email id";
+
+  @override
+  String get sendInvitation => "Send Invitation";
+
+  @override
+  String get addAPersonalizedMessage => "Add a personalized message to the invitation (optional)";
+
+  @override
+  String get emailAddressOfNewUser => "Email address of new user";
+
+  @override
+  String get sendInvitesSubtitle =>
+      "Fill out the form below to invite a new user to join this site. Upon submission of the form, an email will be sent to the invitee containing a link to accept your invitation. You may also add a custom message to the email.";
+
+  @override
+  String get cancelInviteRequest => "Are you sure you want to cancel this Invite Request?";
+
+  @override
+  String get resendInvitation => "Resend Invitation";
+
+  @override
+  String get accepted => "Accepted";
+
+  @override
+  String get blogs => 'Blogs';
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get leaveAReply => 'Leave A Reply';
+
+  @override
+  String get conversationDeleted => 'Conversation Deleted';
+
+  @override
+  String get newConversationText => 'Write a message to start the conversation';
+
+  @override
+  String get listOfUsersBlocked => 'This is a list of users that you have blocked. You may unblock them from the blocklist below.';
+
+  @override
+  String get youHaventBlockedText => 'You haven’t blocked anyone yet';
+
+  @override
+  String get enableInviteConversation => 'When enabled, conversation participants will be able to add other users to conversation.';
+
+  @override
+  String get kickParticipant => 'Kick Participant';
+
+  @override
+  String get to => 'To';
+
+  @override
+  String get userProfile => 'User Profile';
+
+  @override
+  String get allowInviteText => 'Allow conversation members to invite other members';
+
+  @override
+  String get changeConversationSubject => 'Change conversation subject';
+
+  @override
+  String get conversationSettings => 'Conversation Settings';
+
+  @override
+  String get startTypingToSearch => 'Start typing to search members';
+
+  @override
+  String get messages => 'Messages';
+
+  @override
+  String get starredMessages => 'Starred Messages';
+
+  @override
+  String get youCanTSendMessage => 'You can\'t send message to user who was blocked by you';
+
+  @override
+  String get conversations => 'Conversations';
+
+  @override
+  String get restore => 'Restore?';
+
+  @override
+  String get restoring => 'Restoring';
+
+  @override
+  String get attachments => 'attachments';
+
+  @override
+  String get noConversationsYet => 'No conversations yet';
+
+  @override
+  String get startANewConversation => 'Start a New Conversation';
+
+  @override
+  String get noGroupsAddedYet => 'No groups added yet';
+
+  @override
+  String get groupHomepage => 'Group HomePage';
+
+  @override
+  String get noFriendsAddedYet => 'No friends added yet';
+
+  @override
+  String get addParticipants => 'Add Participants';
+
+  @override
+  String get addParticipantText => 'Add a new participant and unlock fresh perspectives.';
+
+  @override
+  String get editMessage => 'Edit Message';
+
+  @override
+  String get replyToMessage => 'Reply to Message';
+
+  @override
+  String get writeAMessage => 'Write a message';
+
+  @override
+  String get online => 'online';
+
+  @override
+  String get typing => 'typing...';
+
+  @override
+  String get participants => 'participants';
+
+  @override
+  String get leave => 'Leave';
+
+  @override
+  String get deleteConversation => 'Delete Conversation';
+
+  @override
+  String get addNewParticipant => 'Add New Participant';
+
+  @override
+  String get muteConversation => 'Mute Conversation';
+
+  @override
+  String get unMuteConversation => 'Un-Mute Conversation';
+
+  @override
+  String get viewParticipants => 'View Participants';
+
+  @override
+  String get deleteChatConfirmation => 'Are you sure do you want to delete this chat?';
+
+  @override
+  String get messageHidden => 'Message Hidden';
+
+  @override
+  String get editGroupSettings => "Edit Group Settings";
+
+  @override
+  String get demoteToMember => "Demote to Member";
+
+  @override
+  String get unban => "Unban";
+
+  @override
+  String get ban => "Ban";
+
+  @override
+  String get promoteToMod => "Promote to Mod";
+
+  @override
+  String get enableGalleryCheckBoxText => "Yes. I want this group to have a Gallery";
+
+  @override
+  String get enableGallerySubtitle => "Bring your creativity to life and showcase it to the world by enabling the gallery feature on our platform.";
+
+  @override
+  String get enableGallery => "Enable Gallery";
+
+  @override
+  String get groupAdminsOnly => "Group admins only";
+
+  @override
+  String get groupAdminsAndModsOnly => "Group admins and mods only";
+
+  @override
+  String get allGroupMembers => "All group members";
+
+  @override
+  String get groupInvitationsSubtitle => "Which members of this group are allowed to invite others?";
+
+  @override
+  String get groupInvitations => "Group Invitations";
+
+  @override
+  String get groupSettings => "Group Settings";
+
+  @override
+  String get albumWithNoMedia => "This album don't have any media";
+
+  @override
+  String get album => "Album";
+
+  @override
+  String get myGallery => "My Gallery";
+
+  @override
+  String get addMedia => "Add Media";
+
+  @override
+  String get albumDeleteConfirmation => "Are you sure you want to delete this Album?";
+
+  @override
+  String get createAlbum => "Create Album";
+
+  @override
+  String get addYourAlbum => "Add Your Album";
+
+  @override
+  String get pushYourCreativityWithAlbums => "Push your Creativity with Albums and show your moments with your circle.";
+
+  @override
+  String get create => "Create";
+
+  @override
+  String get pleaseEnterTitle => "Please Enter Title";
+
+  @override
+  String get type => "Type";
+
+  @override
+  String get addAlbumDetails => "Add album Details";
+
+  @override
+  String get upload => "Upload";
+
+  @override
+  String get add => "Add";
+
+  @override
+  String get addMediaFile => "Add Media File";
+
+  @override
+  String get viewGallery => "View Gallery";
+
+  @override
+  String get onYourComment => "on your comment";
+
+  @override
+  String get removeCouponConfirmation => "Are you sure you want to remove this coupon?";
+
+  @override
+  String get removeMediaConfirmation => "Are you sure you want delete this media?";
+
+  @override
+  String get reactedBy => "Reacted by";
+
+  @override
+  String get unpinned => "Unpinned";
+
+  @override
+  String get pinned => "Pinned";
+
+  @override
+  String get postRemovedFromFavorite => "Post removed from favorite";
+
+  @override
+  String get yourQtyShouldNotBeEmpty => "Your qty should not be empty";
+
+  @override
+  String get favorites => "Favorites";
+
+  @override
+  String get reactions => "Reactions";
+
+  @override
+  String get selectGroups => "Select Groups";
+
+  @override
+  String get myProfile => "My Profile";
+
+  @override
+  String get pinToTop => "Pin to Top";
+
+  @override
+  String get unpin => "Unpin";
+
+  @override
+  String get unfavorite => "UnFavorite";
+
+  @override
+  String get postAddedToFavorite => "Post added to favorite";
+
+  @override
+  String get undo => "Undo";
+
+  @override
+  String get sharedYourPost => "shared your post";
+
+  @override
+  String get onYourPost => "on your post";
+
+  @override
+  String get reacted => "reacted";
+
+  @override
+  String get allMembers => "All Members";
+
+  @override
+  String get suggestions => "Suggestions";
+
+  @override
+  String get suggestedGroups => "Suggested Groups";
+
+  @override
+  String get imageLink => "Image Link ";
+
+  @override
+  String get questionsAttempted => 'Questions Attempted';
+
+  @override
+  String get notificationSettings => 'Notification Settings';
+
+  @override
+  String get user => 'User';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get cost => 'Cost';
+
+  @override
+  String get orderItems => 'Order Items';
+
+  @override
+  String get orderKey => 'Order Key';
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get dateCreated => 'Date Created';
+
+  @override
+  String get payVia => 'Pay Via';
+
+  @override
+  String get orderId => 'Order Id';
+
+  @override
+  String get completeLessonConfirmation => 'Are you sure you want to complete this lesson?';
+
+  @override
+  String get complete => 'Complete';
+
+  @override
+  String get passed => 'Passed';
+
+  @override
+  String get inProgress => 'In Progress';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get courses => 'Courses';
+
+  @override
+  String get myCourses => 'My Courses';
+
+  @override
+  String get finishCourseConfirmation => 'Are you sure you want to finish this course?';
+
+  @override
+  String get finishCourse => 'Finish Course';
+
+  @override
+  String get youHaveFinishedThisCourse => 'You have finished this course';
+
+  @override
+  String get buyNow => 'Buy Now';
+
+  @override
+  String get yourOrderIsWaitingFor => 'Your order is waiting for';
+
+  @override
+  String get startNow => 'Start Now';
+
+  @override
+  String get courseDetail => 'Course Detail';
+
+  @override
+  String get paymentMethodIsRequired => 'Payment Method is Required';
+
+  @override
+  String get noteToAdministrator => 'Note To Administrator';
+
+  @override
+  String get yourOrder => 'Your Order';
+
+  @override
+  String get content => 'Content';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get enjoyLearning => 'Enjoy Learning !!';
+
+  @override
+  String get congratulationsYouHavSuccessfully => 'Congratulations You hav successfully enrolled this Course.';
+
+  @override
+  String get prev => 'Prev';
+
+  @override
+  String get finishQuizConfirmation => 'Are you sure you want to finish quiz?';
+
+  @override
+  String get finishQuiz => 'Finish Quiz';
+
+  @override
+  String get incorrect => 'Incorrect';
+
+  @override
+  String get thisContentIsProtected => 'This content is protected. Please enroll in the course to view this content!';
+
+  @override
+  String get result => 'Result';
+
+  @override
+  String get marks => 'Marks';
+
+  @override
+  String get lastAttempts => 'Last Attempts';
+
+  @override
+  String get review => 'Review';
+
+  @override
+  String get retake => 'Retake';
+
+  @override
+  String get questionsSkipped => 'Questions Skipped:';
+
+  @override
+  String get questionsWrong => 'Questions Wrong:';
+
+  @override
+  String get correct => 'Correct';
+
+  @override
+  String get questions => 'Questions';
+
+  @override
+  String get points => 'Points:';
+
+  @override
+  String get timeSpend => 'Time Spend';
+
+  @override
+  String get passingGrade => 'Passing Grade';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get targetAudiences => 'Target Audiences';
+
+  @override
+  String get features => 'Features';
+
+  @override
+  String get requirements => 'Requirements';
+
+  @override
+  String get self => 'Self';
+
+  @override
+  String get assessments => 'Assessments';
+
+  @override
+  String get studentsParticipated => 'Students participated';
+
+  @override
+  String get ofTheEntireCourse => 'Of The Entire Course';
+
+  @override
+  String get quiz => 'Quiz';
+
+  @override
+  String get detailedLessons => 'detailed Lessons';
+
+  @override
+  String get lblNew => 'New';
+
+  @override
+  String get theCourseIncludes => 'The Course Includes';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get curriculum => 'Curriculum';
+
+  @override
+  String get instructor => 'Instructor';
+
+  @override
+  String get faqs => 'FAQs';
+
+  @override
   String get viewVideo => 'View Video';
 
   @override
@@ -287,10 +837,10 @@ class LanguageEn extends BaseLanguage {
   String get yourAccountIsVerifiedNow => "your account is verified now.";
 
   @override
-  String get signinWithApple => "SignIn with Apple";
+  String get signInWithApple => "Sign in with Apple";
 
   @override
-  String get signinWithGoogle => "SignIn with Google";
+  String get signInWithGoogle => "Sign in with Google";
 
   @override
   String get request => "Request";
@@ -803,7 +1353,7 @@ class LanguageEn extends BaseLanguage {
   String get welcomeBack => "Welcome back!";
 
   @override
-  String get youHaveBeenMissed => "You Have Been Missed For Long Time";
+  String get youHaveBeenMissed => "You Have Been Missed For A Long Time";
 
   @override
   String get username => "Username";
@@ -986,7 +1536,7 @@ class LanguageEn extends BaseLanguage {
   String get pleaseEnterGroupName => 'Please Enter Group Name';
 
   @override
-  String get chooseAvatarCoverImage => '2. Choose Profile & Cover image';
+  String get chooseAvatarCoverImage => 'Choose Profile & Cover image';
 
   @override
   String get somethingWentWrong => 'Something Went Wrong';
@@ -1292,7 +1842,7 @@ class LanguageEn extends BaseLanguage {
   String get profilePictureRemovedSuccessfully => "Profile Picture Removed Successfully";
 
   @override
-  String get areYouSureYou => "Are you sure you want to this member from group ?";
+  String get removeGroupMemberConfirmation => "Are you sure you want to remove this member from group ?";
 
   @override
   String get remove => "Remove";

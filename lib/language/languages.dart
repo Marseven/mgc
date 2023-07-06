@@ -3,6 +3,373 @@ import 'package:flutter/material.dart';
 abstract class BaseLanguage {
   static BaseLanguage? of(BuildContext context) => Localizations.of<BaseLanguage>(context, BaseLanguage);
 
+  String get deleteCommentConfirmation;
+
+  String get protectedPostText;
+
+  String get courseOrders;
+
+  String get invitations;
+
+  String get apply;
+
+  String get selectAll;
+
+  String get resend;
+
+  String get bulkAction;
+
+  String get pendingInvites;
+
+  String get sendInvites;
+
+  String get pleaseEnterValidEmailId;
+
+  String get sendInvitation;
+
+  String get addAPersonalizedMessage;
+
+  String get emailAddressOfNewUser;
+
+  String get sendInvitesSubtitle;
+
+  String get cancelInviteRequest;
+
+  String get resendInvitation;
+
+  String get accepted;
+
+  String get blogs;
+
+  String get message;
+
+  String get leaveAReply;
+
+  String get conversationDeleted;
+
+  String get newConversationText;
+
+  String get listOfUsersBlocked;
+
+  String get youHaventBlockedText;
+
+  String get enableInviteConversation;
+
+  String get kickParticipant;
+
+  String get to;
+
+  String get userProfile;
+
+  String get allowInviteText;
+
+  String get changeConversationSubject;
+
+  String get conversationSettings;
+
+  String get startTypingToSearch;
+
+  String get messages;
+
+  String get starredMessages;
+
+  String get youCanTSendMessage;
+
+  String get conversations;
+
+  String get restore;
+
+  String get restoring;
+
+  String get attachments;
+
+  String get noConversationsYet;
+
+  String get startANewConversation;
+
+  String get noGroupsAddedYet;
+
+  String get groupHomepage;
+
+  String get noFriendsAddedYet;
+
+  String get addParticipants;
+
+  String get addParticipantText;
+
+  String get editMessage;
+
+  String get replyToMessage;
+
+  String get writeAMessage;
+
+  String get online;
+
+  String get typing;
+
+  String get participants;
+
+  String get leave;
+
+  String get deleteConversation;
+
+  String get addNewParticipant;
+
+  String get muteConversation;
+
+  String get unMuteConversation;
+
+  String get viewParticipants;
+
+  String get deleteChatConfirmation;
+
+  String get messageHidden;
+
+  String get editGroupSettings;
+
+  String get demoteToMember;
+
+  String get unban;
+
+  String get ban;
+
+  String get promoteToMod;
+
+  String get enableGalleryCheckBoxText;
+
+  String get enableGallerySubtitle;
+
+  String get enableGallery;
+
+  String get groupAdminsOnly;
+
+  String get groupAdminsAndModsOnly;
+
+  String get allGroupMembers;
+
+  String get groupInvitationsSubtitle;
+
+  String get groupInvitations;
+
+  String get groupSettings;
+
+  String get albumWithNoMedia;
+
+  String get album;
+
+  String get myGallery;
+
+  String get addMedia;
+
+  String get albumDeleteConfirmation;
+
+  String get createAlbum;
+
+  String get addYourAlbum;
+
+  String get pushYourCreativityWithAlbums;
+
+  String get create;
+
+  String get pleaseEnterTitle;
+
+  String get type;
+
+  String get addAlbumDetails;
+
+  String get upload;
+
+  String get add;
+
+  String get addMediaFile;
+
+  String get viewGallery;
+
+  ///
+  String get onYourComment;
+
+  String get removeCouponConfirmation;
+
+  String get removeMediaConfirmation;
+
+  String get reactedBy;
+
+  String get unpinned;
+
+  String get pinned;
+
+  String get postRemovedFromFavorite;
+
+  String get yourQtyShouldNotBeEmpty;
+
+  String get favorites;
+
+  String get reactions;
+
+  String get selectGroups;
+
+  String get myProfile;
+
+  String get pinToTop;
+
+  String get unpin;
+
+  String get unfavorite;
+
+  String get postAddedToFavorite;
+
+  String get undo;
+
+  String get sharedYourPost;
+
+  String get onYourPost;
+
+  String get reacted;
+
+  String get allMembers;
+
+  String get suggestions;
+
+  String get suggestedGroups;
+
+  String get imageLink;
+
+  String get questionsAttempted;
+
+  String get notificationSettings;
+
+  String get user;
+
+  String get quantity;
+
+  String get cost;
+
+  String get orderItems;
+
+  String get orderKey;
+
+  String get customer;
+
+  String get status;
+
+  String get dateCreated;
+
+  String get payVia;
+
+  String get orderId;
+
+  String get completeLessonConfirmation;
+
+  String get complete;
+
+  String get passed;
+
+  String get inProgress;
+
+  String get all;
+
+  String get courses;
+
+  String get myCourses;
+
+  String get finishCourseConfirmation;
+
+  String get finishCourse;
+
+  String get youHaveFinishedThisCourse;
+
+  String get buyNow;
+
+  String get yourOrderIsWaitingFor;
+
+  String get startNow;
+
+  String get courseDetail;
+
+  String get paymentMethodIsRequired;
+
+  String get noteToAdministrator;
+
+  String get yourOrder;
+
+  String get content;
+
+  String get title;
+
+  String get duration;
+
+  String get start;
+
+  String get enjoyLearning;
+
+  String get congratulationsYouHavSuccessfully;
+
+  String get prev;
+
+  String get finishQuizConfirmation;
+
+  String get finishQuiz;
+
+  String get incorrect;
+
+  String get thisContentIsProtected;
+
+  String get result;
+
+  String get marks;
+
+  String get lastAttempts;
+
+  String get review;
+
+  String get retake;
+
+  String get questionsSkipped;
+
+  String get questionsWrong;
+
+  String get correct;
+
+  String get questions;
+
+  String get points;
+
+  String get timeSpend;
+
+  String get passingGrade;
+
+  String get preview;
+
+  String get targetAudiences;
+
+  String get features;
+
+  String get requirements;
+
+  String get self;
+
+  String get assessments;
+
+  String get studentsParticipated;
+
+  String get ofTheEntireCourse;
+
+  String get quiz;
+
+  String get detailedLessons;
+
+  String get lblNew;
+
+  String get theCourseIncludes;
+
+  String get overview;
+
+  String get curriculum;
+
+  String get instructor;
+
+  String get faqs;
+
   String get viewVideo;
 
   String get totalAmount;
@@ -193,9 +560,9 @@ abstract class BaseLanguage {
 
   String get yourAccountIsVerifiedNow;
 
-  String get signinWithApple;
+  String get signInWithApple;
 
-  String get signinWithGoogle;
+  String get signInWithGoogle;
 
   String get request;
 
@@ -861,7 +1228,7 @@ abstract class BaseLanguage {
 
   String get profilePictureRemovedSuccessfully;
 
-  String get areYouSureYou;
+  String get removeGroupMemberConfirmation;
 
   String get remove;
 

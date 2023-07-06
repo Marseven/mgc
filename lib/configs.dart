@@ -1,5 +1,5 @@
 /// App Name
-const APP_NAME = "Manga Golf Club";
+const APP_NAME = "SocialV";
 
 /// App Icon src
 const APP_ICON = "assets/app_icon.png";
@@ -10,10 +10,19 @@ const SPLASH_SCREEN_IMAGE = 'assets/images/splash_image.png';
 /// OneSignal Notification App Id
 const ONESIGNAL_APP_ID = '';
 
+const WEB_SOCKET_URL = "wss://realtime-cloud.bpbettermessages.com/socket.io/?EIO=4&transport=websocket";
+
+/// NOTE: Do not add slash (/) or (https://) or (http://) at the end of your domain.
+const WEB_SOCKET_DOMAIN = "";
+
+
 /// Todo: Remove Base URL
 /// NOTE: Do not add slash (/) at the end of your domain.
-const DOMAIN_URL = 'https://staging.mangagolfclub.com';
+const DOMAIN_URL = '';
 const BASE_URL = '$DOMAIN_URL/wp-json/';
+
+/// AppStore Url
+const IOS_APP_LINK = 'https://apps.apple.com/us/app/socialv/id1641646237';
 
 /// Terms and Conditions URL
 const TERMS_AND_CONDITIONS_URL = '$DOMAIN_URL/terms-condition/';
@@ -33,10 +42,11 @@ const mAdMobBannerId = '';
 const mAdMobAppIdIOS = '';
 const mAdMobBannerIdIOS = '';
 
-const mTestAdMobBannerId = 'ca-app-pub-3144848441651574~8816429250';
+const mTestAdMobBannerId = 'ca-app-pub-3940256099942544/6303211';
 
 /// Woo Commerce keys
 
 // live
-const CONSUMER_KEY = 'ck_a18c63f051a1473d4e46e8638a7b67e22ae9c19e';
-const CONSUMER_SECRET = 'cs_0f9ff846eddfaf6786c2a124aa39b0364ec359e1';
+const CONSUMER_KEY = '';
+const CONSUMER_SECRET = '';
+

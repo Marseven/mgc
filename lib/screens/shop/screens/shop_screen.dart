@@ -47,34 +47,26 @@ class _ShopScreenState extends State<ShopScreen> {
 
   @override
   void initState() {
-    future = getProducts(
-        categoryId:
-            widget.categoryId != null ? widget.categoryId.validate() : null);
+    future = getProducts(categoryId: widget.categoryId != null ? widget.categoryId.validate() : null);
     super.initState();
 
     _scrollController.addListener(() {
       /// scroll down
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
         if (appStore.showShopBottom) appStore.setShopBottom(false);
       }
 
       /// scroll up
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
         if (!appStore.showShopBottom) appStore.setShopBottom(true);
       }
 
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         if (!mIsLastPage) {
           mPage++;
           setState(() {});
           appStore.setLoading(true);
-          future = getProducts(
-              categoryId: widget.categoryId != null
-                  ? widget.categoryId.validate()
-                  : null);
+          future = getProducts(categoryId: widget.categoryId != null ? widget.categoryId.validate() : null);
         }
       }
     });
@@ -94,17 +86,11 @@ class _ShopScreenState extends State<ShopScreen> {
     });
   }
 
-  Future<List<ProductListModel>> getProducts(
-      {String? orderBy, int? categoryId}) async {
+  Future<List<ProductListModel>> getProducts({String? orderBy, int? categoryId}) async {
     if (mPage == 1) productList.clear();
     appStore.setLoading(true);
 
-    await getProductsList(
-            page: mPage,
-            categoryId: categoryId,
-            orderBy: orderBy == null ? ProductFilters.date : orderBy,
-            searchText: searchCont.text)
-        .then((value) {
+    await getProductsList(page: mPage, categoryId: categoryId, orderBy: orderBy == null ? ProductFilters.date : orderBy, searchText: searchCont.text).then((value) {
       mIsLastPage = value.length != PER_PAGE;
       productList.addAll(value);
       setState(() {});
@@ -133,9 +119,7 @@ class _ShopScreenState extends State<ShopScreen> {
   Future<void> onRefresh() async {
     isError = false;
     mPage = 1;
-    future = getProducts(
-        categoryId:
-            widget.categoryId != null ? widget.categoryId.validate() : null);
+    future = getProducts(categoryId: widget.categoryId != null ? widget.categoryId.validate() : null);
   }
 
   @override
@@ -157,21 +141,17 @@ class _ShopScreenState extends State<ShopScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: context.iconColor),
             onPressed: () {
-              finish(context, true);
+              finish(context);
             },
           ),
           titleSpacing: 0,
-          title: Text(
-              widget.categoryName != null
-                  ? widget.categoryName.validate()
-                  : language.shop,
-              style: boldTextStyle(size: 22)),
+          title: Text(widget.categoryName != null ? widget.categoryName.validate() : language.shop, style: boldTextStyle(size: 22)),
           elevation: 0,
           centerTitle: true,
           actions: [
@@ -181,49 +161,13 @@ class _ShopScreenState extends State<ShopScreen> {
                   onPressed: () {
                     WishlistScreen().launch(context);
                   },
-                  icon: Image.asset(ic_heart,
-                      height: 22,
-                      width: 22,
-                      color: appColorPrimary,
-                      fit: BoxFit.fill),
+                  icon: Image.asset(ic_heart, height: 22, width: 22, color: context.primaryColor, fit: BoxFit.fill),
                 ),
-                Stack(
-                  alignment: AlignmentDirectional.center,
-                  children: <Widget>[
-                    IconButton(
-                      onPressed: () {
-                        CartScreen().launch(context);
-                      },
-                      icon: Image.asset(ic_cart,
-                          height: 24,
-                          width: 24,
-                          color: appColorPrimary,
-                          fit: BoxFit.cover),
-                    ),
-                    if (appStore.wooCart > 0)
-                      Positioned(
-                          top: 5.0,
-                          right: 1.0,
-                          child: Stack(
-                            //alignment: AlignmentDirectional.topEnd,
-                            children: <Widget>[
-                              Icon(Icons.brightness_1,
-                                  size: 22.0, color: Colors.green[800]),
-                              Positioned(
-                                  top: 5.0,
-                                  right: 5.5,
-                                  child: Center(
-                                    child: Text(
-                                      appStore.wooCart.toString(),
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10.0,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  )),
-                            ],
-                          )),
-                  ],
+                IconButton(
+                  onPressed: () {
+                    CartScreen().launch(context);
+                  },
+                  icon: Image.asset(ic_cart, height: 24, width: 24, color: context.primaryColor, fit: BoxFit.cover),
                 ),
                 16.width,
               ],
@@ -239,9 +183,7 @@ class _ShopScreenState extends State<ShopScreen> {
                 if (snap.hasError && !appStore.isLoading) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       onRefresh();
                     },
@@ -252,9 +194,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   if (snap.data.validate().isEmpty && !appStore.isLoading) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         onRefresh();
                       },
@@ -264,15 +204,14 @@ class _ShopScreenState extends State<ShopScreen> {
                     return SingleChildScrollView(
                       padding: EdgeInsets.only(bottom: 60),
                       controller: _scrollController,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           AppTextField(
                             suffix: searchCont.text.isNotEmpty
                                 ? CloseButton(
-                                    color: appColorPrimary,
+                                    color: context.primaryColor,
                                     onPressed: () {
                                       searchCont.clear();
                                       hideKeyboard(context);
@@ -299,13 +238,11 @@ class _ShopScreenState extends State<ShopScreen> {
                             },
                             decoration: InputDecoration(
                               hintText: language.searchHere,
-                              prefixIcon: Icon(Icons.search,
-                                  color: context.iconColor, size: 20),
+                              prefixIcon: Icon(Icons.search, color: context.iconColor, size: 20),
                               hintStyle: secondaryTextStyle(),
                               border: OutlineInputBorder(
                                 borderRadius: radius(),
-                                borderSide: BorderSide(
-                                    width: 0, style: BorderStyle.none),
+                                borderSide: BorderSide(width: 0, style: BorderStyle.none),
                               ),
                               filled: true,
                               contentPadding: EdgeInsets.all(16),
@@ -320,14 +257,10 @@ class _ShopScreenState extends State<ShopScreen> {
                               CategoryModel item = categoryList[index];
 
                               return Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 16),
+                                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                                 decoration: BoxDecoration(
-                                  color: item.isSelected.validate()
-                                      ? appColorPrimary
-                                      : context.cardColor,
-                                  borderRadius:
-                                      BorderRadius.all(radiusCircular()),
+                                  color: item.isSelected.validate() ? context.primaryColor : context.cardColor,
+                                  borderRadius: BorderRadius.all(radiusCircular()),
                                 ),
                                 child: Row(
                                   children: [
@@ -339,13 +272,7 @@ class _ShopScreenState extends State<ShopScreen> {
                                         height: 14,
                                         circle: true,
                                       ),
-                                    Text(item.name.validate(),
-                                        style: boldTextStyle(
-                                            size: 14,
-                                            color: item.isSelected.validate()
-                                                ? context.cardColor
-                                                : appColorPrimary),
-                                        maxLines: 1),
+                                    Text(item.name.validate(), style: boldTextStyle(size: 14, color: item.isSelected.validate() ? context.cardColor : context.primaryColor), maxLines: 1),
                                   ],
                                 ),
                               ).onTap(
@@ -360,9 +287,7 @@ class _ShopScreenState extends State<ShopScreen> {
                                   if (item.id == -1) {
                                     future = getProducts();
                                   } else {
-                                    future = getProducts(
-                                        categoryId:
-                                            selectedCategory!.id.validate());
+                                    future = getProducts(categoryId: selectedCategory!.id.validate());
                                   }
 
                                   setState(() {});
@@ -379,11 +304,9 @@ class _ShopScreenState extends State<ShopScreen> {
                             itemCount: productList.length,
                             spacing: 16,
                             runSpacing: 16,
-                            slideConfiguration:
-                                SlideConfiguration(delay: 120.milliseconds),
+                            slideConfiguration: SlideConfiguration(delay: 120.milliseconds),
                             itemBuilder: (ctx, index) {
-                              return ProductCardComponent(
-                                  product: productList[index]);
+                              return ProductCardComponent(product: productList[index]);
                             },
                           ).paddingSymmetric(horizontal: 16),
                           16.height,
@@ -398,9 +321,7 @@ class _ShopScreenState extends State<ShopScreen> {
             Positioned(
               bottom: mPage != 1 ? context.navigationBarHeight + 8 : null,
               child: Observer(builder: (context) {
-                return LoadingWidget(
-                        isBlurBackground: mPage == 1 ? true : false)
-                    .visible(appStore.isLoading);
+                return LoadingWidget(isBlurBackground: mPage == 1 ? true : false).visible(appStore.isLoading);
               }),
             ),
           ],
@@ -412,30 +333,20 @@ class _ShopScreenState extends State<ShopScreen> {
             child: Container(
               margin: EdgeInsets.only(bottom: 16),
               padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: boxDecorationDefault(
-                  color: appColorPrimary, borderRadius: radius(8)),
+              decoration: boxDecorationDefault(color: context.primaryColor, borderRadius: radius(8)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextIcon(
                     text: language.sortBy,
-                    textStyle: primaryTextStyle(
-                        color: appStore.isDarkMode ? bodyDark : Colors.white,
-                        size: 12),
-                    prefix: Image.asset(ic_sort_by,
-                        height: 18,
-                        width: 18,
-                        color: appStore.isDarkMode ? bodyDark : Colors.white,
-                        fit: BoxFit.cover),
+                    textStyle: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : Colors.white, size: 12),
+                    prefix: Image.asset(ic_sort_by, height: 18, width: 18, color: appStore.isDarkMode ? bodyDark : Colors.white, fit: BoxFit.cover),
                     onTap: () async {
                       FilterModel? data = await showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         isDismissible: true,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: radiusOnly(
-                                topLeft: defaultRadius,
-                                topRight: defaultRadius)),
+                        shape: RoundedRectangleBorder(borderRadius: radiusOnly(topLeft: defaultRadius, topRight: defaultRadius)),
                         builder: (_) {
                           return SortByBottomSheet(getProductFilters());
                         },

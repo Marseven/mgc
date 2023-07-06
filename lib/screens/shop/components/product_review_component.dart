@@ -1,5 +1,6 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_html/shims/dart_ui_real.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
@@ -139,7 +140,8 @@ class _ProductReviewComponentState extends State<ProductReviewComponent> {
                                             appStore.loginFullName)
                                           Text('${language.edit}',
                                                   style: secondaryTextStyle(
-                                                      color: appColorPrimary,
+                                                      color:
+                                                          context.primaryColor,
                                                       size: 12))
                                               .onTap(() {
                                             showInDialog(
@@ -254,7 +256,7 @@ class _ProductReviewComponentState extends State<ProductReviewComponent> {
               textStyle: boldTextStyle(color: Colors.white, size: 12),
               padding: EdgeInsets.zero,
               elevation: 0,
-              color: appColorPrimary,
+              color: context.primaryColor,
               onTap: () async {
                 addReview();
               },

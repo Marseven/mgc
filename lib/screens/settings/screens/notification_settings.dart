@@ -84,9 +84,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                   ).center();
                 }
 
@@ -94,9 +92,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                     ).center();
                   } else {
                     return AnimatedListView(
@@ -110,13 +106,11 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                         return SettingItemWidget(
                           padding: EdgeInsets.symmetric(vertical: 4),
                           title: list[index].name.validate(),
-                          titleTextStyle: boldTextStyle(
-                              color: appStore.isDarkMode ? bodyDark : bodyWhite,
-                              size: 14),
+                          titleTextStyle: boldTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: 14),
                           trailing: Transform.scale(
                             scale: 0.8,
                             child: CupertinoSwitch(
-                              activeColor: appColorPrimary,
+                              activeColor: context.primaryColor,
                               value: list[index].value.validate(),
                               onChanged: (val) {
                                 isChange = true;
@@ -148,8 +142,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                     ifNotTester(() async {
                       if (list.isNotEmpty) {
                         appStore.setLoading(true);
-                        await saveNotificationsSettings(requestList: list)
-                            .then((value) {
+                        await saveNotificationsSettings(requestList: list).then((value) {
                           appStore.setLoading(false);
                           toast(value.message);
                           finish(context);

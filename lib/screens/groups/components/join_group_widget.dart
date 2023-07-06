@@ -13,6 +13,7 @@ class JoinGroupWidget extends StatefulWidget {
   final int isRequestSent;
   final int hasInvite;
 
+
   const JoinGroupWidget({
     required this.groupId,
     required this.isGroupMember,
@@ -55,7 +56,7 @@ class _JoinGroupWidgetState extends State<JoinGroupWidget> {
                 elevation: 0,
                 shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
                 text: language.confirm,
-                textStyle: secondaryTextStyle(color: Colors.white, size: 14),
+                textStyle: secondaryTextStyle(color: appStore.isDarkMode ? context.primaryColor : Colors.white, size: 14),
                 onTap: () async {
                   ifNotTester(() async {
                     appStore.setLoading(true);

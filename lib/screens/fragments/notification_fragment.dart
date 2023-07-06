@@ -8,6 +8,7 @@ import 'package:socialv/models/notifications/notification_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/dashboard_screen.dart';
 import 'package:socialv/screens/notification/components/notification_widget.dart';
+import 'package:socialv/utils/cached_network_image.dart';
 
 import '../../utils/app_constants.dart';
 
@@ -129,7 +130,7 @@ class _NotificationFragmentState extends State<NotificationFragment> {
                   );
                 } else {
                   return AnimatedListView(
-                    padding: EdgeInsets.only(bottom: 60),
+                    padding: EdgeInsets.only(bottom: 60, top: notificationList.isNotEmpty ? 52 : 8),
                     shrinkWrap: true,
                     slideConfiguration: SlideConfiguration(delay: 80.milliseconds, verticalOffset: 300),
                     itemCount: notificationList.length,
@@ -151,6 +152,26 @@ class _NotificationFragmentState extends State<NotificationFragment> {
               return LoadingWidget().visible(!appStore.isLoading);
             },
           ),
+          if (notificationList.isNotEmpty)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: TextIcon(
+                prefix: cachedImage(ic_delete, color: Colors.red, width: 20, height: 20, fit: BoxFit.cover),
+                text: language.clearAll,
+                textStyle: primaryTextStyle(color: Colors.red),
+                onTap: () async {
+                  appStore.setLoading(true);
+                  await clearNotification().then((value) {
+                    mPage = 1;
+                    future = getList();
+                  }).catchError((error) {
+                    toast(error.toString());
+                    appStore.setLoading(false);
+                  });
+                },
+              ),
+            ),
           if (appStore.isLoading) Positioned(bottom: mPage != 1 ? 10 : null, child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false))
         ],
       ),

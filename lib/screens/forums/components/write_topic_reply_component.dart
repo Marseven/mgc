@@ -15,23 +15,17 @@ class WriteTopicReplyComponent extends StatefulWidget {
   final TopicReplyModel? reply;
   final List<TagsModel>? tags;
 
-  const WriteTopicReplyComponent(
-      {required this.topicName,
-      required this.topicId,
-      this.replyId,
-      this.newReply,
-      this.reply,
-      this.tags});
+  const WriteTopicReplyComponent({required this.topicName, required this.topicId, this.replyId, this.newReply, this.reply, this.tags});
 
   @override
-  State<WriteTopicReplyComponent> createState() =>
-      _WriteTopicReplyComponentState();
+  State<WriteTopicReplyComponent> createState() => _WriteTopicReplyComponentState();
 }
 
 class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
   final replyFormKey = GlobalKey<FormState>();
 
   TextEditingController content = TextEditingController();
+  TextEditingController image = TextEditingController();
   TextEditingController tags = TextEditingController();
 
   bool doNotify = false;
@@ -56,11 +50,12 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
       ifNotTester(() async {
         Map request = {
           "id": widget.reply!.id,
-          "is_topic": 0,
+          "is_topic": widget.topicId == widget.reply!.id ? 1 : 0,
           "topic_title": widget.topicName,
           "content": content.text,
           "tags": tags.text.split(','),
           "notify_me": doNotify,
+          "image": image.text,
         };
         appStore.setLoading(true);
 
@@ -92,6 +87,7 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
           "content": content.text,
           "tags": tags.text.split(','),
           "notify_me": doNotify,
+          "image": image.text,
         };
         appStore.setLoading(true);
 
@@ -118,7 +114,7 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: context.height() * 0.7,
+      height: context.height() * 0.8,
       child: Stack(
         children: [
           Column(
@@ -126,21 +122,14 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
               Container(
                 width: 45,
                 height: 5,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
               ),
               8.height,
               Container(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                    right: 16,
-                    left: 16),
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, right: 16, left: 16),
                 decoration: BoxDecoration(
                   color: context.cardColor,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16)),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
                 ),
                 child: SingleChildScrollView(
                   child: Form(
@@ -150,8 +139,7 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         30.height,
-                        Text('${language.replyTo}: ${widget.topicName}',
-                            style: boldTextStyle()),
+                        Text('${language.replyTo}: ${widget.topicName}', style: boldTextStyle()),
                         16.height,
                         AppTextField(
                           controller: content,
@@ -159,9 +147,7 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
                           textInputAction: TextInputAction.done,
                           textFieldType: TextFieldType.MULTILINE,
                           textStyle: boldTextStyle(),
-                          decoration: inputDecorationFilled(context,
-                              fillColor: context.scaffoldBackgroundColor,
-                              label: language.writeAReply),
+                          decoration: inputDecorationFilled(context, fillColor: context.scaffoldBackgroundColor, label: language.writeAReply),
                           minLines: 5,
                           onFieldSubmitted: (text) {
                             //addReview();
@@ -174,6 +160,14 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
                           },
                         ),
                         16.height,
+                        TextField(
+                          controller: image,
+                          keyboardType: TextInputType.url,
+                          textInputAction: TextInputAction.done,
+                          style: boldTextStyle(),
+                          decoration: inputDecorationFilled(context, fillColor: context.scaffoldBackgroundColor, label: language.imageLink),
+                        ),
+                        16.height,
                         AppTextField(
                           controller: tags,
                           keyboardType: TextInputType.multiline,
@@ -183,36 +177,28 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
                           minLines: 1,
                           maxLines: 5,
                           isValidationRequired: false,
-                          decoration: inputDecorationFilled(context,
-                              fillColor: context.scaffoldBackgroundColor,
-                              label: language.topicTags),
+                          decoration: inputDecorationFilled(context, fillColor: context.scaffoldBackgroundColor, label: language.topicTags),
                           onFieldSubmitted: (text) {
                             //addReview();
                           },
                         ),
-                        Text(language.notePleaseAddComma,
-                            style: secondaryTextStyle()),
+                        Text(language.notePleaseAddComma, style: secondaryTextStyle()),
                         16.height,
                         Row(
                           children: [
                             Checkbox(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: radius(2)),
-                              activeColor: appColorPrimary,
+                              shape: RoundedRectangleBorder(borderRadius: radius(2)),
+                              activeColor: context.primaryColor,
                               value: doNotify,
                               onChanged: (val) {
                                 doNotify = !doNotify;
                                 setState(() {});
                               },
                             ),
-                            Text(language.notifyMeText,
-                                    style: secondaryTextStyle())
-                                .onTap(() {
+                            Text(language.notifyMeText, style: secondaryTextStyle()).onTap(() {
                               doNotify = !doNotify;
                               setState(() {});
-                            },
-                                    splashColor: Colors.transparent,
-                                    highlightColor: Colors.transparent),
+                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                           ],
                         ),
                         16.height,
@@ -259,9 +245,7 @@ class _WriteTopicReplyComponentState extends State<WriteTopicReplyComponent> {
               ).expand(flex: 1),
             ],
           ),
-          Observer(
-              builder: (_) =>
-                  LoadingWidget().center().visible(appStore.isLoading))
+          Observer(builder: (_) => LoadingWidget().center().visible(appStore.isLoading))
         ],
       ),
     );

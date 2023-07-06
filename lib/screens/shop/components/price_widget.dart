@@ -30,51 +30,23 @@ class PriceWidget extends StatelessWidget {
       if (salePrice.validate() != regularPrice.validate())
         return RichText(
           text: TextSpan(
-            text: '${regularPrice.validate()} ${appStore.wooCurrency}',
-            style: secondaryTextStyle(
-                decoration: TextDecoration.lineThrough,
-                fontFamily: fontFamily,
-                size: size ?? 14),
+            text: '${appStore.wooCurrency}${regularPrice.validate()}',
+            style: secondaryTextStyle(decoration: TextDecoration.lineThrough, fontFamily: fontFamily, size: size ?? 14),
             children: <TextSpan>[
-              TextSpan(
-                  text: '  ${salePrice.validate()} ${appStore.wooCurrency} ',
-                  style: boldTextStyle(
-                      color: appStore.isDarkMode ? bodyDark : bodyWhite,
-                      decoration: TextDecoration.none,
-                      size: size ?? 14)),
+              TextSpan(text: '  ${appStore.wooCurrency}${salePrice.validate()} ', style: boldTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, decoration: TextDecoration.none, size: size ?? 14)),
               if (showDiscountPercentage)
                 TextSpan(
-                    text:
-                        '   ${(((regularPrice.toInt() - salePrice.toInt()) / regularPrice.toInt()) * 100).round()}% ${language.off}',
-                    style: boldTextStyle(
-                        color: Colors.green,
-                        decoration: TextDecoration.none,
-                        fontFamily: fontFamily,
-                        size: offSize ?? 12)),
+                    text: '   ${(((regularPrice.toInt() - salePrice.toInt()) / regularPrice.toInt()) * 100).round()}% ${language.off}',
+                    style: boldTextStyle(color: Colors.green, decoration: TextDecoration.none, fontFamily: fontFamily, size: offSize ?? 12)),
             ],
           ),
         );
       else
-        return Text('${price.validate()} ${appStore.wooCurrency}',
-            style: boldTextStyle(
-                decoration: TextDecoration.none,
-                color: appStore.isDarkMode ? bodyDark : bodyWhite,
-                size: size ?? 14));
-    } else if (priceHtml != null
-        ? parseHtmlString(priceHtml).contains('–')
-        : false) {
-      return Text(parseHtmlString(priceHtml),
-          style: boldTextStyle(
-              color: appStore.isDarkMode ? bodyDark : bodyWhite,
-              size: size ?? 14),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis);
+        return Text('${appStore.wooCurrency}${price.validate()}', style: boldTextStyle(decoration: TextDecoration.none, color: appStore.isDarkMode ? bodyDark : bodyWhite, size: size ?? 14));
+    } else if (priceHtml != null ? parseHtmlString(priceHtml).contains('–') : false) {
+      return Text(parseHtmlString(priceHtml), style: boldTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: size ?? 14), maxLines: 2, overflow: TextOverflow.ellipsis);
     } else {
-      return Text('${price.validate()} ${appStore.wooCurrency}',
-          style: boldTextStyle(
-              decoration: TextDecoration.none,
-              color: appStore.isDarkMode ? bodyDark : bodyWhite,
-              size: size ?? 14));
+      return Text('${appStore.wooCurrency}${price.validate()}', style: boldTextStyle(decoration: TextDecoration.none, color: appStore.isDarkMode ? bodyDark : bodyWhite, size: size ?? 14));
     }
   }
 }

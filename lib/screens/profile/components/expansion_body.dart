@@ -53,8 +53,7 @@ class _ExpansionBodyState extends State<ExpansionBody> {
             itemBuilder: (ctx, i) {
               Field element = widget.group.fields![i];
 
-              return ProfileFieldComponent(field: element, count: 0)
-                  .paddingSymmetric(horizontal: 16, vertical: 8);
+              return ProfileFieldComponent(field: element, count: 0).paddingSymmetric(horizontal: 16, vertical: 8);
             },
           ),
         ),
@@ -67,15 +66,11 @@ class _ExpansionBodyState extends State<ExpansionBody> {
                 profileFieldFormKey.currentState!.save();
                 hideKeyboard(context);
 
-                if (group.fields
-                    .validate()
-                    .any((element) => element.value.validate().isNotEmpty)) {
+                if (group.fields.validate().any((element) => element.value.validate().isNotEmpty)) {
                   if (isDetailChange) {
                     appStore.setLoading(true);
-                    await updateProfileFields(request: group.toJson())
-                        .then((value) {
-                      toast(
-                          '${group.groupName} ${language.updatedSuccessfully}');
+                    await updateProfileFields(request: group.toJson()).then((value) {
+                      toast('${group.groupName} ${language.updatedSuccessfully}');
                       appStore.setLoginFullName(name);
                       widget.callback?.call();
                     }).catchError((e) {
@@ -94,7 +89,7 @@ class _ExpansionBodyState extends State<ExpansionBody> {
           padding: EdgeInsets.symmetric(horizontal: 16),
           text: language.saveChanges,
           textColor: Colors.white,
-          color: appColorPrimary,
+          color: context.primaryColor,
         ),
         16.height,
       ],

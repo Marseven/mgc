@@ -3,9 +3,11 @@ import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/language/app_localizations.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/dashboard_api_response.dart';
 import 'package:socialv/models/groups/group_response.dart';
 import 'package:socialv/models/members/friend_request_model.dart';
 import 'package:socialv/models/members/member_response.dart';
+import 'package:socialv/models/reactions/reactions_model.dart';
 import 'package:socialv/utils/colors.dart';
 import 'package:socialv/utils/constants.dart';
 
@@ -15,7 +17,19 @@ class AppStore = AppStoreBase with _$AppStore;
 
 abstract class AppStoreBase with Store {
   @observable
+  int isWebsocketEnable = 0;
+
+  @observable
+  int isReactionEnable = 0;
+
+  @observable
+  ReactionsModel defaultReaction = ReactionsModel();
+
+  @observable
   String giphyKey = '\$';
+
+  @observable
+  String iosGiphyKey = '\$';
 
   @observable
   String wooCurrency = '\$';
@@ -30,10 +44,10 @@ abstract class AppStoreBase with Store {
   bool showStoryLoader = false;
 
   @observable
-  bool showWoocommerce = true;
+  int showWoocommerce = 0;
 
   @observable
-  bool showStoryHighlight = false;
+  int showStoryHighlight = 0;
 
   @observable
   bool showGif = false;
@@ -81,6 +95,24 @@ abstract class AppStoreBase with Store {
   String loginAvatarUrl = '';
 
   @observable
+  int? isLMSEnable=0;
+
+  @observable
+  int? isCourseEnable=0;
+
+  @observable
+  int? displayPostCount=0;
+
+  @observable
+  int? displayPostCommentsCount=0;
+
+  @observable
+  int? displayFriendRequestBtn=0;
+
+  @observable
+  int? isShopEnable=0;
+
+  @observable
   List<MemberResponse> recentMemberSearchList = [];
 
   @observable
@@ -90,23 +122,50 @@ abstract class AppStoreBase with Store {
   List<FriendRequestModel> suggestedUserList = [];
 
   @observable
+  List<SuggestedGroup> suggestedGroupsList = [];
+
+  @observable
   int notificationCount = 0;
 
   @observable
-  int wooCart = 0;
+  bool isMultiSelect = false;
+
+  @action
+  void setReactionsEnable(int val) {
+    isReactionEnable = val;
+  }
+
+  @action
+  void setWebsocketEnable(int val) {
+    isWebsocketEnable = val;
+  }
+
+  @action
+  void setMultiSelect(bool val) {
+    isMultiSelect = val;
+  }
+
+  @action
+  Future<void> setDefaultReaction(ReactionsModel val, {bool isInitializing = false}) async {
+    defaultReaction = val;
+  }
 
   @action
   Future<void> setGiphyKey(String val, {bool isInitializing = false}) async {
     giphyKey = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.GIPHY_API_KEY, '$val');
+    if (!isInitializing) await setValue(SharePreferencesKey.GIPHY_API_KEY, '$val');
+  }
+
+  @action
+  Future<void> setIOSGiphyKey(String val, {bool isInitializing = false}) async {
+    iosGiphyKey = val;
+    if (!isInitializing) await setValue(SharePreferencesKey.IOS_GIPHY_API_KEY, '$val');
   }
 
   @action
   Future<void> setWooCurrency(String val, {bool isInitializing = false}) async {
     wooCurrency = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.WOO_CURRENCY, '$val');
+    if (!isInitializing) await setValue(SharePreferencesKey.WOO_CURRENCY, '$val');
   }
 
   @action
@@ -116,11 +175,9 @@ abstract class AppStoreBase with Store {
   }
 
   @action
-  Future<void> setVerificationStatus(String val,
-      {bool isInitializing = false}) async {
+  Future<void> setVerificationStatus(String val, {bool isInitializing = false}) async {
     verificationStatus = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.VERIFICATION_STATUS, '$val');
+    if (!isInitializing) await setValue(SharePreferencesKey.VERIFICATION_STATUS, '$val');
   }
 
   @action
@@ -135,23 +192,47 @@ abstract class AppStoreBase with Store {
   }
 
   @action
-  Future<void> setWooCart(int val, {bool isInitializing = false}) async {
-    wooCart = val;
-    if (!isInitializing) await setValue(SharePreferencesKey.WOO_CART, val);
-  }
-
-  @action
   void setStoryLoader(bool val) {
     showStoryLoader = val;
   }
 
   @action
-  void setShowWooCommerce(bool val) {
+  void setLMSEnable(int val) {
+    isLMSEnable = val;
+  }
+
+  @action
+  void setCourseEnable(int val) {
+    isCourseEnable = val;
+  }
+
+  @action
+  void setDisplayPostCount(int val) {
+    displayPostCount = val;
+  }
+
+  @action
+  void setDisplayPostCommentsCount(int val) {
+    displayPostCommentsCount = val;
+  }
+
+  @action
+  void setDisplayFriendRequestBtn(int val) {
+    displayFriendRequestBtn = val;
+  }
+
+  @action
+  void setShopEnable(int val) {
+    isShopEnable = val;
+  }
+
+  @action
+  void setShowWooCommerce(int val) {
     showWoocommerce = val;
   }
 
   @action
-  void setShowStoryHighlight(bool val) {
+  void setShowStoryHighlight(int val) {
     showStoryHighlight = val;
   }
 
@@ -183,25 +264,21 @@ abstract class AppStoreBase with Store {
   }
 
   @action
-  Future<void> setLoginFullName(String val,
-      {bool isInitializing = false}) async {
+  Future<void> setLoginFullName(String val, {bool isInitializing = false}) async {
     loginFullName = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.LOGIN_FULL_NAME, val);
+    if (!isInitializing) await setValue(SharePreferencesKey.LOGIN_FULL_NAME, val);
   }
 
   @action
   Future<void> setLoginName(String val, {bool isInitializing = false}) async {
     loginName = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.LOGIN_DISPLAY_NAME, val);
+    if (!isInitializing) await setValue(SharePreferencesKey.LOGIN_DISPLAY_NAME, val);
   }
 
   @action
   Future<void> setPassword(String val, {bool isInitializing = false}) async {
     password = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.LOGIN_PASSWORD, val);
+    if (!isInitializing) await setValue(SharePreferencesKey.LOGIN_PASSWORD, val);
   }
 
   @action
@@ -211,11 +288,9 @@ abstract class AppStoreBase with Store {
   }
 
   @action
-  Future<void> setLoginAvatarUrl(String val,
-      {bool isInitializing = false}) async {
+  Future<void> setLoginAvatarUrl(String val, {bool isInitializing = false}) async {
     loginAvatarUrl = val;
-    if (!isInitializing)
-      await setValue(SharePreferencesKey.LOGIN_AVATAR_URL, val);
+    if (!isInitializing) await setValue(SharePreferencesKey.LOGIN_AVATAR_URL, val);
   }
 
   @action
@@ -249,19 +324,13 @@ abstract class AppStoreBase with Store {
       shadowColorGlobal = Colors.black12;
     }
 
-    if (!isFromMain)
-      setStatusBarColor(
-          isDarkMode ? appBackgroundColorDark : appLayoutBackground,
-          delayInMilliSeconds: 300);
+    if (!isFromMain) setStatusBarColor(isDarkMode ? appBackgroundColorDark : appLayoutBackground, delayInMilliSeconds: 300);
   }
 
   @action
   Future<void> setLanguage(String aCode, {BuildContext? context}) async {
-    selectedLanguageDataModel =
-        getSelectedLanguageModel(defaultLanguage: Constants.defaultLanguage);
-    selectedLanguage =
-        getSelectedLanguageModel(defaultLanguage: Constants.defaultLanguage)!
-            .languageCode!;
+    selectedLanguageDataModel = getSelectedLanguageModel(defaultLanguage: Constants.defaultLanguage);
+    selectedLanguage = getSelectedLanguageModel(defaultLanguage: Constants.defaultLanguage)!.languageCode!;
     language = await AppLocalizations().load(Locale(selectedLanguage));
   }
 }

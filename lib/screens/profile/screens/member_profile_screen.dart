@@ -20,6 +20,7 @@ import 'package:socialv/screens/settings/screens/settings_screen.dart';
 import 'package:socialv/screens/stories/component/story_highlights_component.dart';
 
 import '../../../utils/app_constants.dart';
+import '../../gallery/screens/gallery_screen.dart';
 
 class MemberProfileScreen extends StatefulWidget {
   final int memberId;
@@ -51,6 +52,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
   bool isLoading = true;
   bool isFetched = false;
   bool showNoData = false;
+  bool isFavorites = false;
 
   @override
   void initState() {
@@ -59,8 +61,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
     super.initState();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         if (!mIsLastPage && postList.isNotEmpty) {
           mPage++;
           future = getPostList();
@@ -90,11 +91,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
     isLoading = true;
     setState(() {});
 
-    await getPost(
-            type: PostRequestType.timeline,
-            page: mPage,
-            userId: widget.memberId)
-        .then((value) {
+    await getPost(type: isFavorites ? PostRequestType.favorites : PostRequestType.timeline, page: mPage, userId: widget.memberId).then((value) {
       mIsLastPage = value.length != PER_PAGE;
       postList.addAll(value);
       isLoading = false;
@@ -126,8 +123,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
         if (member.blockedByMe.validate() || member.blockedBy.validate()) {
           showDetails = false;
         } else {
-          if (member.friendshipStatus.validate() == Friendship.isFriend ||
-              member.friendshipStatus.validate() == Friendship.currentUser) {
+          if (member.friendshipStatus.validate() == Friendship.isFriend || member.friendshipStatus.validate() == Friendship.currentUser) {
             showDetails = true;
           } else {
             showDetails = false;
@@ -202,22 +198,16 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                 },
               ),
               actions: [
-                if (!appStore.isLoading &&
-                    showDetails &&
-                    widget.memberId.toString() != appStore.loginUserId)
+                if (!appStore.isLoading && showDetails && widget.memberId.toString() != appStore.loginUserId)
                   Theme(
                     data: Theme.of(context).copyWith(useMaterial3: false),
                     child: PopupMenuButton(
                       enabled: !appStore.isLoading,
                       position: PopupMenuPosition.under,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(commonRadius)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(commonRadius)),
                       onSelected: (val) async {
                         if (val == 1) {
-                          PersonalInfoScreen(
-                                  profileInfo: member.profileInfo.validate(),
-                                  hasUserInfo: hasInfo)
-                              .launch(context);
+                          PersonalInfoScreen(profileInfo: member.profileInfo.validate(), hasUserInfo: hasInfo).launch(context);
                         } else if (val == 2) {
                           showDialog(
                             context: context,
@@ -235,6 +225,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                         } else {
                           await showModalBottomSheet(
                             context: context,
+                            elevation: 0,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
                             builder: (context) {
@@ -246,22 +237,15 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                                     Container(
                                       width: 45,
                                       height: 5,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          color: Colors.white),
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
                                     ),
                                     8.height,
                                     Container(
                                       decoration: BoxDecoration(
                                         color: context.cardColor,
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(16),
-                                            topRight: Radius.circular(16)),
+                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
                                       ),
-                                      child: ShowReportDialog(
-                                          isPostReport: false,
-                                          userId: widget.memberId),
+                                      child: ShowReportDialog(isPostReport: false, userId: widget.memberId),
                                     ).expand(),
                                   ],
                                 ),
@@ -276,8 +260,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                           value: 1,
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline_rounded,
-                                  color: context.iconColor, size: 20),
+                              Icon(Icons.info_outline_rounded, color: context.iconColor, size: 20),
                               8.width,
                               Text(language.about, style: primaryTextStyle()),
                             ],
@@ -287,8 +270,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                           value: 2,
                           child: Row(
                             children: [
-                              Icon(Icons.block,
-                                  color: context.iconColor, size: 20),
+                              Icon(Icons.block, color: context.iconColor, size: 20),
                               8.width,
                               Text(language.block, style: primaryTextStyle()),
                             ],
@@ -298,8 +280,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                           value: 3,
                           child: Row(
                             children: [
-                              Icon(Icons.report_gmailerrorred,
-                                  color: context.iconColor, size: 20),
+                              Icon(Icons.report_gmailerrorred, color: context.iconColor, size: 20),
                               8.width,
                               Text(language.report, style: primaryTextStyle()),
                             ],
@@ -319,7 +300,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                     height: 20,
                     width: 20,
                     fit: BoxFit.cover,
-                    color: appColorPrimary,
+                    color: context.primaryColor,
                   ),
                 ).visible(widget.memberId.toString() == appStore.loginUserId),
               ],
@@ -332,12 +313,8 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                     child: Column(
                       children: [
                         ProfileHeaderComponent(
-                          avatarUrl: member.blockedBy.validate()
-                              ? AppImages.defaultAvatarUrl
-                              : member.memberAvatarImage.validate(),
-                          cover: member.blockedBy.validate()
-                              ? null
-                              : member.memberCoverImage.validate(),
+                          avatarUrl: member.blockedBy.validate() ? AppImages.defaultAvatarUrl : member.memberAvatarImage.validate(),
+                          cover: member.blockedBy.validate() ? null : member.memberCoverImage.validate(),
                         ),
                         Column(
                           mainAxisSize: MainAxisSize.min,
@@ -347,37 +324,25 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  member.blockedBy.validate()
-                                      ? language.userNotFound
-                                      : member.name.validate(),
+                                  member.blockedBy.validate() ? language.userNotFound : member.name.validate(),
                                   style: boldTextStyle(size: 20),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ).flexible(flex: 1),
-                                if (member.isUserVerified.validate() &&
-                                    !member.blockedBy.validate())
-                                  Image.asset(ic_tick_filled,
-                                          width: 18,
-                                          height: 18,
-                                          color: blueTickColor)
-                                      .paddingSymmetric(horizontal: 4),
+                                if (member.isUserVerified.validate() && !member.blockedBy.validate())
+                                  Image.asset(ic_tick_filled, width: 18, height: 18, color: blueTickColor).paddingSymmetric(horizontal: 4),
                               ],
                             ),
                             4.height,
-                            if (!member.blockedBy.validate())
-                              Text(member.mentionName.validate(),
-                                  style: secondaryTextStyle()),
+                            if (!member.blockedBy.validate()) Text(member.mentionName.validate(), style: secondaryTextStyle()),
                           ],
                         ).paddingAll(16),
-                        if (!appStore.isLoading &&
-                            !member.blockedBy.validate() &&
-                            widget.memberId.toString() != appStore.loginUserId)
+                        if (!appStore.isLoading && !member.blockedBy.validate() && widget.memberId.toString() != appStore.loginUserId)
                           RequestFollowWidget(
                             userMentionName: member.mentionName.validate(),
                             userName: member.name.validate(),
                             memberId: member.id.validate().toInt(),
-                            friendshipStatus:
-                                member.friendshipStatus.validate(),
+                            friendshipStatus: member.friendshipStatus.validate(),
                             callback: () {
                               isCallback = true;
                               future = getPostList();
@@ -386,11 +351,10 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             isBlockedByMe: member.blockedByMe.validate(),
                           ),
                         16.height,
-                        if (appStore.showStoryHighlight && showDetails)
+                        if (appStore.showStoryHighlight==1 && showDetails)
                           StoryHighlightsComponent(
                             categoryList: categoryList,
-                            showAddOption:
-                                member.id.validate() == appStore.loginUserId,
+                            showAddOption: member.id.validate() == appStore.loginUserId,
                             avatarImage: member.memberAvatarImage.validate(),
                             highlightsList: member.highlightStory.validate(),
                             callback: () {
@@ -400,65 +364,55 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                         8.height,
                         Row(
                           children: [
+                            if (appStore.displayPostCount == 1)
                             Column(
                               children: [
-                                Text(member.postCount.validate().toString(),
-                                    style: boldTextStyle(size: 18)),
+                                Text(member.postCount.validate().toString(), style: boldTextStyle(size: 18)),
                                 4.height,
-                                Text(language.posts,
-                                    style: secondaryTextStyle(size: 12)),
+                                Text(language.posts, style: secondaryTextStyle(size: 12)),
                               ],
                             ).onTap(() {
-                              _scrollController.animateTo(
-                                  context.height() * 0.35,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.linear);
-                            },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent).expand(),
+                              _scrollController.animateTo(context.height() * 0.35, duration: const Duration(milliseconds: 500), curve: Curves.linear);
+                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent).expand(),
                             Column(
                               children: [
-                                Text(member.friendsCount.validate().toString(),
-                                    style: boldTextStyle(size: 18)),
+                                Text(member.friendsCount.validate().toString(), style: boldTextStyle(size: 18)),
                                 4.height,
-                                Text(language.friends,
-                                    style: secondaryTextStyle(size: 12)),
+                                Text(language.friends, style: secondaryTextStyle(size: 12)),
                               ],
                             ).onTap(() {
-                              if (member.friendsCount.validate() != 0 &&
-                                  showDetails) {
-                                MemberFriendsScreen(
-                                        memberId: member.id.validate().toInt())
-                                    .launch(context);
+                              if (member.friendsCount.validate() != 0 && showDetails) {
+                                MemberFriendsScreen(memberId: member.id.validate().toInt()).launch(context);
                               } else {
                                 toast(language.canNotViewFriends);
                               }
-                            },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent).expand(),
+                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent).expand(),
                             Column(
                               children: [
-                                Text(member.groupsCount.validate().toString(),
-                                    style: boldTextStyle(size: 18)),
+                                Text(member.groupsCount.validate().toString(), style: boldTextStyle(size: 18)),
                                 4.height,
-                                Text(language.groups,
-                                    style: secondaryTextStyle(size: 12)),
+                                Text(language.groups, style: secondaryTextStyle(size: 12)),
                               ],
                             ).onTap(() {
-                              if (member.groupsCount.validate() != 0 &&
-                                  showDetails) {
-                                GroupScreen(
-                                        userId: member.id.validate().toInt())
-                                    .launch(context);
+                              if (member.groupsCount.validate() != 0 && showDetails) {
+                                GroupScreen(userId: member.id.validate().toInt()).launch(context);
                               } else {
                                 toast(language.canNotViewGroups);
                               }
-                            },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent).expand(),
+                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent).expand(),
                           ],
                         ),
-                        16.height,
+                        8.height,
+                        if (showDetails)
+                          TextIcon(
+                            onTap: () {
+                              GalleryScreen(userId: member.id.toInt(), canEdit: false).launch(context);
+                            },
+                            text: language.viewGallery,
+                            textStyle: primaryTextStyle(color: appColorPrimary),
+                            prefix: Image.asset(ic_image,width: 18,height: 18,color: appColorPrimary),
+                          ),
+                        8.height,
                         if (!appStore.isLoading && showDetails)
                           FutureBuilder<List<PostModel>>(
                             future: future,
@@ -466,9 +420,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                               if (snap.hasError) {
                                 return NoDataWidget(
                                   imageWidget: NoDataLottieWidget(),
-                                  title: isError
-                                      ? language.somethingWentWrong
-                                      : language.noDataFound,
+                                  title: language.somethingWentWrong,
                                 ).center();
                               }
 
@@ -476,40 +428,46 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                                 return Stack(
                                   children: [
                                     Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Align(
-                                          child: Text(
-                                            '${language.posts} (${member.postCount == null ? 0 : member.postCount})',
-                                            style: boldTextStyle(
-                                                color: appColorPrimary),
-                                          ).paddingSymmetric(horizontal: 16),
-                                          alignment: Alignment.centerLeft,
-                                        ).visible(postList.isNotEmpty),
-                                        AnimatedListView(
-                                          padding: EdgeInsets.only(
-                                              left: 8, right: 8, bottom: 50),
-                                          itemCount: postList.length,
-                                          slideConfiguration:
-                                              SlideConfiguration(
-                                                  delay: 80.milliseconds,
-                                                  verticalOffset: 300),
-                                          itemBuilder: (context, index) {
-                                            return PostComponent(
-                                              post: postList[index],
-                                              callback: () {
-                                                appStore.setLoading(true);
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(language.posts, style: boldTextStyle(color: appColorPrimary)).paddingSymmetric(horizontal: 16),
+                                            TextIcon(
+                                              onTap: () {
+                                                isFavorites = !isFavorites;
                                                 mPage = 1;
-                                                future = getPostList();
-                                                getMember();
+                                                setState(() {});
+                                                getPostList();
                                               },
-                                            );
-                                          },
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                        ),
+                                              prefix: Icon(isFavorites ? Icons.check_circle : Icons.circle_outlined, color: appColorPrimary, size: 18),
+                                              text: language.favorites,
+                                              textStyle: secondaryTextStyle(color: isFavorites ? context.primaryColor : null),
+                                            ).paddingSymmetric(horizontal: 8),
+                                          ],
+                                        ).visible(member.postCount.validate() != 0),
+                                        if (snap.data.validate().isEmpty && !isLoading)
+                                          Offstage()
+                                        else
+                                          AnimatedListView(
+                                            padding: EdgeInsets.only(left: 8, right: 8, bottom: 50),
+                                            itemCount: postList.length,
+                                            slideConfiguration: SlideConfiguration(delay: 80.milliseconds, verticalOffset: 300),
+                                            itemBuilder: (context, index) {
+                                              return PostComponent(
+                                                post: postList[index],
+                                                callback: () {
+                                                  appStore.setLoading(true);
+                                                  mPage = 1;
+                                                  future = getPostList();
+                                                  getMember();
+                                                },
+                                              );
+                                            },
+                                            shrinkWrap: true,
+                                            physics: NeverScrollableScrollPhysics(),
+                                          ),
                                       ],
                                     ),
                                     if (isLoading)
@@ -526,24 +484,17 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             },
                           ),
                         16.height,
-                        if (member.accountType == AccountType.private &&
-                            !showDetails)
+                        if (member.accountType == AccountType.private && !showDetails)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(),
-                                    shape: BoxShape.circle),
+                                decoration: BoxDecoration(border: Border.all(), shape: BoxShape.circle),
                                 padding: EdgeInsets.all(8),
-                                child: Image.asset(ic_lock,
-                                    height: 24,
-                                    width: 24,
-                                    color: context.iconColor),
+                                child: Image.asset(ic_lock, height: 24, width: 24, color: context.iconColor),
                               ),
                               16.height,
-                              Text(language.thisAccountIsPrivate,
-                                  style: boldTextStyle()),
+                              Text(language.thisAccountIsPrivate, style: boldTextStyle()),
                               Text(
                                 language.followThisAccountText,
                                 style: secondaryTextStyle(),
@@ -558,9 +509,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                 if (!appStore.isLoading && showNoData)
                   NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       onRefresh();
                     },

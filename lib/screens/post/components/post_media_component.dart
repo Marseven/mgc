@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:socialv/components/youtube_player_component.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/common_models/post_mdeia_model.dart';
 import 'package:socialv/screens/post/components/audio_component.dart';
@@ -78,92 +80,51 @@ class _PostMediaComponentState extends State<PostMediaComponent> {
                     height: 300,
                     width: context.width() - 32,
                     fit: BoxFit.cover,
-                  )
-                      .cornerRadiusWithClipRRect(defaultAppButtonRadius)
-                      .paddingSymmetric(horizontal: 8)
-                      .onTap(() {
-                    ImageScreen(
-                            imageURl: widget.mediaList
-                                .validate()[index]
-                                .url
-                                .validate())
-                        .launch(context);
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent);
+                  ).cornerRadiusWithClipRRect(defaultAppButtonRadius).paddingSymmetric(horizontal: 8).onTap(() {
+                    ImageScreen(imageURl: widget.mediaList.validate()[index].url.validate()).launch(context);
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
                 } else if (widget.mediaType == MediaTypes.audio) {
                   return widget.isFromPostDetail
-                      ? AudioPostComponent(
-                          audioURl:
-                              widget.mediaList.validate()[index].url.validate())
+                      ? AudioPostComponent(audioURl: widget.mediaList.validate()[index].url.validate())
                       : Container(
                           margin: EdgeInsets.symmetric(horizontal: 8),
                           padding: EdgeInsets.symmetric(vertical: 40),
-                          decoration: BoxDecoration(
-                              borderRadius: radius(defaultAppButtonRadius)),
-                          child: cachedImage(ic_voice,
-                              color:
-                                  appStore.isDarkMode ? bodyDark : bodyWhite),
+                          decoration: BoxDecoration(borderRadius: radius(defaultAppButtonRadius)),
+                          child: cachedImage(ic_voice, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                         ).onTap(() {
-                          AudioPostScreen(widget.mediaList
-                                  .validate()[index]
-                                  .url
-                                  .validate())
-                              .launch(context);
-                        },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent);
+                          AudioPostScreen(widget.mediaList.validate()[index].url.validate()).launch(context);
+                        }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
                 } else if (widget.mediaType == MediaTypes.doc) {
                   return Container(
                     margin: EdgeInsets.symmetric(horizontal: 8),
                     padding: EdgeInsets.symmetric(vertical: 40),
-                    decoration: BoxDecoration(
-                        borderRadius: radius(defaultAppButtonRadius)),
+                    decoration: BoxDecoration(borderRadius: radius(defaultAppButtonRadius)),
                     child: cachedImage(
                       ic_document,
                       color: appStore.isDarkMode ? bodyDark : bodyWhite,
                     ),
                   ).onTap(() {
-                    PDFScreen(
-                            docURl: widget.mediaList
-                                .validate()[index]
-                                .url
-                                .validate())
-                        .launch(context);
-                  },
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent);
+                    PDFScreen(docURl: widget.mediaList.validate()[index].url.validate()).launch(context);
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
                 } else if (widget.mediaType == MediaTypes.video) {
-                  return widget.isFromPostDetail
-                      ? VideoPostComponent(
-                          videoURl:
-                              widget.mediaList.validate()[index].url.validate(),
-                          isShowControllers: widget.isFromQuickViewDetail,
-                        )
-                      : VideoPostComponent(
-                              videoURl: widget.mediaList
-                                  .validate()[index]
-                                  .url
-                                  .validate())
-                          .onTap(() {
-                          VideoPostScreen(
-                                  widget.mediaList
-                                      .validate()[index]
-                                      .url
-                                      .validate(),
-                                  widget.mediaTitle)
-                              .launch(context);
-                        },
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent);
+                  if (widget.mediaList.validate()[index].source.validate() == 'youtube') {
+                    return YoutubePlayerComponent(id: widget.mediaList.validate()[index].url.validate().toYouTubeId()).paddingSymmetric(horizontal: 8);
+                  } else {
+                    return widget.isFromPostDetail
+                        ? VideoPostComponent(
+                            videoURl: widget.mediaList.validate()[index].url.validate(),
+                            isShowControllers: widget.isFromQuickViewDetail,
+                          ).cornerRadiusWithClipRRect(10).paddingSymmetric(horizontal: 8)
+                        : VideoPostComponent(videoURl: widget.mediaList.validate()[index].url.validate()).onTap(() {
+                            VideoPostScreen(widget.mediaList.validate()[index].url.validate()).launch(context);
+                          }, splashColor: Colors.transparent, highlightColor: Colors.transparent).cornerRadiusWithClipRRect(10).paddingSymmetric(horizontal: 8);
+                  }
                 } else if (widget.mediaType == MediaTypes.gif) {
                   return cachedImage(
                     widget.mediaList.validate()[index].url,
                     width: context.width() - 32,
                     fit: BoxFit.cover,
-                  )
-                      .cornerRadiusWithClipRRect(defaultAppButtonRadius)
-                      .paddingSymmetric(horizontal: 8);
+                  ).cornerRadiusWithClipRRect(defaultAppButtonRadius).paddingSymmetric(horizontal: 8);
                 } else {
                   return Offstage();
                 }
@@ -186,11 +147,8 @@ class _PostMediaComponentState extends State<PostMediaComponent> {
                 children: widget.mediaList.validate().map((e) {
                   return Icon(
                     Icons.circle,
-                    size:
-                        selectedIndex == widget.mediaList!.indexOf(e) ? 12 : 8,
-                    color: selectedIndex == widget.mediaList!.indexOf(e)
-                        ? appColorPrimary
-                        : Colors.grey.shade500,
+                    size: selectedIndex == widget.mediaList!.indexOf(e) ? 12 : 8,
+                    color: selectedIndex == widget.mediaList!.indexOf(e) ? context.primaryColor : Colors.grey.shade500,
                   ).paddingSymmetric(horizontal: 2);
                 }).toList(),
               ),

@@ -227,7 +227,7 @@ class StoryPageState extends State<StoryPage> {
                       if (story.mediaType == MediaTypes.video)
                         TextButton(
                           onPressed: () {
-                            VideoPostScreen(story.storyMedia.validate(), user.name.validate()).launch(context);
+                            VideoPostScreen(story.storyMedia.validate()).launch(context);
                           },
                           child: Text(language.viewVideo, style: boldTextStyle(color: Colors.white)),
                         ),

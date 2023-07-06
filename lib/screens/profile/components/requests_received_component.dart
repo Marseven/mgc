@@ -14,12 +14,10 @@ class RequestsReceivedComponent extends StatefulWidget {
   RequestsReceivedComponent();
 
   @override
-  State<RequestsReceivedComponent> createState() =>
-      _RequestsReceivedComponentState();
+  State<RequestsReceivedComponent> createState() => _RequestsReceivedComponentState();
 }
 
-class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
-    with AutomaticKeepAliveClientMixin {
+class _RequestsReceivedComponentState extends State<RequestsReceivedComponent> with AutomaticKeepAliveClientMixin {
   List<FriendRequestModel> list = [];
   late Future<List<FriendRequestModel>> future;
 
@@ -35,8 +33,7 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
     super.initState();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         if (!mIsLastPage) {
           mPage++;
           appStore.setLoading(true);
@@ -89,32 +86,23 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
 
     return Container(
       width: context.width(),
-      decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius:
-              radiusOnly(topLeft: defaultRadius, topRight: defaultRadius)),
+      decoration: BoxDecoration(color: context.cardColor, borderRadius: radiusOnly(topLeft: defaultRadius, topRight: defaultRadius)),
       child: Stack(
-        alignment:
-            isError || list.isEmpty ? Alignment.center : Alignment.topCenter,
+        alignment: isError || list.isEmpty ? Alignment.center : Alignment.topCenter,
         children: [
           SingleChildScrollView(
             controller: _scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (list.isNotEmpty)
-                  Text('${language.requestsReceived} ( ${list.length} )',
-                          style: boldTextStyle())
-                      .paddingAll(16),
+                if (list.isNotEmpty) Text('${language.requestsReceived} ( ${list.length} )', style: boldTextStyle()).paddingAll(16),
                 FutureBuilder<List<FriendRequestModel>>(
                   future: future,
                   builder: (ctx, snap) {
                     if (snap.hasError) {
                       return NoDataWidget(
                         imageWidget: NoDataLottieWidget(),
-                        title: isError
-                            ? language.somethingWentWrong
-                            : language.noDataFound,
+                        title: isError ? language.somethingWentWrong : language.noDataFound,
                         onRetry: () {
                           isError = false;
                           mPage = 1;
@@ -128,9 +116,7 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
                       if (snap.data.validate().isEmpty) {
                         return NoDataWidget(
                           imageWidget: NoDataLottieWidget(),
-                          title: isError
-                              ? language.somethingWentWrong
-                              : language.noDataFound,
+                          title: isError ? language.somethingWentWrong : language.noDataFound,
                           onRetry: () {
                             isError = false;
                             mPage = 1;
@@ -146,17 +132,14 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
                             delay: 80.milliseconds,
                             verticalOffset: 300,
                           ),
-                          padding:
-                              EdgeInsets.only(left: 16, right: 16, bottom: 50),
+                          padding: EdgeInsets.only(left: 16, right: 16, bottom: 50),
                           itemCount: list.length,
                           itemBuilder: (context, index) {
                             FriendRequestModel friend = list[index];
 
                             return Container(
                               padding: EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                  color: context.scaffoldBackgroundColor,
-                                  borderRadius: radius(commonRadius)),
+                              decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
                               child: Column(
                                 children: [
                                   Row(
@@ -173,33 +156,17 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
                                           RichText(
                                             text: TextSpan(
                                               children: [
-                                                TextSpan(
-                                                    text:
-                                                        '${friend.userName.validate()} ',
-                                                    style: boldTextStyle(
-                                                        fontFamily:
-                                                            fontFamily)),
-                                                if (friend.isUserVerified
-                                                    .validate())
-                                                  WidgetSpan(
-                                                      child: Image.asset(
-                                                          ic_tick_filled,
-                                                          height: 18,
-                                                          width: 18,
-                                                          color: blueTickColor,
-                                                          fit: BoxFit.cover)),
+                                                TextSpan(text: '${friend.userName.validate()} ', style: boldTextStyle(fontFamily: fontFamily)),
+                                                if (friend.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
                                               ],
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.start,
                                           ),
-                                          Text(
-                                              friend.userMentionName.validate(),
-                                              style: secondaryTextStyle()),
+                                          Text(friend.userMentionName.validate(), style: secondaryTextStyle()),
                                         ],
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                       ).expand(),
                                     ],
                                   ),
@@ -207,51 +174,40 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
                                   Row(
                                     children: [
                                       AppButton(
-                                        shapeBorder: RoundedRectangleBorder(
-                                            borderRadius: radius(4)),
+                                        shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
                                         text: language.confirm,
-                                        textStyle: secondaryTextStyle(
-                                            color: Colors.white, size: 14),
+                                        textStyle: secondaryTextStyle(color: Colors.white, size: 14),
                                         onTap: () async {
                                           if (!appStore.isLoading)
                                             ifNotTester(() async {
                                               appStore.setLoading(true);
-                                              await acceptFriendRequest(
-                                                      id: friend.userId
-                                                          .validate())
-                                                  .then((value) async {
+                                              await acceptFriendRequest(id: friend.userId.validate()).then((value) async {
                                                 mPage = 1;
                                                 appStore.setLoading(true);
                                                 future = requestList();
-                                                LiveStream()
-                                                    .emit(OnRequestAccept);
+                                                LiveStream().emit(OnRequestAccept);
                                               }).catchError((e) {
                                                 appStore.setLoading(false);
-                                                toast(e.toString(),
-                                                    print: true);
+                                                toast(e.toString(), print: true);
                                               });
                                             });
                                         },
                                         elevation: 0,
-                                        color: appColorPrimary,
+                                        color: context.primaryColor,
                                         height: 32,
                                       ).expand(),
                                       16.width,
                                       AppButton(
-                                        shapeBorder: RoundedRectangleBorder(
-                                            borderRadius: radius(4)),
+                                        shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
                                         text: language.decline,
-                                        textStyle: secondaryTextStyle(
-                                            color: appColorPrimary, size: 14),
+                                        textStyle: secondaryTextStyle(color: context.primaryColor, size: 14),
                                         onTap: () {
                                           if (!appStore.isLoading)
                                             ifNotTester(() {
                                               appStore.setLoading(true);
 
                                               removeExistingFriendConnection(
-                                                friendId: friend.userId
-                                                    .validate()
-                                                    .toString(),
+                                                friendId: friend.userId.validate().toString(),
                                                 passRequest: false,
                                               ).then((value) {
                                                 mPage = 1;
@@ -259,8 +215,7 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
                                                 future = requestList();
                                               }).catchError((e) {
                                                 appStore.setLoading(false);
-                                                toast(e.toString(),
-                                                    print: true);
+                                                toast(e.toString(), print: true);
                                               });
                                             });
                                         },
@@ -273,10 +228,7 @@ class _RequestsReceivedComponentState extends State<RequestsReceivedComponent>
                                 ],
                               ),
                             ).onTap(() async {
-                              MemberProfileScreen(
-                                      memberId: friend.userId.validate())
-                                  .launch(context)
-                                  .then((value) {
+                              MemberProfileScreen(memberId: friend.userId.validate()).launch(context).then((value) {
                                 if (value ?? false) {
                                   mPage = 1;
                                   appStore.setLoading(true);

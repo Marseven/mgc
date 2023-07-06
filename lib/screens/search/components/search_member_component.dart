@@ -14,16 +14,15 @@ class SearchMemberComponent extends StatelessWidget {
   final bool showRecent;
   final List<MemberResponse> memberList;
   final VoidCallback? callback;
-  final bool showActiveUser;
 
-  const SearchMemberComponent({required this.showRecent, required this.memberList, this.callback, this.showActiveUser = true});
+  const SearchMemberComponent({required this.showRecent, required this.memberList, this.callback});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showActiveUser)
+        if (showRecent)
           SnapHelperWidget<List<MemberResponse>>(
             future: getOnlineMembers(),
             onSuccess: (snap) {

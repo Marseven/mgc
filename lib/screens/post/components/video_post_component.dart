@@ -1,6 +1,12 @@
 import 'package:appinio_video_player/appinio_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:socialv/components/loading_widget.dart';
+import 'package:socialv/main.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+
+import '../../../utils/images.dart';
 
 class VideoPostComponent extends StatefulWidget {
   final String videoURl;
@@ -16,24 +22,26 @@ class VideoPostComponent extends StatefulWidget {
 class _VideoPostComponentState extends State<VideoPostComponent> {
   late VideoPlayerController videoPlayerController;
   late CustomVideoPlayerController _customVideoPlayerController;
+  GlobalKey visibilityKey = GlobalKey();
+  bool isVisible = false;
 
   @override
   void initState() {
     super.initState();
-
     videoPlayerController = VideoPlayerController.network(widget.videoURl)..initialize().then((value) => setState(() {}));
     _customVideoPlayerController = CustomVideoPlayerController(
       context: context,
       videoPlayerController: videoPlayerController,
+      customVideoPlayerSettings: CustomVideoPlayerSettings(
+        enterFullscreenButton: Image.asset(ic_full_screen, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        exitFullscreenButton: Image.asset(ic_exit_full_screen, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        playButton: Image.asset(ic_play_button, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        pauseButton: Image.asset(ic_pause, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        playbackSpeedButtonAvailable: false,
+        settingsButtonAvailable: false,
+      ),
     );
-
     widget.callBack?.call();
-  }
-
-  @override
-  void dispose() {
-    _customVideoPlayerController.dispose();
-    super.dispose();
   }
 
   @override
@@ -42,11 +50,24 @@ class _VideoPostComponentState extends State<VideoPostComponent> {
   }
 
   @override
+  void dispose() {
+    videoPlayerController.pause();
+    _customVideoPlayerController.videoPlayerController.pause();
+    _customVideoPlayerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: context.width(),
       height: context.height() * 0.8,
-      child: CustomVideoPlayer(customVideoPlayerController: _customVideoPlayerController),
+      child: VisibilityDetector(
+          key: visibilityKey,
+          onVisibilityChanged: (info) {
+            _customVideoPlayerController.videoPlayerController.pause();
+          },
+          child: CustomVideoPlayer(customVideoPlayerController: _customVideoPlayerController)),
     ).center();
   }
 }
@@ -63,12 +84,18 @@ class StoryVideoPostComponent extends StatefulWidget {
 }
 
 class _StoryVideoPostComponentState extends State<StoryVideoPostComponent> {
+  String videoUrl = '';
+
   late VideoPlayerController videoPlayerController;
 
   @override
   void initState() {
+    videoUrl = widget.videoURl;
     super.initState();
+    init();
+  }
 
+  void init() {
     videoPlayerController = VideoPlayerController.network(
       widget.videoURl,
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true, allowBackgroundPlayback: true),
@@ -80,8 +107,7 @@ class _StoryVideoPostComponentState extends State<StoryVideoPostComponent> {
     videoPlayerController.setLooping(true);
     videoPlayerController.initialize();
     videoPlayerController.play();
-
-    //widget.callBack?.call();
+    setState(() {});
   }
 
   @override
@@ -97,6 +123,10 @@ class _StoryVideoPostComponentState extends State<StoryVideoPostComponent> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.videoURl != videoUrl) {
+      init();
+      videoUrl = widget.videoURl;
+    }
     return SizedBox(
       width: context.width(),
       height: context.height() * 0.8,

@@ -25,16 +25,16 @@ class CartScreen extends StatefulWidget {
   State<CartScreen> createState() => _CartScreenState();
 }
 
+List<CartItemModel> cartItemList = [];
+
 class _CartScreenState extends State<CartScreen> {
-  List<CartItemModel> cartItemList = [];
-  CartModel? cart;
   late Future<List<CartItemModel>> future;
+  CartModel? cart;
 
   bool mIsLastPage = false;
   bool isError = false;
 
   int total = 0;
-  int subTotal = 0;
 
   TextEditingController couponController = TextEditingController();
 
@@ -69,14 +69,10 @@ class _CartScreenState extends State<CartScreen> {
     if (couponController.text.isNotEmpty) {
       ifNotTester(() async {
         appStore.setLoading(true);
-        await Future.forEach<CartItemModel>(cart!.items.validate(),
-            (element) async {
+        await Future.forEach<CartItemModel>(cart!.items.validate(), (element) async {
           if (element.isQuantityChanged.validate()) {
             appStore.setLoading(true);
-            await updateCartItem(
-                    productKey: element.key.validate(),
-                    quantity: element.quantity.validate())
-                .then((value) async {
+            await updateCartItem(productKey: element.key.validate(), quantity: element.quantity.validate()).then((value) async {
               log('item updated successfully');
             }).catchError((e) {
               appStore.setLoading(false);
@@ -90,7 +86,9 @@ class _CartScreenState extends State<CartScreen> {
           await applyCoupon(code: couponController.text).then((value) {
             cart = value;
             couponController.clear();
-            future = getCart();
+            total = value.totals!.totalPrice.validate().toInt();
+            log('Total: $total');
+            //future = getCart();
             setState(() {});
             appStore.setLoading(false);
           }).catchError((e) {
@@ -127,13 +125,13 @@ class _CartScreenState extends State<CartScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: context.iconColor),
             onPressed: () {
-              finish(context, true);
+              finish(context);
             },
           ),
           titleSpacing: 0,
@@ -152,9 +150,7 @@ class _CartScreenState extends State<CartScreen> {
                   if (snap.hasError && !appStore.isLoading) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                     ).center();
                   }
                   if (snap.hasData) {
@@ -167,8 +163,7 @@ class _CartScreenState extends State<CartScreen> {
                             AnimatedListView(
                               shrinkWrap: true,
                               listAnimationType: ListAnimationType.FadeIn,
-                              slideConfiguration: SlideConfiguration(
-                                  delay: 80.milliseconds, verticalOffset: 300),
+                              slideConfiguration: SlideConfiguration(delay: 80.milliseconds, verticalOffset: 300),
                               physics: NeverScrollableScrollPhysics(),
                               padding: EdgeInsets.symmetric(horizontal: 16),
                               itemCount: cartItemList.length,
@@ -178,204 +173,92 @@ class _CartScreenState extends State<CartScreen> {
                                 return Container(
                                   padding: EdgeInsets.all(16),
                                   margin: EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(
-                                      color: context.cardColor,
-                                      borderRadius: radius(defaultRadius)),
+                                  decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultRadius)),
                                   child: Column(
                                     children: [
                                       Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           cachedImage(
-                                            cartItem.images
-                                                    .validate()
-                                                    .isNotEmpty
-                                                ? cartItem.images!.first.src
-                                                    .validate()
-                                                : '',
+                                            cartItem.images.validate().isNotEmpty ? cartItem.images!.first.src.validate() : '',
                                             height: 70,
                                             width: 70,
                                             fit: BoxFit.cover,
-                                          ).cornerRadiusWithClipRRect(
-                                              defaultAppButtonRadius),
+                                          ).cornerRadiusWithClipRRect(defaultAppButtonRadius),
                                           16.width,
                                           Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
-                                                  Text(
-                                                      cartItem.name
-                                                          .validate()
-                                                          .capitalizeFirstLetter(),
-                                                      style: boldTextStyle(),
-                                                      maxLines: 2,
-                                                      overflow: TextOverflow
-                                                          .ellipsis),
-                                                  Image.asset(ic_close_square,
-                                                          color:
-                                                              appColorPrimary,
-                                                          height: 20,
-                                                          width: 20,
-                                                          fit: BoxFit.cover)
-                                                      .onTap(() {
+                                                  Text(cartItem.name.validate().capitalizeFirstLetter(), style: boldTextStyle(), maxLines: 2, overflow: TextOverflow.ellipsis).expand(),
+                                                  Image.asset(ic_close_square, color: context.primaryColor, height: 20, width: 20, fit: BoxFit.cover).onTap(() {
                                                     showConfirmDialogCustom(
                                                       context,
                                                       onAccept: (c) {
-                                                        cartItem.isQuantityChanged =
-                                                            true;
+                                                        cartItem.isQuantityChanged = true;
 
-                                                        total = total -
-                                                            (cartItem.prices!
-                                                                    .price
-                                                                    .validate()
-                                                                    .toInt() *
-                                                                cartItem
-                                                                    .quantity!
-                                                                    .toInt());
+                                                        product.isAddedCart = false;
 
-                                                        cartItemList
-                                                            .remove(cartItem);
-                                                        setState(() {
-                                                          var count =
-                                                              appStore.wooCart -
-                                                                  1;
-                                                          appStore.setWooCart(
-                                                              count);
-                                                        });
-                                                        toast(language
-                                                            .itemRemovedSuccessfully);
+                                                        total = total - (cartItem.prices!.price.validate().toInt() * cartItem.quantity!.toInt());
 
-                                                        removeCartItem(
-                                                                productKey: cartItem
-                                                                    .key
-                                                                    .validate())
-                                                            .then((value) {
-                                                          //getCart();
+                                                        cartItemList.remove(cartItem);
+                                                        setState(() {});
+                                                        toast(language.itemRemovedSuccessfully);
+
+                                                        removeCartItem(productKey: cartItem.key.validate()).then((value) {
+                                                          getCart();
                                                         }).catchError((e) {
-                                                          toast(e.toString(),
-                                                              print: true);
+                                                          toast(e.toString(), print: true);
                                                         });
                                                       },
-                                                      dialogType: DialogType
-                                                          .CONFIRMATION,
-                                                      title: language
-                                                          .removeFromCartConfirmation,
-                                                      positiveText:
-                                                          language.remove,
+                                                      dialogType: DialogType.CONFIRMATION,
+                                                      title: language.removeFromCartConfirmation,
+                                                      positiveText: language.remove,
                                                     );
-                                                  },
-                                                          splashColor: Colors
-                                                              .transparent,
-                                                          highlightColor: Colors
-                                                              .transparent),
+                                                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                                                 ],
                                               ),
                                               4.height,
                                               PriceWidget(
-                                                price: getPrice(cartItem
-                                                    .prices!.price
-                                                    .validate()),
-                                                salePrice: getPrice(cartItem
-                                                    .prices!.salePrice
-                                                    .validate()),
-                                                regularPrice: getPrice(cartItem
-                                                    .prices!.regularPrice
-                                                    .validate()),
+                                                price: getPrice(cartItem.prices!.price.validate()),
+                                                salePrice: getPrice(cartItem.prices!.salePrice.validate()),
+                                                regularPrice: getPrice(cartItem.prices!.regularPrice.validate()),
                                               ),
                                               8.height,
                                               Row(
                                                 children: [
-                                                  Text('${language.qty}: ',
-                                                      style: primaryTextStyle(
-                                                          color: appStore
-                                                                  .isDarkMode
-                                                              ? bodyDark
-                                                              : bodyWhite,
-                                                          size: 12)),
+                                                  Text('${language.qty}: ', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: 12)),
                                                   Icon(
                                                     Icons.remove,
-                                                    color: appStore.isDarkMode
-                                                        ? bodyDark
-                                                        : bodyWhite,
+                                                    color: appStore.isDarkMode ? bodyDark : bodyWhite,
                                                     size: 18,
-                                                  )
-                                                      .paddingOnly(
-                                                          left: 8,
-                                                          right: 6,
-                                                          top: 8,
-                                                          bottom: 8)
-                                                      .onTap(() {
-                                                    if (cartItem.quantity
-                                                            .validate() >
-                                                        1) {
-                                                      cartItem.quantity =
-                                                          cartItem.quantity
-                                                                  .validate() -
-                                                              1;
-                                                      cartItem.isQuantityChanged =
-                                                          true;
+                                                  ).paddingOnly(left: 8, right: 6, top: 8, bottom: 8).onTap(() {
+                                                    if (cartItem.quantity.validate() > 1) {
+                                                      cartItem.quantity = cartItem.quantity.validate() - 1;
+                                                      cartItem.isQuantityChanged = true;
 
-                                                      total = total -
-                                                          cartItem.prices!.price
-                                                              .validate()
-                                                              .toInt();
+                                                      total = total - cartItem.prices!.price.validate().toInt();
                                                       setState(() {});
                                                     }
                                                   }),
                                                   Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 2,
-                                                            horizontal: 8),
-                                                    margin: EdgeInsets.only(
-                                                        top: 8, bottom: 8),
-                                                    decoration: BoxDecoration(
-                                                        borderRadius: radius(4),
-                                                        border: Border.all(
-                                                            color: appStore
-                                                                    .isDarkMode
-                                                                ? bodyDark
-                                                                : bodyWhite)),
-                                                    child: Text(
-                                                        cartItem.quantity
-                                                            .toString(),
-                                                        style: primaryTextStyle(
-                                                            color: appStore
-                                                                    .isDarkMode
-                                                                ? bodyDark
-                                                                : bodyWhite,
-                                                            size: 12)),
+                                                    padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                                                    margin: EdgeInsets.only(top: 8, bottom: 8),
+                                                    decoration: BoxDecoration(borderRadius: radius(4), border: Border.all(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                                                    child: Text(cartItem.quantity.toString(), style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: 12)),
                                                   ),
                                                   Icon(
                                                     Icons.add,
-                                                    color: appStore.isDarkMode
-                                                        ? bodyDark
-                                                        : bodyWhite,
+                                                    color: appStore.isDarkMode ? bodyDark : bodyWhite,
                                                     size: 18,
-                                                  )
-                                                      .paddingOnly(
-                                                          left: 6,
-                                                          right: 12,
-                                                          top: 8,
-                                                          bottom: 8)
-                                                      .onTap(() {
-                                                    cartItem.quantity = cartItem
-                                                            .quantity
-                                                            .validate() +
-                                                        1;
-                                                    cartItem.isQuantityChanged =
-                                                        true;
-                                                    total = total +
-                                                        cartItem.prices!.price
-                                                            .validate()
-                                                            .toInt();
+                                                  ).paddingOnly(left: 6, right: 12, top: 8, bottom: 8).onTap(() {
+                                                    cartItem.quantity = cartItem.quantity.validate() + 1;
+                                                    cartItem.isQuantityChanged = true;
+                                                    total = total + cartItem.prices!.price.validate().toInt();
 
                                                     setState(() {});
                                                   }),
@@ -383,13 +266,8 @@ class _CartScreenState extends State<CartScreen> {
                                               ),
                                             ],
                                           ).onTap(() {
-                                            ProductDetailScreen(
-                                                    id: cartItem.id.validate())
-                                                .launch(context);
-                                          },
-                                              splashColor: Colors.transparent,
-                                              highlightColor:
-                                                  Colors.transparent).expand(),
+                                            ProductDetailScreen(id: cartItem.id.validate()).launch(context);
+                                          }, splashColor: Colors.transparent, highlightColor: Colors.transparent).expand(),
                                         ],
                                       ),
                                     ],
@@ -400,37 +278,38 @@ class _CartScreenState extends State<CartScreen> {
                             16.height,
                             if (cart!.coupons.validate().isNotEmpty)
                               CartCouponsComponent(
-                                  couponsList: cart!.coupons.validate()),
+                                couponsList: cart!.coupons.validate(),
+                                onCouponRemoved: (value) {
+                                  cart = value;
+                                  total = value.totals!.totalPrice.validate().toInt();
+
+                                  setState(() {});
+                                },
+                              ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Container(
+                                SizedBox(
                                   width: context.width() / 2 - 32,
-                                  padding: EdgeInsets.zero,
-                                  decoration: BoxDecoration(
-                                      color: context.cardColor,
-                                      borderRadius:
-                                          radius(defaultAppButtonRadius)),
-                                  child: AppTextField(
+                                  child: TextField(
                                     enabled: !appStore.isLoading,
                                     controller: couponController,
                                     keyboardType: TextInputType.name,
                                     textInputAction: TextInputAction.done,
-                                    textFieldType: TextFieldType.NAME,
-                                    textStyle: boldTextStyle(),
                                     maxLines: 1,
-                                    decoration: inputDecorationFilled(context,
-                                        label: language.couponCode,
-                                        contentPadding: EdgeInsets.symmetric(
-                                            vertical: 0, horizontal: 8),
-                                        fillColor: context.cardColor),
-                                    onFieldSubmitted: (text) async {
+                                    decoration: inputDecorationFilled(
+                                      context,
+                                      label: language.couponCode,
+                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                                      fillColor: context.cardColor,
+                                    ),
+                                    onSubmitted: (text) async {
                                       await applyCouponToCart();
                                     },
                                   ),
                                 ),
                                 TextButton(
-                                  child: Text(language.applyCoupon),
+                                  child: Text(language.applyCoupon, style: primaryTextStyle(color: context.primaryColor)),
                                   onPressed: () async {
                                     await applyCouponToCart();
                                   },
@@ -441,64 +320,41 @@ class _CartScreenState extends State<CartScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(language.productDetails,
-                                    style: boldTextStyle()),
+                                Text(language.productDetails, style: boldTextStyle()),
                                 Container(
                                   padding: EdgeInsets.all(16),
                                   margin: EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(
-                                      color: context.cardColor,
-                                      borderRadius: radius(defaultRadius)),
+                                  decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultRadius)),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(language.subTotal,
-                                              style:
-                                                  secondaryTextStyle(size: 16)),
-                                          PriceWidget(
-                                              price: getPrice((total +
-                                                      cart!
-                                                          .totals!.totalDiscount
-                                                          .validate()
-                                                          .toInt())
-                                                  .toString()),
-                                              size: 16),
+                                          Text(language.subTotal, style: secondaryTextStyle(size: 16)),
+                                          PriceWidget(price: getPrice((total + cart!.totals!.totalDiscount.validate().toInt()).toString()), size: 16),
                                         ],
                                       ),
                                       8.height,
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             language.discount,
                                             style: secondaryTextStyle(size: 16),
                                           ),
                                           Text(
-                                            '- ${getPrice(cart!.totals!.totalDiscount.validate())} ${cart!.totals!.currencySymbol}',
-                                            style: primaryTextStyle(
-                                                color: appStore.isDarkMode
-                                                    ? Colors.green
-                                                    : Colors.green),
+                                            '-${cart!.totals!.currencySymbol}${getPrice(cart!.totals!.totalDiscount.validate())}',
+                                            style: primaryTextStyle(color: appStore.isDarkMode ? Colors.green : Colors.green),
                                           ),
                                         ],
                                       ),
                                       8.height,
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(language.totalAmount,
-                                              style:
-                                                  secondaryTextStyle(size: 16)),
-                                          PriceWidget(
-                                              price: getPrice(total.toString()),
-                                              size: 16),
+                                          Text(language.totalAmount, style: secondaryTextStyle(size: 16)),
+                                          PriceWidget(price: getPrice(total.toString()), size: 16),
                                         ],
                                       ),
                                     ],
@@ -508,31 +364,20 @@ class _CartScreenState extends State<CartScreen> {
                             ).paddingAll(16),
                             cart!.items.validate().isNotEmpty
                                 ? AppButton(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 16),
-                                    shapeBorder: RoundedRectangleBorder(
-                                        borderRadius: radius(commonRadius)),
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                                    shapeBorder: RoundedRectangleBorder(borderRadius: radius(commonRadius)),
                                     text: language.lblContinue,
-                                    textStyle:
-                                        boldTextStyle(color: Colors.white),
+                                    textStyle: boldTextStyle(color: Colors.white),
                                     elevation: 0,
-                                    color: appColorPrimary,
+                                    color: context.primaryColor,
                                     width: context.width() - 32,
                                     onTap: () async {
                                       if (!appStore.isLoading)
                                         ifNotTester(() async {
-                                          await Future.forEach<CartItemModel>(
-                                              cart!.items.validate(),
-                                              (element) async {
-                                            if (element.isQuantityChanged
-                                                .validate()) {
+                                          await Future.forEach<CartItemModel>(cart!.items.validate(), (element) async {
+                                            if (element.isQuantityChanged.validate()) {
                                               appStore.setLoading(true);
-                                              await updateCartItem(
-                                                      productKey: element.key
-                                                          .validate(),
-                                                      quantity: element.quantity
-                                                          .validate())
-                                                  .then((value) async {
+                                              await updateCartItem(productKey: element.key.validate(), quantity: element.quantity.validate()).then((value) async {
                                                 log('item updated successfully');
                                                 await getCart();
                                               }).catchError((e) {
@@ -541,9 +386,7 @@ class _CartScreenState extends State<CartScreen> {
                                               });
                                             }
                                           }).then((value) {
-                                            CheckoutScreen(cartDetails: cart!)
-                                                .launch(context)
-                                                .then((value) async {
+                                            CheckoutScreen(cartDetails: cart!).launch(context).then((value) async {
                                               if (value ?? false) {
                                                 await getCart();
                                               }

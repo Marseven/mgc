@@ -4,8 +4,6 @@ import 'package:socialv/main.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/blockReport/components/unblock_member_dialog.dart';
 import 'package:socialv/utils/app_constants.dart';
-import 'package:socialv/utils/common.dart';
-import 'package:socialv/utils/constants.dart';
 
 class RequestFollowWidget extends StatefulWidget {
   final int memberId;
@@ -15,13 +13,7 @@ class RequestFollowWidget extends StatefulWidget {
   final String userName;
   final String userMentionName;
 
-  const RequestFollowWidget(
-      {required this.memberId,
-      required this.friendshipStatus,
-      this.callback,
-      required this.isBlockedByMe,
-      required this.userName,
-      required this.userMentionName});
+  const RequestFollowWidget({required this.memberId, required this.friendshipStatus, this.callback, required this.isBlockedByMe, required this.userName, required this.userMentionName});
 
   @override
   State<RequestFollowWidget> createState() => _RequestFollowWidgetState();
@@ -62,10 +54,10 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
             );
           }
         },
-        color: appColorPrimary,
+        color: context.primaryColor,
         elevation: 0,
       );
-    } else if (friendshipStatus == Friendship.notFriends) {
+    } else if (friendshipStatus == Friendship.notFriends && appStore.displayFriendRequestBtn == 1) {
       return AppButton(
         shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
         text: Friendship.follow,
@@ -75,10 +67,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
             friendshipStatus = Friendship.pending;
             setState(() {});
 
-            Map request = {
-              "initiator_id": appStore.loginUserId,
-              "friend_id": widget.memberId.toString().validate()
-            };
+            Map request = {"initiator_id": appStore.loginUserId, "friend_id": widget.memberId.toString().validate()};
             await requestNewFriend(request).then((value) async {
               widget.callback?.call();
             }).catchError((e) {
@@ -88,7 +77,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
             });
           });
         },
-        color: appColorPrimary,
+        color: context.primaryColor,
         elevation: 0,
       );
     } else if (friendshipStatus == Friendship.pending) {
@@ -101,9 +90,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
             friendshipStatus = Friendship.notFriends;
             setState(() {});
 
-            await removeExistingFriendConnection(
-                    friendId: widget.memberId.toString(), passRequest: true)
-                .then((value) {
+            await removeExistingFriendConnection(friendId: widget.memberId.toString(), passRequest: true).then((value) {
               widget.callback?.call();
             }).catchError((e) {
               friendshipStatus = Friendship.pending;
@@ -113,7 +100,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
           });
         },
         elevation: 0,
-        color: appColorPrimary,
+        color: context.primaryColor,
       );
     } else if (friendshipStatus == Friendship.awaitingResponse) {
       return Row(
@@ -128,8 +115,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
                 friendshipStatus = Friendship.isFriend;
                 setState(() {});
 
-                await acceptFriendRequest(id: widget.memberId.validate())
-                    .then((value) {
+                await acceptFriendRequest(id: widget.memberId.validate()).then((value) {
                   widget.callback?.call();
                 }).catchError((e) {
                   friendshipStatus = Friendship.awaitingResponse;
@@ -138,23 +124,20 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
               });
             },
             elevation: 0,
-            color: appColorPrimary,
+            color: context.primaryColor,
             height: 32,
           ),
           16.width,
           AppButton(
             shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
             text: language.delete,
-            textStyle: secondaryTextStyle(color: appColorPrimary, size: 14),
+            textStyle: secondaryTextStyle(color: context.primaryColor, size: 14),
             onTap: () async {
               ifNotTester(() async {
                 friendshipStatus = Friendship.notFriends;
                 setState(() {});
 
-                await removeExistingFriendConnection(
-                        friendId: widget.memberId.toString().validate(),
-                        passRequest: false)
-                    .then((value) {
+                await removeExistingFriendConnection(friendId: widget.memberId.toString().validate(), passRequest: false).then((value) {
                   widget.callback?.call();
                 }).catchError((e) {
                   friendshipStatus = Friendship.awaitingResponse;
@@ -173,7 +156,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
       return AppButton(
         shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
         text: Friendship.following,
-        textStyle: boldTextStyle(color: appColorPrimary),
+        textStyle: boldTextStyle(color: context.primaryColor),
         onTap: () async {
           setState(() {});
           await Future.delayed(Duration.zero);
@@ -183,9 +166,7 @@ class _RequestFollowWidgetState extends State<RequestFollowWidget> {
               ifNotTester(() async {
                 friendshipStatus = Friendship.notFriends;
                 appStore.setLoading(true);
-                await removeExistingFriendConnection(
-                        friendId: widget.memberId.toString(), passRequest: true)
-                    .then((value) {
+                await removeExistingFriendConnection(friendId: widget.memberId.toString(), passRequest: true).then((value) {
                   widget.callback?.call();
                 }).catchError((e) {
                   appStore.setLoading(false);

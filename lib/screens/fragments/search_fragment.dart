@@ -219,15 +219,14 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
             if (dropdownValue == searchOptions.first)
               SearchMemberComponent(
                 memberList: memberList.isEmpty ? appStore.recentMemberSearchList : memberList,
-                showRecent: memberList.isEmpty ? true : false,
-                showActiveUser: memberList.isEmpty,
+                showRecent: memberList.isEmpty,
                 callback: () {
                   setState(() {});
                 },
               )
             else
               SearchGroupComponent(
-                showRecent: groupList.isEmpty ? true : false,
+                showRecent: groupList.isEmpty,
                 groupList: groupList.isEmpty ? appStore.recentGroupsSearchList : groupList,
                 callback: () {
                   setState(() {});

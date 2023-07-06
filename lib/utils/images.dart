@@ -61,6 +61,37 @@ const ic_gif = 'assets/icons/ic_gif.png';
 const ic_history = 'assets/icons/ic_history.png';
 const ic_cart = 'assets/icons/ic_cart.png';
 const ic_sort_by = 'assets/icons/ic_sort_by.png';
+const ic_book = 'assets/icons/ic_book.png';
+const ic_course = 'assets/icons/ic_course.png';
+const ic_time = 'assets/icons/ic_time.png';
+const ic_preview = 'assets/icons/ic_preview.png';
+const ic_facebook = 'assets/icons/ic_facebook.png';
+const ic_twitter = 'assets/icons/ic_twitter.png';
+const ic_linkedIn = 'assets/icons/ic_linkedIn.png';
+const ic_youtube = 'assets/icons/ic_youtube.png';
+const ic_book_filled = 'assets/icons/ic_book_filled.png';
+const ic_calendar_filled = 'assets/icons/ic_calendar_filled.png';
+const ic_quiz = 'assets/icons/ic_quiz.png';
+const ic_student = 'assets/icons/ic_student.png';
+const ic_time_filled = 'assets/icons/ic_time_filled.png';
+const ic_timer = 'assets/icons/ic_timer.png';
+const ic_like = 'assets/icons/ic_like.png';
+const ic_share='assets/icons/ic_share.png';
+const ic_push_pin='assets/icons/ic_push_pin.png';
+const ic_message='assets/icons/ic_message.png';
+const ic_shield_fail='assets/icons/ic_shield_fail.png';
+const ic_blog = 'assets/icons/ic_blog.png';
+const ic_books = 'assets/icons/ic_books.png';
+const ic_full_screen = 'assets/icons/ic_full_screen.png';
+const ic_exit_full_screen = 'assets/icons/ic_exit_full_screen.png';
+const ic_pause = 'assets/icons/ic_pause.png';
+const ic_play_button = 'assets/icons/ic_play_button.png';
+// messages
+const ic_new_chat = 'assets/icons/ic_new_chat.png';
+const ic_start_chat = 'assets/icons/ic_start_chat.png';
+const ic_unstar = 'assets/icons/ic_unstar.png';
+const ic_pin = 'assets/icons/ic_pin.png';
+const ic_volume_mute = 'assets/icons/ic_volume_mute.png';
 
 /// Lottie Files
 const no_data = "assets/lottie/no_data.json";
