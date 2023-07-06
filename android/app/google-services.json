@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "203176417957",
-    "project_id": "socialv-flutter",
-    "storage_bucket": "socialv-flutter.appspot.com"
+    "project_number": "61709721681",
+    "project_id": "manga-golf-club-a7776",
+    "storage_bucket": "manga-golf-club-a7776.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:203176417957:android:6d2dde980112558149cb4c",
+        "mobilesdk_app_id": "1:61709721681:android:453f9ea7eeb7eafd5a1870",
         "android_client_info": {
-          "package_name": "com.iconic.socialv"
+          "package_name": "com.jobsconseil.mgc"
         }
       },
       "oauth_client": [
         {
-          "client_id": "203176417957-85qj4djghloja46aci7smcjtd701ea4m.apps.googleusercontent.com",
+          "client_id": "61709721681-b5a06k0ntj42egt8daiqvoqfubab2udk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDgYJs0fijqzbOGCzZ_HTM8-t7NTrjOSmw"
+          "current_key": "AIzaSyDFJMkvkI_gjwxXw9CAYxBQ2neHeRAwtHI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "203176417957-85qj4djghloja46aci7smcjtd701ea4m.apps.googleusercontent.com",
+              "client_id": "61709721681-b5a06k0ntj42egt8daiqvoqfubab2udk.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

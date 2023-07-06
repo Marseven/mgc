@@ -18,6 +18,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
   }
 
   init() async {
+    print(localeLanguageList);
     localeLanguageList.forEach((element) {
       if (appStore.selectedLanguage == element.languageCode.validate()) {
         selectedIndex = localeLanguageList.indexOf(element);
@@ -27,9 +28,11 @@ class _LanguageScreenState extends State<LanguageScreen> {
   }
 
   Color? getSelectedColor(LanguageDataModel data) {
-    if (appStore.selectedLanguage == data.languageCode.validate() && appStore.isDarkMode) {
+    if (appStore.selectedLanguage == data.languageCode.validate() &&
+        appStore.isDarkMode) {
       return Colors.white54;
-    } else if (appStore.selectedLanguage == data.languageCode.validate() && !appStore.isDarkMode) {
+    } else if (appStore.selectedLanguage == data.languageCode.validate() &&
+        !appStore.isDarkMode) {
       return appColorPrimary.withAlpha(40);
     } else {
       return null;
@@ -61,7 +64,9 @@ class _LanguageScreenState extends State<LanguageScreen> {
           LanguageDataModel data = localeLanguageList[index];
           return Container(
             padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
-            color: appStore.selectedLanguage == data.languageCode.validate() ? context.cardColor : context.scaffoldBackgroundColor,
+            color: appStore.selectedLanguage == data.languageCode.validate()
+                ? context.cardColor
+                : context.scaffoldBackgroundColor,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -81,7 +86,8 @@ class _LanguageScreenState extends State<LanguageScreen> {
                     ),
                   ],
                 ),
-                if (appStore.selectedLanguage == data.languageCode.validate()) Icon(Icons.check, color: appColorPrimary)
+                if (appStore.selectedLanguage == data.languageCode.validate())
+                  Icon(Icons.check, color: appColorPrimary)
               ],
             ).onTap(
               () async {

@@ -232,23 +232,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             );
                           },
                         ),
-                        SettingItemWidget(
-                          title: language.appLanguage,
-                          titleTextStyle: primaryTextStyle(
-                              color:
-                                  appStore.isDarkMode ? bodyDark : bodyWhite),
-                          leading: Image.asset(ic_network,
-                              height: 18,
-                              width: 18,
-                              color: appColorPrimary,
-                              fit: BoxFit.cover),
-                          trailing: Icon(Icons.arrow_forward_ios,
-                              color: appStore.isDarkMode ? bodyDark : bodyWhite,
-                              size: 16),
-                          onTap: () {
-                            LanguageScreen().launch(context);
-                          },
-                        ),
+                        // SettingItemWidget(
+                        //   title: language.appLanguage,
+                        //   titleTextStyle: primaryTextStyle(
+                        //       color:
+                        //           appStore.isDarkMode ? bodyDark : bodyWhite),
+                        //   leading: Image.asset(ic_network,
+                        //       height: 18,
+                        //       width: 18,
+                        //       color: appColorPrimary,
+                        //       fit: BoxFit.cover),
+                        //   trailing: Icon(Icons.arrow_forward_ios,
+                        //       color: appStore.isDarkMode ? bodyDark : bodyWhite,
+                        //       size: 16),
+                        //   onTap: () {
+                        //     LanguageScreen().launch(context);
+                        //   },
+                        // ),
                       ],
                     ),
                     SettingSection(

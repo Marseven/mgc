@@ -3,7 +3,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
 
 /// DO NOT CHANGE THIS PACKAGE NAME
-const APP_PACKAGE_NAME = "com.iconic.socialv";
+const APP_PACKAGE_NAME = "com.jobsconseil.mgc";
 
 /// Radius
 
@@ -43,7 +43,7 @@ const DEMO_USER_EMAIL = "jerry@gmail.com";
 const DEMO_USER_PASSWORD = "123456";
 
 class Constants {
-  static const defaultLanguage = 'en';
+  static const defaultLanguage = 'fr';
 }
 //endregion
 
