@@ -9,8 +9,6 @@ class FriendRequestModel {
 
   FriendRequestModel({this.requestId, this.userId, this.userImage, this.userMentionName, this.userName,this.isUserVerified,this.isRequested = false});
 
-  /// todo : use this model for any user list
-
   factory FriendRequestModel.fromJson(Map<String, dynamic> json) {
     return FriendRequestModel(
       requestId: json['request_id'],

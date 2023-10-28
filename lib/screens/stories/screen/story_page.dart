@@ -5,11 +5,14 @@ import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/story/story_response_model.dart';
 import 'package:socialv/network/rest_apis.dart';
-import 'package:socialv/screens/post/components/video_post_component.dart';
 import 'package:socialv/screens/post/screens/video_post_screen.dart';
+import 'package:socialv/screens/stories/component/story_video_component.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 import 'package:story_time/story_time.dart';
+import 'package:video_player/video_player.dart';
+
+VideoPlayerController? globalVideoPlayerController;
 
 class StoryPage extends StatefulWidget {
   final VoidCallback? callback;
@@ -48,10 +51,6 @@ class StoryPageState extends State<StoryPage> {
 
     super.initState();
 
-    afterBuildCreated(() {
-      if (!widget.fromUserStory) indicatorAnimationController.value = IndicatorAnimationCommand(pause: true);
-    });
-
     userIndex = widget.initialIndex;
     storyIndex = widget.initialStoryIndex ?? 0;
     setStatusBarColor(Colors.transparent);
@@ -77,8 +76,15 @@ class StoryPageState extends State<StoryPage> {
         child: StoryPageView(
           onStoryIndexChanged: (int newStoryIndex) async {
             storyIndex = 0;
-
-            indicatorAnimationController.value = IndicatorAnimationCommand(pause: true);
+            int duration = storyDuration.toInt();
+            if (widget.stories[userIndex].items.validate().isNotEmpty) {
+              if (widget.stories[userIndex].items.validate().length > newStoryIndex) {
+                if (widget.stories[userIndex].items.validate()[newStoryIndex].duration != null) {
+                  duration = widget.stories[userIndex].items.validate()[newStoryIndex].duration.validate().toInt();
+                }
+              }
+            }
+            indicatorAnimationController.value = IndicatorAnimationCommand(duration: Duration(seconds: duration));
           },
           itemBuilder: (context, pageIndex, storyIndex) {
             userIndex = pageIndex;
@@ -107,9 +113,7 @@ class StoryPageState extends State<StoryPage> {
                               width: context.width(),
                               height: context.height(),
                               imageBuilder: (context, imageProvider) {
-                                int duration = widget.stories[userIndex].items.validate()[storyIndex].duration.validate().toInt();
-
-                                indicatorAnimationController.value = IndicatorAnimationCommand(duration: Duration(seconds: duration), resume: true);
+                                indicatorAnimationController.value = IndicatorAnimationCommand(resume: true);
                                 return Container(
                                   width: context.width(),
                                   height: context.height(),
@@ -125,14 +129,7 @@ class StoryPageState extends State<StoryPage> {
                                 return LoadingWidget();
                               },
                             )
-                          : StoryVideoPostComponent(
-                              videoURl: story.storyMedia.validate(),
-                              callBack: () {
-                                int duration = widget.stories[userIndex].items.validate()[storyIndex].duration.validate().toInt();
-
-                                indicatorAnimationController.value = IndicatorAnimationCommand(duration: Duration(seconds: duration), resume: true);
-                              },
-                            ),
+                          : StoryVideoPostComponent(videoURl: story.storyMedia.validate()),
                     ),
                     Container(
                       decoration: BoxDecoration(
@@ -227,7 +224,11 @@ class StoryPageState extends State<StoryPage> {
                       if (story.mediaType == MediaTypes.video)
                         TextButton(
                           onPressed: () {
-                            VideoPostScreen(story.storyMedia.validate(), user.name.validate()).launch(context);
+                            if (globalVideoPlayerController != null) {
+                              globalVideoPlayerController!.pause();
+                            }
+
+                            VideoPostScreen(story.storyMedia.validate()).launch(context);
                           },
                           child: Text(language.viewVideo, style: boldTextStyle(color: Colors.white)),
                         ),

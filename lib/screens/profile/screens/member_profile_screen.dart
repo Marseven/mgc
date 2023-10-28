@@ -11,6 +11,7 @@ import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/blockReport/components/block_member_dialog.dart';
 import 'package:socialv/screens/blockReport/components/show_report_dialog.dart';
 import 'package:socialv/screens/groups/screens/group_screen.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 import 'package:socialv/screens/post/components/post_component.dart';
 import 'package:socialv/screens/profile/components/profile_header_component.dart';
 import 'package:socialv/screens/profile/components/request_follow_widget.dart';
@@ -18,8 +19,10 @@ import 'package:socialv/screens/profile/screens/member_friends_screen.dart';
 import 'package:socialv/screens/profile/screens/personal_info_screen.dart';
 import 'package:socialv/screens/settings/screens/settings_screen.dart';
 import 'package:socialv/screens/stories/component/story_highlights_component.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 import '../../../utils/app_constants.dart';
+import '../../gallery/screens/gallery_screen.dart';
 
 class MemberProfileScreen extends StatefulWidget {
   final int memberId;
@@ -51,6 +54,8 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
   bool isLoading = true;
   bool isFetched = false;
   bool showNoData = false;
+  bool isFavorites = false;
+  var unescape = HtmlUnescape();
 
   @override
   void initState() {
@@ -91,7 +96,9 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
     setState(() {});
 
     await getPost(
-            type: PostRequestType.timeline,
+            type: isFavorites
+                ? PostRequestType.favorites
+                : PostRequestType.timeline,
             page: mPage,
             userId: widget.memberId)
         .then((value) {
@@ -223,7 +230,8 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             context: context,
                             builder: (BuildContext context) {
                               return BlockMemberDialog(
-                                mentionName: member.mentionName.validate(),
+                                mentionName: unescape
+                                    .convert(member.mentionName.validate()),
                                 id: member.id.validate().toInt(),
                                 callback: () {
                                   appStore.setLoading(true);
@@ -235,6 +243,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                         } else {
                           await showModalBottomSheet(
                             context: context,
+                            elevation: 0,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
                             builder: (context) {
@@ -319,7 +328,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                     height: 20,
                     width: 20,
                     fit: BoxFit.cover,
-                    color: appColorPrimary,
+                    color: context.primaryColor,
                   ),
                 ).visible(widget.memberId.toString() == appStore.loginUserId),
               ],
@@ -349,7 +358,8 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                                 Text(
                                   member.blockedBy.validate()
                                       ? language.userNotFound
-                                      : member.name.validate(),
+                                      : unescape
+                                          .convert(member.name.validate()),
                                   style: boldTextStyle(size: 20),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -365,7 +375,9 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             ),
                             4.height,
                             if (!member.blockedBy.validate())
-                              Text(member.mentionName.validate(),
+                              Text(
+                                  unescape
+                                      .convert(member.mentionName.validate()),
                                   style: secondaryTextStyle()),
                           ],
                         ).paddingAll(16),
@@ -373,8 +385,9 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             !member.blockedBy.validate() &&
                             widget.memberId.toString() != appStore.loginUserId)
                           RequestFollowWidget(
-                            userMentionName: member.mentionName.validate(),
-                            userName: member.name.validate(),
+                            userMentionName:
+                                unescape.convert(member.mentionName.validate()),
+                            userName: unescape.convert(member.name.validate()),
                             memberId: member.id.validate().toInt(),
                             friendshipStatus:
                                 member.friendshipStatus.validate(),
@@ -386,7 +399,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             isBlockedByMe: member.blockedByMe.validate(),
                           ),
                         16.height,
-                        if (appStore.showStoryHighlight && showDetails)
+                        if (appStore.showStoryHighlight == 1 && showDetails)
                           StoryHighlightsComponent(
                             categoryList: categoryList,
                             showAddOption:
@@ -400,22 +413,23 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                         8.height,
                         Row(
                           children: [
-                            Column(
-                              children: [
-                                Text(member.postCount.validate().toString(),
-                                    style: boldTextStyle(size: 18)),
-                                4.height,
-                                Text(language.posts,
-                                    style: secondaryTextStyle(size: 12)),
-                              ],
-                            ).onTap(() {
-                              _scrollController.animateTo(
-                                  context.height() * 0.35,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.linear);
-                            },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent).expand(),
+                            if (appStore.displayPostCount == 1)
+                              Column(
+                                children: [
+                                  Text(member.postCount.validate().toString(),
+                                      style: boldTextStyle(size: 18)),
+                                  4.height,
+                                  Text(language.posts,
+                                      style: secondaryTextStyle(size: 12)),
+                                ],
+                              ).onTap(() {
+                                _scrollController.animateTo(
+                                    context.height() * 0.35,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.linear);
+                              },
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent).expand(),
                             Column(
                               children: [
                                 Text(member.friendsCount.validate().toString(),
@@ -427,9 +441,14 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             ).onTap(() {
                               if (member.friendsCount.validate() != 0 &&
                                   showDetails) {
-                                MemberFriendsScreen(
-                                        memberId: member.id.validate().toInt())
-                                    .launch(context);
+                                if (pmpStore.memberDirectory) {
+                                  MemberFriendsScreen(
+                                          memberId:
+                                              member.id.validate().toInt())
+                                      .launch(context);
+                                } else {
+                                  MembershipPlansScreen().launch(context);
+                                }
                               } else {
                                 toast(language.canNotViewFriends);
                               }
@@ -447,9 +466,13 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                             ).onTap(() {
                               if (member.groupsCount.validate() != 0 &&
                                   showDetails) {
-                                GroupScreen(
-                                        userId: member.id.validate().toInt())
-                                    .launch(context);
+                                if (pmpStore.viewGroups) {
+                                  GroupScreen(
+                                          userId: member.id.validate().toInt())
+                                      .launch(context);
+                                } else {
+                                  MembershipPlansScreen().launch(context);
+                                }
                               } else {
                                 toast(language.canNotViewGroups);
                               }
@@ -458,7 +481,20 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                                 highlightColor: Colors.transparent).expand(),
                           ],
                         ),
-                        16.height,
+                        8.height,
+                        if (showDetails)
+                          TextIcon(
+                            onTap: () {
+                              GalleryScreen(
+                                      userId: member.id.toInt(), canEdit: false)
+                                  .launch(context);
+                            },
+                            text: language.viewGallery,
+                            textStyle: primaryTextStyle(color: appColorPrimary),
+                            prefix: Image.asset(ic_image,
+                                width: 18, height: 18, color: appColorPrimary),
+                          ),
+                        8.height,
                         if (!appStore.isLoading && showDetails)
                           FutureBuilder<List<PostModel>>(
                             future: future,
@@ -466,9 +502,7 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                               if (snap.hasError) {
                                 return NoDataWidget(
                                   imageWidget: NoDataLottieWidget(),
-                                  title: isError
-                                      ? language.somethingWentWrong
-                                      : language.noDataFound,
+                                  title: language.somethingWentWrong,
                                 ).center();
                               }
 
@@ -479,37 +513,76 @@ class _MemberProfileScreenState extends State<MemberProfileScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Align(
-                                          child: Text(
-                                            '${language.posts} (${member.postCount == null ? 0 : member.postCount})',
-                                            style: boldTextStyle(
-                                                color: appColorPrimary),
-                                          ).paddingSymmetric(horizontal: 16),
-                                          alignment: Alignment.centerLeft,
-                                        ).visible(postList.isNotEmpty),
-                                        AnimatedListView(
-                                          padding: EdgeInsets.only(
-                                              left: 8, right: 8, bottom: 50),
-                                          itemCount: postList.length,
-                                          slideConfiguration:
-                                              SlideConfiguration(
-                                                  delay: 80.milliseconds,
-                                                  verticalOffset: 300),
-                                          itemBuilder: (context, index) {
-                                            return PostComponent(
-                                              post: postList[index],
-                                              callback: () {
-                                                appStore.setLoading(true);
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(language.posts,
+                                                    style: boldTextStyle(
+                                                        color: appColorPrimary))
+                                                .paddingSymmetric(
+                                                    horizontal: 16),
+                                            TextIcon(
+                                              onTap: () {
+                                                isFavorites = !isFavorites;
                                                 mPage = 1;
-                                                future = getPostList();
-                                                getMember();
+                                                setState(() {});
+                                                getPostList();
                                               },
-                                            );
-                                          },
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                        ),
+                                              prefix: Icon(
+                                                  isFavorites
+                                                      ? Icons.check_circle
+                                                      : Icons.circle_outlined,
+                                                  color: appColorPrimary,
+                                                  size: 18),
+                                              text: language.favorites,
+                                              textStyle: secondaryTextStyle(
+                                                  color: isFavorites
+                                                      ? context.primaryColor
+                                                      : null),
+                                            ).paddingSymmetric(horizontal: 8),
+                                          ],
+                                        ).visible(
+                                            member.postCount.validate() != 0),
+                                        if (snap.data.validate().isEmpty &&
+                                            !isLoading)
+                                          NoDataWidget(
+                                            imageWidget: NoDataLottieWidget(),
+                                            title: language.noPostsFound,
+                                          ).center()
+                                        else
+                                          AnimatedListView(
+                                            padding: EdgeInsets.only(
+                                                left: 8, right: 8, bottom: 50),
+                                            itemCount: postList.length,
+                                            slideConfiguration:
+                                                SlideConfiguration(
+                                                    delay: 80.milliseconds,
+                                                    verticalOffset: 300),
+                                            itemBuilder: (context, index) {
+                                              return PostComponent(
+                                                fromProfile: true,
+                                                post: postList[index],
+                                                callback: () {
+                                                  appStore.setLoading(true);
+                                                  mPage = 1;
+                                                  future = getPostList();
+                                                  getMember();
+                                                },
+                                                commentCallback: () {
+                                                  mPage = 1;
+                                                  future = getPostList();
+                                                },
+                                                fromFavourites: widget.memberId
+                                                            .toString() ==
+                                                        appStore.loginUserId &&
+                                                    isFavorites,
+                                              );
+                                            },
+                                            shrinkWrap: true,
+                                            physics:
+                                                NeverScrollableScrollPhysics(),
+                                          ),
                                       ],
                                     ),
                                     if (isLoading)

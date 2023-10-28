@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:socialv/main.dart';
 import 'package:socialv/models/common_models/post_mdeia_model.dart';
 import 'package:socialv/models/posts/media_model.dart';
 import 'package:socialv/network/rest_apis.dart';
@@ -12,8 +13,7 @@ class EditPostMediaComponent extends StatefulWidget {
   final List<PostMediaModel> mediaList;
   final VoidCallback? callback;
 
-  const EditPostMediaComponent(
-      {required this.mediaType, required this.mediaList, this.callback});
+  const EditPostMediaComponent({required this.mediaType, required this.mediaList, this.callback});
 
   @override
   State<EditPostMediaComponent> createState() => _EditPostMediaComponentState();
@@ -25,7 +25,9 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
   @override
   void initState() {
     super.initState();
-
+    init();
+  }
+  void init()async{
     if (widget.mediaType.type == MediaTypes.video)
       widget.mediaList.forEach((element) {
         controller.add(VideoPlayerController.network(element.url.validate())
@@ -36,18 +38,27 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
   }
 
   void deletePostMedia(PostMediaModel media) {
-    deleteMedia(
-            id: media.id.validate().toString(),
-            type: media.type == MediaTypes.gif
-                ? MediaTypes.gif
-                : MediaTypes.media)
-        .then((value) {
-      log(value);
-    }).catchError((e) {
-      toast(e.toString(), print: true);
-    });
 
+    showConfirmDialogCustom(
+      context,
+      onAccept: (c) {
+        ifNotTester(() {
+          deleteMedia(id: media.id.validate().toInt(), type: media.type == MediaTypes.gif ? MediaTypes.gif : MediaTypes.media).then((value) {
+            log(value);
+          }).catchError((e) {
+            toast(e.toString(), print: true);
+          });
+        });
+
+      },
+      dialogType: DialogType.DELETE,
+      title:language.removeMediaConfirmation,
+      positiveText: language.delete,
+    );
+
+    int index=widget.mediaList.indexOf(media);
     widget.mediaList.remove(media);
+    controller.removeAt(index);
     setState(() {});
 
     widget.callback?.call();
@@ -81,17 +92,11 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
             padding: index == 0 ? EdgeInsets.only(left: 8) : EdgeInsets.all(0),
             child: Stack(
               children: [
-                cachedImage(media.url.validate(),
-                        height: 80, width: 80, fit: BoxFit.cover)
-                    .cornerRadiusWithClipRRect(commonRadius),
+                cachedImage(media.url.validate(), height: 80, width: 80, fit: BoxFit.cover).cornerRadiusWithClipRRect(commonRadius),
                 Positioned(
-                  child: Icon(Icons.cancel_outlined,
-                          color: appColorPrimary, size: 18)
-                      .onTap(() async {
+                  child: Icon(Icons.cancel_outlined, color: context.primaryColor, size: 18).onTap(() async {
                     deletePostMedia(media);
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                   right: 4,
                   top: 4,
                 ),
@@ -114,27 +119,19 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
                     ? Container(
                         width: 80,
                         height: 80,
-                        child: VideoPlayer(controller[index])
-                            .cornerRadiusWithClipRRect(commonRadius),
+                        child: VideoPlayer(controller[index]).cornerRadiusWithClipRRect(commonRadius),
                       )
                     : Container(
-                        decoration: BoxDecoration(
-                            color: context.scaffoldBackgroundColor,
-                            borderRadius: radius(commonRadius)),
+                        decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
                         height: 80,
                         width: 80,
                         padding: EdgeInsets.all(20),
-                        child: Image.asset(ic_video,
-                            height: 20, width: 20, fit: BoxFit.cover),
+                        child: Image.asset(ic_video, height: 20, width: 20, fit: BoxFit.cover),
                       ),
                 Positioned(
-                  child: Icon(Icons.cancel_outlined,
-                          color: appColorPrimary, size: 18)
-                      .onTap(() async {
+                  child: Icon(Icons.cancel_outlined, color: context.primaryColor, size: 18).onTap(() async {
                     deletePostMedia(media);
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                   right: 4,
                   top: 4,
                 ),
@@ -154,23 +151,16 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
             child: Stack(
               children: [
                 Container(
-                  decoration: BoxDecoration(
-                      color: context.scaffoldBackgroundColor,
-                      borderRadius: radius(commonRadius)),
+                  decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
                   height: 80,
                   width: 80,
                   padding: EdgeInsets.all(20),
-                  child: Image.asset(ic_voice,
-                      height: 20, width: 20, fit: BoxFit.cover),
+                  child: Image.asset(ic_voice, height: 20, width: 20, fit: BoxFit.cover),
                 ),
                 Positioned(
-                  child: Icon(Icons.cancel_outlined,
-                          color: appColorPrimary, size: 18)
-                      .onTap(() async {
+                  child: Icon(Icons.cancel_outlined, color: context.primaryColor, size: 18).onTap(() async {
                     deletePostMedia(media);
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                   right: 4,
                   top: 4,
                 ),
@@ -190,23 +180,16 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
             child: Stack(
               children: [
                 Container(
-                  decoration: BoxDecoration(
-                      color: context.scaffoldBackgroundColor,
-                      borderRadius: radius(commonRadius)),
+                  decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(commonRadius)),
                   height: 80,
                   width: 80,
                   padding: EdgeInsets.all(20),
-                  child: Image.asset(ic_document,
-                      height: 20, width: 20, fit: BoxFit.cover),
+                  child: Image.asset(ic_document, height: 20, width: 20, fit: BoxFit.cover),
                 ),
                 Positioned(
-                  child: Icon(Icons.cancel_outlined,
-                          color: appColorPrimary, size: 18)
-                      .onTap(() async {
+                  child: Icon(Icons.cancel_outlined, color: context.primaryColor, size: 18).onTap(() async {
                     deletePostMedia(media);
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                   right: 4,
                   top: 4,
                 ),
@@ -225,17 +208,11 @@ class _EditPostMediaComponentState extends State<EditPostMediaComponent> {
             padding: index == 0 ? EdgeInsets.only(left: 8) : EdgeInsets.all(0),
             child: Stack(
               children: [
-                cachedImage(media.url.validate(),
-                        height: 80, width: 80, fit: BoxFit.cover)
-                    .cornerRadiusWithClipRRect(commonRadius),
+                cachedImage(media.url.validate(), height: 80, width: 80, fit: BoxFit.cover).cornerRadiusWithClipRRect(commonRadius),
                 Positioned(
-                  child: Icon(Icons.cancel_outlined,
-                          color: appColorPrimary, size: 18)
-                      .onTap(() async {
+                  child: Icon(Icons.cancel_outlined, color: context.primaryColor, size: 18).onTap(() async {
                     deletePostMedia(media);
-                  },
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent),
+                  }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                   right: 4,
                   top: 4,
                 ),

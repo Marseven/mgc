@@ -4,6 +4,7 @@ import 'package:socialv/components/no_data_lottie_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/screens/home/screens/group_list_screen.dart';
 import 'package:socialv/screens/home/screens/members_list_screen.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 
 class InitialHomeComponent extends StatefulWidget {
@@ -38,7 +39,11 @@ class _InitialHomeComponentState extends State<InitialHomeComponent> {
               side: MaterialStateProperty.all(BorderSide(color: appColorPrimary.withOpacity(0.5))),
             ),
             onPressed: () {
-              MembersListScreen().launch(context);
+              if (pmpStore.memberDirectory) {
+                MembersListScreen().launch(context);
+              } else {
+                MembershipPlansScreen().launch(context);
+              }
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -69,10 +74,15 @@ class _InitialHomeComponentState extends State<InitialHomeComponent> {
           ),
           TextButton(
             style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
-                side: MaterialStateProperty.all(BorderSide(color: appColorPrimary.withOpacity(0.5)))),
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+              side: MaterialStateProperty.all(BorderSide(color: appColorPrimary.withOpacity(0.5))),
+            ),
             onPressed: () {
-              GroupListScreen().launch(context);
+              if (pmpStore.viewGroups) {
+                GroupListScreen().launch(context);
+              } else {
+                MembershipPlansScreen().launch(context);
+              }
             },
             child: Row(
               mainAxisSize: MainAxisSize.min,

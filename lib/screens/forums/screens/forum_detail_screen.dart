@@ -11,6 +11,7 @@ import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/forums/components/forum_detail_component.dart';
 import 'package:socialv/screens/forums/screens/create_topic_screen.dart';
 import 'package:socialv/screens/groups/screens/group_detail_screen.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 
 import '../../profile/components/profile_header_component.dart';
@@ -215,18 +216,22 @@ class _ForumDetailScreenState extends State<ForumDetailScreen> with SingleTicker
                               16.height,
                               Text(forum.title.validate(), style: boldTextStyle(size: 20)).paddingSymmetric(horizontal: 16).onTap(() {
                                 if (forum.groupDetails != null && forum.groupDetails!.groupId != 0) {
-                                  GroupDetailScreen(groupId: forum.groupDetails!.groupId.validate()).launch(context).then((value) {
-                                    if (value ?? false) {
-                                      mPage = 1;
-                                      setState(() {});
-                                      getDetails();
-                                    }
-                                  });
+                                  if (pmpStore.viewSingleGroup) {
+                                    GroupDetailScreen(groupId: forum.groupDetails!.groupId.validate()).launch(context).then((value) {
+                                      if (value ?? false) {
+                                        mPage = 1;
+                                        setState(() {});
+                                        getDetails();
+                                      }
+                                    });
+                                  } else {
+                                    MembershipPlansScreen().launch(context);
+                                  }
                                 }
                               }, splashColor: Colors.transparent, highlightColor: Colors.transparent).center(),
                               8.height,
                               ReadMoreText(
-                                forum.description.validate(),
+                                forum.description.validateAndFilter(),
                                 trimLength: 100,
                                 style: secondaryTextStyle(),
                                 textAlign: TextAlign.center,
@@ -285,16 +290,21 @@ class _ForumDetailScreenState extends State<ForumDetailScreen> with SingleTicker
                                   text: language.viewGroup,
                                   textStyle: boldTextStyle(color: Colors.white),
                                   onTap: () {
-                                    if (forum.groupDetails != null && forum.groupDetails!.groupId != 0)
-                                      GroupDetailScreen(groupId: forum.groupDetails!.groupId.validate()).launch(context).then((value) {
-                                        if (value ?? false) {
-                                          mPage = 1;
-                                          setState(() {});
-                                          getDetails();
-                                        }
-                                      });
-                                    else
+                                    if (forum.groupDetails != null && forum.groupDetails!.groupId != 0) {
+                                      if (pmpStore.viewSingleGroup) {
+                                        GroupDetailScreen(groupId: forum.groupDetails!.groupId.validate()).launch(context).then((value) {
+                                          if (value ?? false) {
+                                            mPage = 1;
+                                            setState(() {});
+                                            getDetails();
+                                          }
+                                        });
+                                      } else {
+                                        MembershipPlansScreen().launch(context);
+                                      }
+                                    } else {
                                       toast(language.canNotViewThisGroup);
+                                    }
                                   },
                                   width: context.width() - 64,
                                 ).paddingSymmetric(vertical: 20).center()

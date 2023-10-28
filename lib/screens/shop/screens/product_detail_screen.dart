@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:provider/provider.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/components/no_data_lottie_widget.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/cart_badge_model.dart';
 import 'package:socialv/models/woo_commerce/common_models.dart';
 import 'package:socialv/models/woo_commerce/product_detail_model.dart';
 import 'package:socialv/network/rest_apis.dart';
@@ -25,10 +27,10 @@ class ProductDetailScreen extends StatefulWidget {
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  ProductDetailModel product = ProductDetailModel();
-  ProductDetailModel mainProduct = ProductDetailModel();
+ProductDetailModel product = ProductDetailModel();
+ProductDetailModel mainProduct = ProductDetailModel();
 
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isError = false;
   bool isFetched = false;
   bool isLoading = false;
@@ -97,6 +99,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     super.dispose();
   }
 
+  late CartBadge cartBadge;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialisez myState en utilisant Provider
+    cartBadge = Provider.of<CartBadge>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,7 +149,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 8, vertical: 6),
                                     decoration: BoxDecoration(
-                                        color: appColorPrimary,
+                                        color: context.primaryColor,
                                         borderRadius: radius(4)),
                                     child: Text(language.sale,
                                         style: secondaryTextStyle(
@@ -149,7 +159,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 Positioned(
                                   bottom: 8,
                                   child: DotIndicator(
-                                    indicatorColor: appColorPrimary,
+                                    indicatorColor: context.primaryColor,
                                     pageController: pageController,
                                     pages: product.images.validate(),
                                   ),
@@ -178,7 +188,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             icon: Image.asset(ic_cart,
                                 width: 24,
                                 height: 24,
-                                color: appColorPrimary,
+                                color: context.primaryColor,
                                 fit: BoxFit.cover),
                           ).visible(innerBoxIsScrolled),
                         ],
@@ -217,8 +227,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             16.width,
                             Text(
                                 '(${product.ratingCount} ${language.reviews.toLowerCase()})',
-                                style:
-                                    secondaryTextStyle(color: appColorPrimary)),
+                                style: secondaryTextStyle(
+                                    color: context.primaryColor)),
                           ],
                         ).paddingOnly(left: 16, right: 16, top: 8).visible(
                             product.averageRating.validate().toDouble() != 0.0),
@@ -322,8 +332,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       left: 8, right: 6, top: 8, bottom: 8)
                                   .onTap(() {
                                 if (count > 0) {
-                                  count = count - 1;
-                                  setState(() {});
+                                  setState(() {
+                                    count = count - 1;
+                                  });
                                 }
                               },
                                       splashColor: Colors.transparent,
@@ -354,8 +365,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   .paddingOnly(
                                       left: 6, right: 12, top: 8, bottom: 8)
                                   .onTap(() {
-                                count = count + 1;
-                                setState(() {});
+                                setState(() {
+                                  count = count + 1;
+                                });
                               },
                                       splashColor: Colors.transparent,
                                       highlightColor: Colors.transparent),
@@ -384,6 +396,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ).paddingOnly(top: 16, left: 16, right: 16),
                         if (product.categories.validate().isNotEmpty)
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('${language.category}: ',
                                   style: boldTextStyle(
@@ -392,17 +405,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           : bodyWhite,
                                       size: 14)),
                               Wrap(
-                                  children: product.categories!.map((e) {
+                                      children: product.categories!.map((e) {
                                 return Text(e.name.validate(),
                                         style: primaryTextStyle(
-                                            color: appColorPrimary, size: 14))
+                                            color: context.primaryColor,
+                                            size: 14))
                                     .onTap(() {
                                   ShopScreen(
                                           categoryName: e.name,
                                           categoryId: e.id)
                                       .launch(context);
                                 });
-                              }).toList()),
+                              }).toList())
+                                  .expand(),
                             ],
                           ).paddingSymmetric(horizontal: 16),
                         16.height,
@@ -497,20 +512,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               children: e.options
                                                   .validate()
                                                   .map((option) {
-                                                int index = e.options
-                                                    .validate()
-                                                    .indexOf(option);
-
-                                                return index != 0
-                                                    ? Text(
-                                                        option.validate(),
-                                                        style: primaryTextStyle(
-                                                            color: appStore
-                                                                    .isDarkMode
+                                                if (option !=
+                                                    'Choose an option') {
+                                                  return Text(
+                                                    option.validate(),
+                                                    style: primaryTextStyle(
+                                                        color:
+                                                            appStore.isDarkMode
                                                                 ? bodyDark
                                                                 : bodyWhite),
-                                                      ).paddingAll(8)
-                                                    : Offstage();
+                                                  ).paddingAll(8);
+                                                } else {
+                                                  return Offstage();
+                                                }
                                               }).toList(),
                                             ),
                                     ],
@@ -603,13 +617,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           log(e.toString());
                         });
                       }
-                      ;
                     },
                     icon: Image.asset(
                       isWishListed ? ic_heart_filled : ic_heart,
                       height: 22,
                       width: 22,
-                      color: appColorPrimary,
+                      color: context.primaryColor,
                       fit: BoxFit.fill,
                     ),
                   ),
@@ -618,7 +631,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     shapeBorder:
                         RoundedRectangleBorder(borderRadius: radius(0)),
                     child: TextIcon(
-                      //prefix: Image.asset(ic_bag, color: Colors.white, height: 20, width: 20, fit: BoxFit.cover),
                       text: product.isAddedCart.validate()
                           ? language.goToCart
                           : product.inStock.validate()
@@ -628,29 +640,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                     padding: EdgeInsets.symmetric(vertical: 8),
                     onTap: () async {
-                      if (product.isAddedCart.validate()) {
-                        CartScreen().launch(context);
+                      if (count == 0) {
+                        toast(language.yourQtyShouldNotBeEmpty);
                       } else {
-                        if (product.inStock.validate()) {
-                          appStore.setLoading(true);
-                          addItemToCart(
-                                  productId: product.id.validate(),
-                                  quantity: count)
-                              .then((value) {
-                            toast(language.successfullyAddedToCart);
-                            appStore.setLoading(false);
-                            product.isAddedCart = true;
-                            setState(() {});
-                          }).catchError((e) {
-                            appStore.setLoading(false);
-                            toast(e.toString(), print: true);
-                          });
+                        if (product.isAddedCart.validate()) {
+                          CartScreen()
+                              .launch(context)
+                              .then((_) => setState(() {}));
+                        } else {
+                          if (product.inStock.validate()) {
+                            appStore.setLoading(true);
+
+                            var _count = appStore.wooCart + count;
+                            cartBadge.updateCartCount(_count);
+                            appStore.setWooCart(_count);
+
+                            addItemToCart(
+                                    productId: product.id.validate(),
+                                    quantity: count)
+                                .then((value) {
+                              toast(language.successfullyAddedToCart);
+                              appStore.setLoading(false);
+                              product.isAddedCart = true;
+                              setState(() {});
+                            }).catchError((e) {
+                              appStore.setLoading(false);
+                              toast(e.toString(), print: true);
+                            });
+                          }
                         }
                       }
                     },
                     elevation: 0,
                     color: product.inStock.validate()
-                        ? appColorPrimary
+                        ? context.primaryColor
                         : Colors.grey.withOpacity(0.5),
                   ).expand().visible(product.type != ProductTypes.grouped),
                 ],

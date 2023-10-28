@@ -7,6 +7,7 @@ import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class MemberVerifiedNotification extends StatelessWidget {
   final NotificationModel element;
@@ -16,10 +17,13 @@ class MemberVerifiedNotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var unescape = HtmlUnescape();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        cachedImage(appStore.loginAvatarUrl, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+        cachedImage(appStore.loginAvatarUrl,
+                height: 40, width: 40, fit: BoxFit.cover)
+            .cornerRadiusWithClipRRect(100),
         8.width,
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,12 +32,21 @@ class MemberVerifiedNotification extends StatelessWidget {
               text: TextSpan(
                 children: [
                   WidgetSpan(
-                    child: Text('${appStore.loginFullName} ', style: boldTextStyle(size: 14,fontFamily: fontFamily)).onTap(() {
-                      MemberProfileScreen(memberId: appStore.loginUserId.toInt()).launch(context);
-                    }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
+                    child: Text(unescape.convert('${appStore.loginFullName} '),
+                            style:
+                                boldTextStyle(size: 14, fontFamily: fontFamily))
+                        .onTap(() {
+                      MemberProfileScreen(
+                              memberId: appStore.loginUserId.toInt())
+                          .launch(context);
+                    },
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent),
                   ),
                   TextSpan(
-                    text: element.action == NotificationAction.memberVerified ? ' ${language.yourAccountIsVerifiedNow}' : ' ${language.verificationRequestRejectedText}',
+                    text: element.action == NotificationAction.memberVerified
+                        ? ' ${language.yourAccountIsVerifiedNow}'
+                        : ' ${language.verificationRequestRejectedText}',
                     style: secondaryTextStyle(fontFamily: fontFamily),
                   ),
                 ],
@@ -43,7 +56,8 @@ class MemberVerifiedNotification extends StatelessWidget {
               textAlign: TextAlign.start,
             ),
             6.height,
-            Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+            Text(convertToAgo(element.date.validate()),
+                style: secondaryTextStyle(size: 12)),
           ],
         ).expand(),
         Observer(
@@ -56,7 +70,8 @@ class MemberVerifiedNotification extends StatelessWidget {
                     ifNotTester(() {
                       appStore.setLoading(true);
 
-                      deleteNotification(notificationId: element.id.toString()).then((value) {
+                      deleteNotification(notificationId: element.id.toString())
+                          .then((value) {
                         if (value.deleted.validate()) {
                           callback?.call();
                         }
@@ -71,7 +86,8 @@ class MemberVerifiedNotification extends StatelessWidget {
                   positiveText: language.remove,
                 );
             },
-            icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+            icon: Icon(Icons.delete_outline,
+                color: appStore.isDarkMode ? bodyDark : bodyWhite),
           ),
         ),
       ],

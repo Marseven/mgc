@@ -30,6 +30,8 @@ class WpPostResponse {
   Content? title;
   String? type;
   Embedded? embedded;
+  bool? sv_is_comment_open;
+  bool? is_restricted;
 
   WpPostResponse({
     this.links,
@@ -58,6 +60,8 @@ class WpPostResponse {
     this.title,
     this.type,
     this.embedded,
+    this.sv_is_comment_open,
+    this.is_restricted,
   });
 
   factory WpPostResponse.fromJson(Map<String, dynamic> json) {
@@ -88,6 +92,8 @@ class WpPostResponse {
       title: json['title'] != null ? Content.fromJson(json['title']) : null,
       type: json['type'],
       embedded: json['_embedded'] != null ? Embedded.fromJson(json['_embedded']) : null,
+      sv_is_comment_open: json['sv_is_comment_open'],
+      is_restricted: json['is_restricted'],
     );
   }
 
@@ -109,6 +115,9 @@ class WpPostResponse {
     data['sticky'] = this.sticky;
     data['template'] = this.template;
     data['type'] = this.type;
+    data['sv_is_comment_open'] = this.sv_is_comment_open;
+    data['is_restricted'] = this.is_restricted;
+
     if (this.links != null) {
       data['_links'] = this.links!.toJson();
     }

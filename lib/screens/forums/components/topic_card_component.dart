@@ -59,9 +59,8 @@ class _TopicCardComponentState extends State<TopicCardComponent> {
               ),
               if (widget.isFavTab)
                 Image.asset(ic_heart_filled, height: 16, width: 16, fit: BoxFit.fill).onTap(() {
-                  widget.callback!.call();
-
                   ifNotTester(() {
+                    widget.callback!.call();
                     favoriteTopic(topicId: widget.topic.id.validate()).then((value) {
                       log('Success');
                     }).catchError(onError);
@@ -70,7 +69,7 @@ class _TopicCardComponentState extends State<TopicCardComponent> {
             ],
           ),
           12.height,
-          Text(widget.topic.title.validate(), style: boldTextStyle()),
+          Text(widget.topic.title.validate().validateAndFilter(), style: boldTextStyle()),
           Divider(height: 30),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

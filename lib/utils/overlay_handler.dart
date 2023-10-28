@@ -8,7 +8,7 @@ class OverlayHandler {
       overlayEntry?.remove();
     }
     overlayEntry = null;
-    Overlay.of(context)?.insert(overlay);
+    Overlay.of(context).insert(overlay);
     overlayEntry = overlay;
   }
 

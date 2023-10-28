@@ -14,6 +14,7 @@ import 'package:socialv/screens/post/components/update_comment_component.dart';
 import 'package:socialv/screens/post/screens/comment_reply_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class CommentScreen extends StatefulWidget {
   final int postId;
@@ -38,6 +39,7 @@ class _CommentScreenState extends State<CommentScreen> {
   bool isError = false;
   bool isChange = false;
   int commentParentId = -1;
+  var unescape = HtmlUnescape();
 
   @override
   void initState() {
@@ -80,6 +82,7 @@ class _CommentScreenState extends State<CommentScreen> {
       await deletePostComment(postId: widget.postId, commentId: commentId)
           .then((value) {
         mPage = 1;
+        isChange = true;
         future = getCommentsList();
       }).catchError((e) {
         appStore.setLoading(false);
@@ -94,7 +97,7 @@ class _CommentScreenState extends State<CommentScreen> {
         content: commentContent,
         userImage: appStore.loginAvatarUrl,
         dateRecorded: DateFormat(DATE_FORMAT_1).format(DateTime.now()),
-        userName: appStore.loginFullName,
+        userName: unescape.convert(appStore.loginFullName),
         medias: gif != null
             ? [PostMediaModel(url: gif!.images!.original!.url.validate())]
             : [],
@@ -126,10 +129,9 @@ class _CommentScreenState extends State<CommentScreen> {
         appStore.setLoading(false);
         toast(e.toString());
       });
+      gif = null;
+      setState(() {});
     });
-
-    gif = null;
-    setState(() {});
   }
 
   Future<void> onRefresh() async {
@@ -156,7 +158,7 @@ class _CommentScreenState extends State<CommentScreen> {
         onRefresh: () async {
           onRefresh();
         },
-        color: appColorPrimary,
+        color: context.primaryColor,
         child: Scaffold(
           backgroundColor: context.cardColor,
           appBar: AppBar(
@@ -167,7 +169,7 @@ class _CommentScreenState extends State<CommentScreen> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: context.iconColor),
               onPressed: () {
-                finish(context);
+                finish(context, isChange);
               },
             ),
           ),

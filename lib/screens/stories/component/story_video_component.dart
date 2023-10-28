@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:appinio_video_player/appinio_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:socialv/screens/stories/screen/story_page.dart';
 import 'package:socialv/utils/app_constants.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class CreateVideoStory extends StatefulWidget {
   final File videoFile;
@@ -18,15 +20,27 @@ class CreateVideoStory extends StatefulWidget {
 class _CreateVideoStoryState extends State<CreateVideoStory> {
   late VideoPlayerController videoPlayerController;
   late CustomVideoPlayerController _customVideoPlayerController;
+  GlobalKey storyVisibilityKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
 
     videoPlayerController = VideoPlayerController.file(widget.videoFile)..initialize().then((value) => setState(() {}));
+    videoPlayerController.play();
+
     _customVideoPlayerController = CustomVideoPlayerController(
       context: context,
       videoPlayerController: videoPlayerController,
+      customVideoPlayerSettings: CustomVideoPlayerSettings(
+        enterFullscreenButton: Image.asset(ic_full_screen, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        exitFullscreenButton: Image.asset(ic_exit_full_screen, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        playButton: Image.asset(ic_play_button, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        pauseButton: Image.asset(ic_pause, color: Colors.white, width: 16, height: 16).paddingAll(4),
+        playbackSpeedButtonAvailable: false,
+        settingsButtonAvailable: false,
+        playOnlyOnce: false,
+      ),
     );
   }
 
@@ -43,8 +57,14 @@ class _CreateVideoStoryState extends State<CreateVideoStory> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomVideoPlayer(
-      customVideoPlayerController: _customVideoPlayerController,
+    return Container(
+      width: context.width(),
+      height: context.height(),
+      decoration: BoxDecoration(color: Colors.black),
+      padding: EdgeInsets.only(bottom: 180),
+      child: CustomVideoPlayer(
+        customVideoPlayerController: _customVideoPlayerController,
+      ),
     );
   }
 }
@@ -77,7 +97,18 @@ class _CreateVideoThumbnailState extends State<CreateVideoThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    return controller.value.isInitialized ? VideoPlayer(controller).cornerRadiusWithClipRRect(defaultAppButtonRadius) : Image.asset(ic_video, height: 20, width: 20, fit: BoxFit.cover);
+    if (controller.value.isInitialized) {
+      return VideoPlayer(controller).cornerRadiusWithClipRRect(defaultAppButtonRadius);
+    } else {
+      return Container(
+        decoration: BoxDecoration(
+          color: context.cardColor,
+          borderRadius: radius(defaultAppButtonRadius),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Image.asset(ic_video, height: 20, width: 20, fit: BoxFit.contain),
+      );
+    }
   }
 }
 
@@ -91,15 +122,24 @@ class ShowVideoThumbnail extends StatefulWidget {
 }
 
 class ShowVideoThumbnailState extends State<ShowVideoThumbnail> {
+  String videoUrl = '';
+
   late VideoPlayerController controller;
 
   @override
   void initState() {
-    controller = VideoPlayerController.network(widget.videoUrl!)
+    videoUrl = widget.videoUrl.validate();
+
+    super.initState();
+    init();
+  }
+
+  void init() {
+    controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl!))
       ..initialize().then((_) {
         setState(() {});
       });
-    super.initState();
+    setState(() {});
   }
 
   @override
@@ -108,7 +148,106 @@ class ShowVideoThumbnailState extends State<ShowVideoThumbnail> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (widget.videoUrl != videoUrl) {
+      init();
+      videoUrl = widget.videoUrl.validate();
+    }
     return controller.value.isInitialized ? VideoPlayer(controller).cornerRadiusWithClipRRect(24) : Image.asset(ic_video, height: 18, width: 18, fit: BoxFit.cover).paddingAll(8);
+  }
+}
+
+class StoryVideoPostComponent extends StatefulWidget {
+  final String videoURl;
+  final bool isShowControllers;
+
+  StoryVideoPostComponent({
+    super.key,
+    required this.videoURl,
+    this.isShowControllers = true,
+  });
+
+  @override
+  State<StoryVideoPostComponent> createState() => _StoryVideoPostComponentState();
+}
+
+class _StoryVideoPostComponentState extends State<StoryVideoPostComponent> {
+  late VideoPlayerController videoPlayerController;
+  bool isVideoVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  void init() async {
+    videoPlayerController = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoURl),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false, allowBackgroundPlayback: true),
+    );
+
+    globalVideoPlayerController = videoPlayerController;
+
+    videoPlayerController.initialize();
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) super.setState(fn);
+  }
+
+  @override
+  void dispose() {
+    videoPlayerController.pause();
+    videoPlayerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: UniqueKey(),
+      onVisibilityChanged: (visibilityInfo) {
+        if (widget.videoURl != videoPlayerController.dataSource) {
+          videoPlayerController.pause();
+          init();
+          videoPlayerController.play();
+          videoPlayerController.setLooping(true);
+        } else {
+          videoPlayerController.pause();
+        }
+
+        setState(() {
+          isVideoVisible = visibilityInfo.visibleFraction > 0.5;
+        });
+
+        if (!isVideoVisible) {
+          videoPlayerController.pause();
+        } else if (!videoPlayerController.value.isPlaying) {
+          if (mounted) videoPlayerController.play();
+        }
+      },
+      child: SizedBox(
+        width: context.width(),
+        height: context.height() * 0.8,
+        child: AspectRatio(
+          aspectRatio: videoPlayerController.value.aspectRatio,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: <Widget>[
+              VideoPlayer(videoPlayerController),
+              VideoProgressIndicator(videoPlayerController, allowScrubbing: true),
+            ],
+          ),
+        ),
+      ).center(),
+    );
   }
 }

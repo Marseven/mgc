@@ -21,6 +21,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
 
   TextEditingController title = TextEditingController();
   TextEditingController description = TextEditingController();
+  TextEditingController image = TextEditingController();
   TextEditingController tags = TextEditingController();
 
   bool doNotify = false;
@@ -42,6 +43,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
           "topic_content": description.text,
           "tags": tags.text.split(','),
           "notify_me": doNotify,
+          "image": image.text,
         };
         appStore.setLoading(true);
 
@@ -120,6 +122,14 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                     },
                   ),
                   16.height,
+                  TextField(
+                    controller: image,
+                    keyboardType: TextInputType.url,
+                    textInputAction: TextInputAction.done,
+                    style: boldTextStyle(),
+                    decoration: inputDecorationFilled(context, fillColor: context.cardColor, label: language.imageLink),
+                  ),
+                  16.height,
                   AppTextField(
                     controller: tags,
                     keyboardType: TextInputType.multiline,
@@ -129,11 +139,12 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                     minLines: 1,
                     maxLines: 5,
                     decoration: inputDecorationFilled(context, fillColor: context.cardColor, label: language.topicTags),
+                    isValidationRequired: false,
                     onFieldSubmitted: (text) {
                       //addReview();
                     },
                   ),
-                  Text(language.notePleaseAddComma,style: secondaryTextStyle()),
+                  Text(language.notePleaseAddComma, style: secondaryTextStyle()),
                   16.height,
                   Row(
                     children: [
@@ -146,10 +157,20 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                           setState(() {});
                         },
                       ),
-                      Text(language.notifyMeText, style: secondaryTextStyle()).onTap(() {
-                        doNotify = !doNotify;
-                        setState(() {});
-                      }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
+                      InkWell(
+                        onTap: () {
+                          doNotify = !doNotify;
+                          setState(() {});
+                        },
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        child: Text(
+                          language.notifyMeText,
+                          style: secondaryTextStyle(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ).expand(),
                     ],
                   ),
                   16.height,

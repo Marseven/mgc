@@ -12,6 +12,8 @@ class NotificationModel {
   String? secondaryItemName;
   bool? isUserVerified;
   int? topicId;
+  String? requestId;
+  int? groupId;
 
   NotificationModel({
     this.action,
@@ -27,6 +29,8 @@ class NotificationModel {
     this.secondaryItemName,
     this.isUserVerified,
     this.topicId,
+    this.requestId,
+    this.groupId,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +48,8 @@ class NotificationModel {
       secondaryItemName: (json['secondary_item_name'] is bool) ? "" : json['secondary_item_name'],
       isUserVerified: json['is_user_verified'],
       topicId: json['topic_id'],
+      requestId: json['request_id'].toString(),
+      groupId: json['group_id'],
     );
   }
 
@@ -62,6 +68,8 @@ class NotificationModel {
     data['secondary_item_name'] = this.secondaryItemName;
     data['is_user_verified'] = this.isUserVerified;
     data['topic_id'] = this.topicId;
+    data['request_id'] = this.requestId;
+    data['group_id'] = this.groupId;
     return data;
   }
 }

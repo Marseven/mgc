@@ -6,8 +6,8 @@ class AvatarUrls {
 
   factory AvatarUrls.fromJson(Map<String, dynamic> json) {
     return AvatarUrls(
-      full: json['full'],
-      thumb: json['thumb'],
+      full: json['full'].toString(),
+      thumb: json['thumb'].toString(),
     );
   }
 

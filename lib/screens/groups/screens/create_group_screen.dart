@@ -3,7 +3,8 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/screens/groups/components/create_group_step_one.dart';
 import 'package:socialv/screens/groups/components/create_group_step_second.dart';
-import 'package:socialv/screens/groups/components/create_group_step_three.dart';
+import 'package:socialv/screens/groups/components/create_group_step_third.dart';
+import 'package:socialv/screens/groups/components/create_group_step_four.dart';
 
 class CreateGroupScreen extends StatefulWidget {
   @override
@@ -31,7 +32,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             _pageController.animateToPage(nextPageIndex, duration: const Duration(milliseconds: 250), curve: Curves.linear);
           },
         ),
-        CreateGroupStepThree(onFinish: () => finish(context, true)),
+        CreateGroupStepThird(
+          onNextPage: (int nextPageIndex) {
+            _pageController.animateToPage(nextPageIndex, duration: const Duration(milliseconds: 250), curve: Curves.linear);
+          },
+        ),
+        CreateGroupStepFour(onFinish: () => finish(context, true)),
       ],
     );
   }
@@ -50,7 +56,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,color: context.iconColor),
+          icon: Icon(Icons.arrow_back, color: context.iconColor),
           onPressed: () {
             finish(context, groupId != -1 ? true : false);
           },

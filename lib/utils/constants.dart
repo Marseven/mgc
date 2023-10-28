@@ -2,11 +2,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
 
-/// DO NOT CHANGE THIS PACKAGE NAME
+/// DO NOT CHANGE THIS Keys
 const APP_PACKAGE_NAME = "com.iconic.socialv";
+const WEB_SOCKET_URL =
+    "wss://realtime-cloud.bpbettermessages.com/socket.io/?EIO=4&transport=websocket";
 
 /// Radius
-
 double commonRadius = 8.0;
 
 String? fontFamily = GoogleFonts.plusJakartaSans().fontFamily;
@@ -18,11 +19,16 @@ const tokenStream = 'tokenStream';
 const PER_PAGE = 10;
 const DATE_FORMAT_1 = 'yyyy-MM-DD HH:mm:ss';
 const DATE_FORMAT_2 = 'yyyy-MM-DDTHH:mm:ss';
-const DATE_FORMAT_3 = 'dd-MMM,yyyy';
+const DATE_FORMAT_3 = 'dd-MM-yyyy';
+const DATE_FORMAT_4 = 'yyyy-MM-dd';
+const DATE_FORMAT_5 = 'dd, MM yyyy';
+const TIME_FORMAT_1 = 'hh:mm a';
 
 const storyDuration = "3";
 
 const updateActiveStatusDuration = 10;
+
+const ARTICLE_LINE_HEIGHT = 1.5;
 
 //WooCommerce
 
@@ -36,14 +42,25 @@ const GetTopicDetail = 'GetTopicDetail';
 const RefreshForumsFragment = 'RefreshForumsFragment';
 const RefreshNotifications = 'RefreshNotifications';
 const STREAM_FILTER_ORDER_BY = 'STREAM_FILTER_ORDER_BY';
+const ThreadMessageReceived = 'ThreadMessageReceived';
+const RefreshRecentMessage = 'RefreshRecentMessage';
+const ThreadStatusChanged = 'ThreadStatusChanged';
+const RecentThreadStatus = 'RecentThreadStatus';
+const MetaChanged = 'MetaChanged';
+const DeleteMessage = 'DeleteMessage';
+const RefreshRecentMessages = 'RefreshRecentMessages';
+const SendMessage = 'SendMessage';
+const FastMessage = 'FastMessage';
+const AbortFastMessage = 'AbortFastMessage';
+
 //endregion
 
 /// Demo Login
-const DEMO_USER_EMAIL = "jerry@gmail.com";
-const DEMO_USER_PASSWORD = "123456";
+const DEMO_USER_EMAIL = "";
+const DEMO_USER_PASSWORD = "";
 
 class Constants {
-  static const defaultLanguage = 'en';
+  static const defaultLanguage = 'fr';
 }
 //endregion
 
@@ -54,10 +71,15 @@ class SharePreferencesKey {
   static const IS_LOGGED_IN = 'IS_LOGGED_IN';
   static const WOO_CURRENCY = 'WOO_CURRENCY';
   static const GIPHY_API_KEY = 'GIPHY_API_KEY';
-
-  static const WOO_CART = 'WOO_CART';
+  static const IOS_GIPHY_API_KEY = 'IOS_GIPHY_API_KEY';
+  static const BM_SECRET_KEY = 'BM_SECRET_KEY';
+  static const USERNAME_KEY = 'USERNAME_KEY';
+  static const USER_AVATAR_KEY = 'USER_AVATAR_KEY';
+  static const FILTER_CONTENT = 'FILTER_CONTENT';
 
   static const REMEMBER_ME = 'REMEMBER_ME';
+
+  static const WOO_CART = 'WOO_CART';
 
   static const LOGIN_EMAIL = 'LOGIN_EMAIL';
   static const LOGIN_PASSWORD = 'LOGIN_PASSWORD';
@@ -72,6 +94,11 @@ class SharePreferencesKey {
   static const RECENT_SEARCH_MEMBERS = 'RECENT_SEARCH_MEMBERS';
   static const RECENT_SEARCH_GROUPS = 'RECENT_SEARCH_GROUPS';
   static const ONE_SIGNAL_PLAYER_ID = 'ONE_SIGNAL_PLAYER_ID';
+  static const LMS_QUIZ_LIST = 'LMS_QUIZ_LIST';
+
+  static const PMP_CURRENCY = 'PMP_CURRENCY';
+  static const PMP_ENABLE = 'PMP_ENABLE';
+  static const PMP_MEMBERSHIP = 'PMP_MEMBERSHIP';
 }
 
 const APPLE_EMAIL = 'APPLE_EMAIL';
@@ -179,6 +206,7 @@ class APIEndPoint {
   static const productDetails =
       'socialv-api/api/v1/socialv/get-product-details';
   static const countries = 'wc/v3/data/countries';
+  static const events = 'wp/v2/mec-events/';
   static const forums = 'socialv-api/api/v1/socialv/get-all-forums';
   static const forumDetails = 'socialv-api/api/v1/socialv/get-forum-details';
   static const subscribeForum = 'socialv-api/api/v1/socialv/subscribe';
@@ -209,6 +237,93 @@ class APIEndPoint {
   static const activity = 'buddypress/v1/activity';
   static const getHighlightStories =
       'socialv-api/api/v1/socialv/get-highlight-stories';
+  static const courses = 'learnpress/v1/courses';
+  static const enrollCourse = 'learnpress/v1/courses/enroll';
+  static const retakeCourse = 'learnpress/v1/courses/retake';
+  static const finishCourse = 'learnpress/v1/courses/finish';
+  static const courseReview = 'learnpress/v1/review/course';
+  static const submitCourseReview = 'learnpress/v1/review/submit';
+  static const lessons = 'learnpress/v1/lessons';
+  static const finishLessons = 'learnpress/v1/lessons/finish';
+  static const quiz = 'learnpress/v1/quiz';
+  static const startQuiz = 'learnpress/v1/quiz/start';
+  static const finishQuiz = 'learnpress/v1/quiz/finish';
+  static const lmsPayments = 'socialv-api/api/v1/socialv/lms-payment-methods';
+  static const lmsPlaceOrder = 'socialv-api/api/v1/socialv/lms-place-order';
+  static const getReactionList = 'iqonic/api/v1/reaction/reaction-list';
+  static const getDefaultReaction = 'iqonic/api/v1/reaction/default-reaction';
+  static const activityReaction = 'iqonic/api/v1/reaction/activity';
+  static const commentsReaction = 'iqonic/api/v1/reaction/comment';
+  static const clearNotification =
+      'socialv-api/api/v1/socialv/clear-notification';
+  static const favoriteActivity =
+      'socialv-api/api/v1/socialv/favorite-activity';
+  static const pinActivity = 'socialv-api/api/v1/socialv/pin-activity';
+  static const refuseGroupSuggestion =
+      'socialv-api/api/v1/socialv/refuse-group-suggestion';
+  static const notificationCount =
+      'socialv-api/api/v1/socialv/notification-count';
+  static const mediaActiveStatus =
+      'socialv-api/api/v1/socialv/media-active-statuses';
+  static const createAlbum = 'socialv-api/api/v1/socialv/create-album';
+  static const getAlbums = 'socialv-api/api/v1/socialv/albums';
+  static const uploadMedia = 'socialv-api/api/v1/socialv/upload-media';
+  static const albumMediaList = 'socialv-api/api/v1/socialv/album-media-list';
+  static const groupManageSettings =
+      'socialv-api/api/v1/socialv/group-manage-settings';
+  static const inviteList = 'socialv-api/api/v1/socialv/invite-list';
+  static const sendInvite = 'socialv-api/api/v1/socialv/send-invite';
+  static const wpComments = 'wp/v2/comments';
+  static const getCourseCategory = 'wp/v2/course_category';
+  static const courseOrders = 'socialv-api/api/v1/socialv/lms-orders';
+  static const courseOrderDetails =
+      'socialv-api/api/v1/socialv/lms-order-details';
+  static const blogComment = 'socialv-api/api/v1/wp-posts/comment';
+  static const activateAccount = 'socialv-api/api/v1/socialv/activate-account';
+  static const generalSettings = 'socialv-api/api/v1/socialv/settings';
+  static const updateProfile = 'socialv-api/api/v1/socialv/update-profile';
+}
+
+class MessageAPIEndPoint {
+  static const threads = 'better-messages/v1/threads';
+  static const getFriends = 'better-messages/v1/getFriends';
+  static const getGroups = 'better-messages/v1/getGroups';
+  static const thread = 'better-messages/v1/thread';
+  static const getPrivateThread = 'better-messages/v1/getPrivateThread';
+  static const userSettings = 'better-messages/v1/userSettings';
+  static const unblockUser = 'better-messages/v1/unblockUser';
+  static const blockUser = 'better-messages/v1/blockUser';
+  static const favorite = 'favorite';
+  static const search = 'better-messages/v1/search';
+  static const suggestions = 'better-messages/v1/suggestions';
+  static const getFavorited = 'better-messages/v1/getFavorited';
+  static const addParticipant = 'addParticipant';
+  static const removeParticipant = 'removeParticipant';
+  static const changeMeta = 'changeMeta';
+  static const changeSubject = 'changeSubject';
+  static const leaveThread = 'leaveThread';
+  static const message = 'socialv-api/api/v1/messages/message';
+  static const saveThread = 'better-messages/v1/reactions/save';
+  static const getEmojiList = 'socialv-api/api/v1/messages/emoji-reactions';
+  static const loadMore = 'loadMore';
+  static const mentionsSuggestions = 'mentionsSuggestions';
+  static const restore = 'restore';
+  static const chatBackground = 'socialv-api/api/v1/messages/chat-background';
+  static const messagesSettings = 'socialv-api/api/v1/messages/settings';
+}
+
+class PMPAPIEndPoint {
+  static const getMembershipLevelForUser =
+      'pmpro/v1/get_membership_level_for_user';
+  static const changeMembershipLevel = 'pmpro/v1/change_membership_level';
+  static const cancelMembershipLevel = 'pmpro/v1/cancel_membership_level';
+  static const membershipLevels = 'socialv-api/api/v1/membership/levels';
+  static const order = 'socialv-api/api/v1/membership/order';
+  static const membershipOrders = 'socialv-api/api/v1/membership/orders';
+  static const paymentGateway =
+      'socialv-api/api/v1/membership/payment-gateways';
+  static const restrictions = 'socialv-api/api/v1/membership/bp-restrictions';
+  static const discountCodes = 'socialv-api/api/v1/membership/discount-codes';
 }
 
 class AppImages {
@@ -248,6 +363,10 @@ class NotificationAction {
   static String memberVerified = 'bp_verified_member_verified';
   static String memberUnverified = 'bp_verified_member_unverified';
   static String bbpNewReply = 'bbp_new_reply';
+  static String socialVSharePost = 'socialv_share_post';
+  static String actionActivityReacted = 'action_activity_reacted';
+  static String actionCommentActivityReacted =
+      'action_comment_activity_reacted';
 }
 
 class MemberType {
@@ -288,13 +407,12 @@ class Component {
   static String activityLike = 'socialv_activity_like_notification';
   static String verifiedMember = 'bp_verified_member';
   static String forums = 'forums';
-  static String media = 'media';
-  static String gallery = 'gallery';
 }
 
 class Roles {
   static const admin = 'admin';
   static const member = 'member';
+  static String mod = 'mod';
 }
 
 class MediaTypes {
@@ -305,11 +423,15 @@ class MediaTypes {
   static String doc = 'doc';
   static String gif = 'gif';
   static String media = 'media';
+  static String gallery = 'gallery';
+  static String myGallery = 'my-gallery';
 }
 
 class GroupActions {
   static String demote = 'demote';
   static String promote = 'promote';
+  static String ban = 'ban';
+  static String unban = 'unban';
 }
 
 class PostActivityType {
@@ -330,6 +452,7 @@ class PostRequestType {
   static String timeline = 'timeline';
   static String group = 'groups';
   static String singleActivity = 'single-activity';
+  static String favorites = 'favorites';
 }
 
 class FieldType {
@@ -341,9 +464,9 @@ class FieldType {
 }
 
 class ProfileFields {
-  static String birthDate = 'Birthdate';
-  static String name = 'Name';
-  static String socialNetworks = 'Social Networks';
+  static String birthDate = 'Date de Naissance';
+  static String name = 'Nom';
+  static String socialNetworks = 'Réseaux Sociaux';
 }
 
 class BlockUserKey {
@@ -401,7 +524,7 @@ class StoryHighlightOptions {
   static String story = 'story';
 }
 
-enum FileTypes { CANCEL, CAMERA, GALLERY }
+enum FileTypes { CANCEL, CAMERA, GALLERY, CAMERA_VIDEO }
 
 class AppThemeMode {
   static const ThemeModeSystem = 0;
@@ -413,4 +536,76 @@ class VerificationStatus {
   static const pending = 'pending';
   static const accepted = 'accepted';
   static const rejected = 'rejected';
+}
+
+class CourseStatus {
+  static const completed = 'completed';
+  static const failed = 'failed';
+  static const passed = 'passed';
+  static const enrolled = 'enrolled';
+  static const started = 'started';
+  static const finished = 'finished';
+  static const inProgress = 'in-progress';
+}
+
+class CourseType {
+  static const lp_lesson = 'lp_lesson';
+  static const lp_quiz = 'lp_quiz';
+  static const evaluate_lesson = 'evaluate_lesson';
+  static const evaluate_quiz = 'evaluate_quiz';
+}
+
+class QuestionType {
+  static const single_choice = 'single_choice';
+  static const true_or_false = 'true_or_false';
+  static const fill_in_blanks = 'fill_in_blanks';
+}
+
+class FavouriteType {
+  static const star = 'star';
+  static const unStar = 'unstar';
+}
+
+class ThreadType {
+  static const group = 'group';
+  static const thread = 'thread';
+}
+
+class MessageText {
+  static const onlyFiles = '<!-- BM-ONLY-FILES -->';
+}
+
+class SocketEvents {
+  static const onlineUsers = 'onlineUsers';
+  static const getUnread = 'getUnread';
+  static const subscribeToThreads = 'subscribeToThreads';
+  static const message = 'message';
+  static const writing = 'writing';
+  static const groupCallStatusesBulk = 'groupCallStatusesBulk';
+  static const threadOpen = 'threadOpen';
+  static const v3GetStatuses = '/v3/getStatuses';
+  static const v3fastMsg = '/v3/fastMsg';
+  static const delivered = 'delivered';
+  static const tempId = 'tempId';
+  static const seen = 'seen';
+  static const threadInfoChanged = 'threadInfoChanged';
+  static const userOffline = 'userOffline';
+  static const userOnline = 'userOnline';
+  static const v2MessageMetaUpdate = 'v2/messageMetaUpdate';
+  static const messageDeleted = 'message_deleted';
+  static const v2AbortFastMessage = '/v2/abortFastMessage';
+}
+
+class MessageUserSettings {
+  static const chatBackground = 'chat_background';
+  static const bmBlockedUsers = 'bm_blocked_users';
+  static const notifications = 'notifications';
+}
+
+/// PaymentMethods
+class PaymentMethods {
+  static const card = 'card';
+  static const upi = 'upi';
+  static const netBanking = 'netbanking';
+  static const paylater = 'paylater';
 }

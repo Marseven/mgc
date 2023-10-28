@@ -11,6 +11,9 @@ class GroupModel {
   int? id;
   bool? isGroupAdmin;
   bool? isGroupMember;
+  int? isMod;
+  int? isBanned;
+  int? isGalleryEnabled;
   int? isRequestSent;
   int? hasInvite;
   String? memberCount;
@@ -18,8 +21,12 @@ class GroupModel {
   String? name;
   String? postCount;
   bool? canInvite;
+  String? inviteStatus;
 
   GroupModel({
+    this.isBanned,
+    this.isMod,
+    this.isGalleryEnabled,
     this.dateCreated,
     this.description,
     this.groupAvatarImage,
@@ -37,6 +44,7 @@ class GroupModel {
     this.postCount,
     this.hasInvite,
     this.canInvite,
+    this.inviteStatus,
   });
 
   factory GroupModel.fromJson(Map<String, dynamic> json) {
@@ -49,8 +57,11 @@ class GroupModel {
       groupCreatedById: json['group_created_by_id'],
       groupType: json['group_type'],
       id: json['id'],
+      isGalleryEnabled: json['is_gallery_enabled'],
       isGroupAdmin: json['is_group_admin'],
       isGroupMember: json['is_group_member'],
+      isBanned: json['is_banned'],
+      isMod: json['is_mod'],
       isRequestSent: json['is_request_sent'],
       hasInvite: json['has_invite'],
       memberCount: json['member_count'],
@@ -58,11 +69,13 @@ class GroupModel {
       name: json['name'],
       postCount: json['post_count'],
       canInvite: json['can_invite'],
+      inviteStatus: json['invite_status'],
     );
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['is_gallery_enabled'] = this.isGalleryEnabled;
     data['date_created'] = this.dateCreated;
     data['description'] = this.description;
     data['group_avtar_image'] = this.groupAvatarImage;
@@ -72,12 +85,15 @@ class GroupModel {
     data['group_type'] = this.groupType;
     data['id'] = this.id;
     data['is_group_admin'] = this.isGroupAdmin;
+    data['is_mod'] = this.isMod;
+    data['is_banned'] = this.isBanned;
     data['is_group_member'] = this.isGroupMember;
     data['is_request_sent'] = this.isRequestSent;
     data['has_invite'] = this.hasInvite;
     data['member_count'] = this.memberCount;
     data['name'] = this.name;
     data['post_count'] = this.postCount;
+    data['invite_status'] = this.inviteStatus;
     if (this.memberList != null) {
       data['member_list'] = this.memberList!.map((v) => v.toJson()).toList();
     }

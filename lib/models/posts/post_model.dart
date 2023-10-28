@@ -2,14 +2,16 @@ import 'package:socialv/models/common_models/post_mdeia_model.dart';
 import 'package:socialv/models/posts/comment_model.dart';
 import 'package:socialv/models/posts/get_post_likes_model.dart';
 
+import '../reactions/reactions_count_model.dart';
+
 class PostModel {
   int? activityId;
   int? commentCount;
   List<CommentModel>? comments;
   String? content;
   String? dateRecorded;
-  bool? isFavorites;
-  bool? isLiked;
+  int? isFavorites;
+  int? isLiked;
   int? likeCount;
   List<String>? mediaList;
   String? mediaType;
@@ -19,14 +21,19 @@ class PostModel {
   String? userImage;
   String? userName;
   List<GetPostLikesModel>? usersWhoLiked;
-  bool? isUserVerified;
+  int? isUserVerified;
   List<PostMediaModel>? medias;
-  bool? isFriend;
+  int? isFriend;
   String? type;
   PostModel? childPost;
   int? blogId;
   int? groupId;
   String? groupName;
+  int? hasMentions;
+  List<Reactions>? reactions;
+  Reactions? curUserReaction;
+  int? reactionCount;
+  int? isPinned;
 
   PostModel({
     this.activityId,
@@ -53,6 +60,11 @@ class PostModel {
     this.blogId,
     this.groupId,
     this.groupName,
+    this.hasMentions,
+    this.reactions,
+    this.curUserReaction,
+    this.reactionCount,
+    this.isPinned,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -81,6 +93,11 @@ class PostModel {
       childPost: json['child_post'] != null ? PostModel.fromJson(json['child_post']) : null,
       groupId: json['group_id'],
       groupName: json['group_name'],
+      hasMentions: json['has_mentions'],
+      reactions: json['reactions'] != null ? (json['reactions'] as List).map((i) => Reactions.fromJson(i)).toList() : null,
+      curUserReaction: json['cur_user_reaction'] != null ? Reactions.fromJson(json['cur_user_reaction']) : null,
+      reactionCount: json['reaction_count'],
+      isPinned: json['is_pinned'],
     );
   }
 
@@ -105,6 +122,9 @@ class PostModel {
     data['blog_id'] = this.blogId;
     data['group_id'] = this.groupId;
     data['group_name'] = this.groupName;
+    data['has_mentions'] = this.hasMentions;
+    data['reaction_count'] = this.reactionCount;
+    data['is_pinned'] = this.isPinned;
     if (this.comments != null) {
       data['comments'] = this.comments!.map((v) => v.toJson()).toList();
     }
@@ -120,6 +140,13 @@ class PostModel {
     if (this.childPost != null) {
       data['child_post'] = this.childPost!.toJson();
     }
+    if (this.reactions != null) {
+      data['reactions'] = this.reactions!.map((v) => v.toJson()).toList();
+    }
+    if (this.curUserReaction != null) {
+      data['cur_user_reaction'] = this.curUserReaction!.toJson();
+    }
+
     return data;
   }
 }

@@ -16,8 +16,7 @@ class ProfileVisibilityScreen extends StatefulWidget {
   const ProfileVisibilityScreen({Key? key}) : super(key: key);
 
   @override
-  State<ProfileVisibilityScreen> createState() =>
-      _ProfileVisibilityScreenState();
+  State<ProfileVisibilityScreen> createState() => _ProfileVisibilityScreenState();
 }
 
 class _ProfileVisibilityScreenState extends State<ProfileVisibilityScreen> {
@@ -88,9 +87,7 @@ class _ProfileVisibilityScreenState extends State<ProfileVisibilityScreen> {
               if (snap.hasError) {
                 return NoDataWidget(
                   imageWidget: NoDataLottieWidget(),
-                  title: isError
-                      ? language.somethingWentWrong
-                      : language.noDataFound,
+                  title: isError ? language.somethingWentWrong : language.noDataFound,
                 ).center();
               }
 
@@ -98,9 +95,7 @@ class _ProfileVisibilityScreenState extends State<ProfileVisibilityScreen> {
                 if (snap.data.validate().isEmpty) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                   ).center();
                 } else {
                   return ListView.builder(
@@ -114,13 +109,10 @@ class _ProfileVisibilityScreenState extends State<ProfileVisibilityScreen> {
                             width: context.width(),
                             color: context.cardColor,
                             padding: EdgeInsets.all(16),
-                            child: Text(
-                                list[index].groupName.validate().toUpperCase(),
-                                style: boldTextStyle(color: appColorPrimary)),
+                            child: Text(list[index].groupName.validate().toUpperCase(), style: boldTextStyle(color: context.primaryColor)),
                           ),
                           ListView.builder(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             itemCount: list[index].fields.validate().length,
                             itemBuilder: (context, i) {
                               return VisibilityComponent(
@@ -139,6 +131,7 @@ class _ProfileVisibilityScreenState extends State<ProfileVisibilityScreen> {
                   );
                 }
               }
+
 
               return Offstage();
             },
@@ -166,8 +159,7 @@ class _ProfileVisibilityScreenState extends State<ProfileVisibilityScreen> {
                       if (element.isChange) {
                         appStore.setLoading(true);
 
-                        await saveProfileVisibility(request: element.toJson())
-                            .then((value) {
+                        await saveProfileVisibility(request: element.toJson()).then((value) {
                           appStore.setLoading(false);
                           toast(value.message);
 
@@ -196,11 +188,7 @@ class VisibilityComponent extends StatefulWidget {
   final int groupIndex;
   final String type;
 
-  VisibilityComponent(
-      {required this.field,
-      required this.groupIndex,
-      required this.fieldIndex,
-      required this.type});
+  VisibilityComponent({required this.field, required this.groupIndex, required this.fieldIndex, required this.type});
 
   @override
   State<VisibilityComponent> createState() => _VisibilityComponentState();
@@ -216,9 +204,7 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
   }
 
   Future<void> init() async {
-    dropdownValue = widget.type == ProfileVisibilityTypes.dynamicSettings
-        ? visibilities!.first
-        : accountPrivacyVisibility!.first;
+    dropdownValue = widget.type == ProfileVisibilityTypes.dynamicSettings ? visibilities!.first : accountPrivacyVisibility!.first;
 
     if (widget.type == ProfileVisibilityTypes.dynamicSettings) {
       visibilities!.forEach((element) {
@@ -248,10 +234,7 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
       return Observer(
         builder: (_) => Row(
           children: [
-            Text(widget.field.name.validate(),
-                    style: primaryTextStyle(
-                        color: appStore.isDarkMode ? bodyDark : bodyWhite))
-                .expand(),
+            Text(widget.field.name.validate(), style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)).expand(),
             widget.type == ProfileVisibilityTypes.dynamicSettings
                 ? IgnorePointer(
                     ignoring: appStore.isLoading,
@@ -261,8 +244,7 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
                         borderRadius: BorderRadius.circular(commonRadius),
                         value: dropdownValue,
                         isExpanded: true,
-                        icon: Icon(Icons.arrow_drop_down,
-                            color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                        icon: Icon(Icons.arrow_drop_down, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                         elevation: 16,
                         underline: Container(height: 2, color: appColorPrimary),
                         style: primaryTextStyle(),
@@ -271,17 +253,12 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
                           setState(() {});
 
                           profileVisibility[widget.groupIndex].isChange = true;
-                          profileVisibility[widget.groupIndex]
-                              .fields
-                              .validate()[widget.fieldIndex]
-                              .level = newValue.id;
+                          profileVisibility[widget.groupIndex].fields.validate()[widget.fieldIndex].level = newValue.id;
                         },
-                        items: visibilities!
-                            .map<DropdownMenuItem<VisibilityOptions>>((e) {
+                        items: visibilities!.map<DropdownMenuItem<VisibilityOptions>>((e) {
                           return DropdownMenuItem<VisibilityOptions>(
                             value: e,
-                            child: Text('${e.label.validate()}',
-                                overflow: TextOverflow.ellipsis, maxLines: 1),
+                            child: Text('${e.label.validate()}', overflow: TextOverflow.ellipsis, maxLines: 1),
                           );
                         }).toList(),
                       ).paddingSymmetric(horizontal: 16),
@@ -295,8 +272,7 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
                         borderRadius: BorderRadius.circular(commonRadius),
                         value: dropdownValue,
                         isExpanded: true,
-                        icon: Icon(Icons.arrow_drop_down,
-                            color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                        icon: Icon(Icons.arrow_drop_down, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                         elevation: 16,
                         underline: Container(height: 2, color: appColorPrimary),
                         style: primaryTextStyle(),
@@ -305,17 +281,12 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
                           setState(() {});
 
                           profileVisibility[widget.groupIndex].isChange = true;
-                          profileVisibility[widget.groupIndex]
-                              .fields
-                              .validate()[widget.fieldIndex]
-                              .level = newValue.id;
+                          profileVisibility[widget.groupIndex].fields.validate()[widget.fieldIndex].level = newValue.id;
                         },
-                        items: accountPrivacyVisibility!
-                            .map<DropdownMenuItem<VisibilityOptions>>((e) {
+                        items: accountPrivacyVisibility!.map<DropdownMenuItem<VisibilityOptions>>((e) {
                           return DropdownMenuItem<VisibilityOptions>(
                             value: e,
-                            child: Text('${e.label.validate()}',
-                                overflow: TextOverflow.ellipsis, maxLines: 1),
+                            child: Text('${e.label.validate()}', overflow: TextOverflow.ellipsis, maxLines: 1),
                           );
                         }).toList(),
                       ).paddingSymmetric(horizontal: 16),
@@ -327,14 +298,10 @@ class _VisibilityComponentState extends State<VisibilityComponent> {
     } else {
       return Row(
         children: [
-          Text(widget.field.name.validate(),
-                  style: primaryTextStyle(
-                      color: appStore.isDarkMode ? bodyDark : bodyWhite))
-              .expand(),
+          Text(widget.field.name.validate(), style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)).expand(),
           Text(
             widget.field.visibility.validate(),
-            style: primaryTextStyle(
-                fontStyle: FontStyle.italic, color: textSecondaryColor),
+            style: primaryTextStyle(fontStyle: FontStyle.italic, color: textSecondaryColor),
           ).paddingSymmetric(horizontal: 16, vertical: 8).expand(),
         ],
       );

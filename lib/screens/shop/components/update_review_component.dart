@@ -36,13 +36,8 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
         ifNotTester(() async {
           appStore.setLoading(true);
           finish(context);
-          Map request = {
-            "review": reviewController.text,
-            "rating": selectedRating.toString()
-          };
-          await updateProductReview(
-                  request: request, reviewId: widget.reviewId.validate())
-              .then((value) async {
+          Map request = {"review": reviewController.text, "rating": selectedRating.toString()};
+          await updateProductReview(request: request, reviewId: widget.reviewId.validate()).then((value) async {
             toast(language.reviewUpdatedSuccessfully);
             appStore.setLoading(false);
           }).catchError((e) {
@@ -71,8 +66,7 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(language.rating,
-                    style: boldTextStyle(color: appColorPrimary, size: 20)),
+                Text(language.rating, style: boldTextStyle(color: context.primaryColor, size: 20)),
                 if (widget.review != null)
                   IconButton(
                     onPressed: () async {
@@ -82,9 +76,7 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
                           ifNotTester(() {
                             appStore.setLoading(true);
                             finish(context);
-                            deleteProductReview(
-                                    reviewId: widget.reviewId.validate())
-                                .then((value) {
+                            deleteProductReview(reviewId: widget.reviewId.validate()).then((value) {
                               appStore.setLoading(false);
                               toast(language.reviewDeletedSuccessfully);
                             }).catchError((e) {
@@ -98,8 +90,7 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
                         positiveText: language.delete,
                       );
                     },
-                    icon: Icon(Icons.delete_outline,
-                        color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                    icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                   ),
               ],
             ),
@@ -122,8 +113,7 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
               maxLines: 10,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.only(left: 12, bottom: 10, top: 10, right: 10),
+                contentPadding: EdgeInsets.only(left: 12, bottom: 10, top: 10, right: 10),
                 labelText: language.writeReview,
                 labelStyle: secondaryTextStyle(),
                 enabledBorder: OutlineInputBorder(
@@ -140,10 +130,7 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
                 ),
                 errorMaxLines: 2,
                 errorStyle: primaryTextStyle(color: Colors.red, size: 12),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: radius(),
-                    borderSide: BorderSide(
-                        color: context.scaffoldBackgroundColor, width: 0.0)),
+                focusedBorder: OutlineInputBorder(borderRadius: radius(), borderSide: BorderSide(color: context.scaffoldBackgroundColor, width: 0.0)),
                 filled: true,
                 fillColor: context.scaffoldBackgroundColor,
               ),
@@ -168,7 +155,7 @@ class _UpdateReviewComponentState extends State<UpdateReviewComponent> {
                   textColor: Colors.white,
                   text: language.submit,
                   elevation: 0,
-                  color: appColorPrimary,
+                  color: context.primaryColor,
                   onTap: () {
                     updateReview();
                   },

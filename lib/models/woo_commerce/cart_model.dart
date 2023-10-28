@@ -12,7 +12,6 @@ class CartModel {
   bool? hasCalculatedShipping;
   List<CartItemModel>? items;
   int? itemsCount;
-  int? itemsWeight;
   bool? needsPayment;
   bool? needsShipping;
   List<String>? paymentRequirements;
@@ -29,7 +28,6 @@ class CartModel {
       this.hasCalculatedShipping,
       this.items,
       this.itemsCount,
-      this.itemsWeight,
       this.needsPayment,
       this.needsShipping,
       this.paymentRequirements,
@@ -47,7 +45,6 @@ class CartModel {
       hasCalculatedShipping: json['has_calculated_shipping'],
       items: json['items'] != null ? (json['items'] as List).map((i) => CartItemModel.fromJson(i)).toList() : null,
       itemsCount: json['items_count'],
-      itemsWeight: json['items_weight'],
       needsPayment: json['needs_payment'],
       needsShipping: json['needs_shipping'],
       paymentRequirements: json['payment_requirements'] != null ? new List<String>.from(json['payment_requirements']) : null,
@@ -60,7 +57,6 @@ class CartModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['has_calculated_shipping'] = this.hasCalculatedShipping;
     data['items_count'] = this.itemsCount;
-    data['items_weight'] = this.itemsWeight;
     data['needs_payment'] = this.needsPayment;
     data['needs_shipping'] = this.needsShipping;
     if (this.billingAddress != null) {

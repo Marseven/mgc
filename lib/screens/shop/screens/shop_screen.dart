@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:provider/provider.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/components/no_data_lottie_widget.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/cart_badge_model.dart';
 import 'package:socialv/models/common_models.dart';
 import 'package:socialv/models/woo_commerce/category_model.dart';
 import 'package:socialv/models/woo_commerce/product_list_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/shop/components/product_card_component.dart';
 import 'package:socialv/screens/shop/screens/wishlist_screen.dart';
+import 'package:badges/badges.dart' as badges;
 
 import '../../../utils/app_constants.dart';
 import '../components/cached_image_widget.dart';
@@ -45,11 +48,14 @@ class _ShopScreenState extends State<ShopScreen> {
   bool mIsLastPage = false;
   bool isError = false;
 
+  late bool _showCartBadge;
+
   @override
   void initState() {
     future = getProducts(
         categoryId:
             widget.categoryId != null ? widget.categoryId.validate() : null);
+
     super.initState();
 
     _scrollController.addListener(() {
@@ -121,7 +127,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Future<void> getCategories() async {
     await getCategoryList().then((value) {
-      categoryList.add(CategoryModel(name: 'All', id: -1));
+      categoryList.add(CategoryModel(name: 'Tout', id: -1));
 
       categoryList.addAll(value);
       setState(() {});
@@ -151,19 +157,28 @@ class _ShopScreenState extends State<ShopScreen> {
     super.dispose();
   }
 
+  late CartBadge cartBadge;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialisez myState en utilisant Provider
+    cartBadge = Provider.of<CartBadge>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    _showCartBadge = cartBadge.cartCount > 0;
     return RefreshIndicator(
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: context.iconColor),
             onPressed: () {
-              finish(context, true);
+              finish(context);
             },
           ),
           titleSpacing: 0,
@@ -184,45 +199,30 @@ class _ShopScreenState extends State<ShopScreen> {
                   icon: Image.asset(ic_heart,
                       height: 22,
                       width: 22,
-                      color: appColorPrimary,
+                      color: context.primaryColor,
                       fit: BoxFit.fill),
                 ),
                 Stack(
                   alignment: AlignmentDirectional.center,
                   children: <Widget>[
-                    IconButton(
-                      onPressed: () {
-                        CartScreen().launch(context);
-                      },
-                      icon: Image.asset(ic_cart,
-                          height: 24,
-                          width: 24,
-                          color: appColorPrimary,
-                          fit: BoxFit.cover),
+                    badges.Badge(
+                      badgeContent: Text(cartBadge.cartCount.toString()),
+                      badgeStyle: badges.BadgeStyle(
+                        badgeColor: appColorPrimary,
+                      ),
+                      showBadge: _showCartBadge,
+                      position: badges.BadgePosition.topEnd(top: 2, end: 2),
+                      child: IconButton(
+                        onPressed: () {
+                          CartScreen().launch(context);
+                        },
+                        icon: Image.asset(ic_cart,
+                            height: 24,
+                            width: 24,
+                            color: appColorPrimary,
+                            fit: BoxFit.cover),
+                      ),
                     ),
-                    if (appStore.wooCart > 0)
-                      Positioned(
-                          top: 5.0,
-                          right: 1.0,
-                          child: Stack(
-                            //alignment: AlignmentDirectional.topEnd,
-                            children: <Widget>[
-                              Icon(Icons.brightness_1,
-                                  size: 22.0, color: Colors.green[800]),
-                              Positioned(
-                                  top: 5.0,
-                                  right: 5.5,
-                                  child: Center(
-                                    child: Text(
-                                      appStore.wooCart.toString(),
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10.0,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  )),
-                            ],
-                          )),
                   ],
                 ),
                 16.width,
@@ -272,7 +272,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           AppTextField(
                             suffix: searchCont.text.isNotEmpty
                                 ? CloseButton(
-                                    color: appColorPrimary,
+                                    color: context.primaryColor,
                                     onPressed: () {
                                       searchCont.clear();
                                       hideKeyboard(context);
@@ -324,7 +324,7 @@ class _ShopScreenState extends State<ShopScreen> {
                                     vertical: 8, horizontal: 16),
                                 decoration: BoxDecoration(
                                   color: item.isSelected.validate()
-                                      ? appColorPrimary
+                                      ? context.primaryColor
                                       : context.cardColor,
                                   borderRadius:
                                       BorderRadius.all(radiusCircular()),
@@ -335,16 +335,16 @@ class _ShopScreenState extends State<ShopScreen> {
                                       CachedImageWidget(
                                         url: item.image!.src.validate(),
                                         fit: BoxFit.cover,
-                                        width: 14,
-                                        height: 14,
+                                        width: 16,
+                                        height: 16,
                                         circle: true,
-                                      ),
+                                      ).paddingOnly(right: 4),
                                     Text(item.name.validate(),
                                         style: boldTextStyle(
                                             size: 14,
                                             color: item.isSelected.validate()
                                                 ? context.cardColor
-                                                : appColorPrimary),
+                                                : context.primaryColor),
                                         maxLines: 1),
                                   ],
                                 ),
@@ -413,7 +413,7 @@ class _ShopScreenState extends State<ShopScreen> {
               margin: EdgeInsets.only(bottom: 16),
               padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: boxDecorationDefault(
-                  color: appColorPrimary, borderRadius: radius(8)),
+                  color: context.primaryColor, borderRadius: radius(8)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

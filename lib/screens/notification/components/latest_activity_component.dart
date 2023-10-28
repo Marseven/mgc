@@ -8,12 +8,14 @@ import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class LatestActivityComponent extends StatelessWidget {
   const LatestActivityComponent({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var unescape = HtmlUnescape();
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,15 +29,18 @@ class LatestActivityComponent extends StatelessWidget {
               if (snap.isNotEmpty) {
                 return AnimatedListView(
                   shrinkWrap: true,
-                  slideConfiguration: SlideConfiguration(delay: 80.milliseconds, verticalOffset: 300),
-                  physics: AlwaysScrollableScrollPhysics(),
+                  slideConfiguration: SlideConfiguration(
+                      delay: 80.milliseconds, verticalOffset: 300),
+                  physics: NeverScrollableScrollPhysics(),
                   padding: EdgeInsets.only(left: 0, right: 0, bottom: 16),
                   itemCount: snap.length,
                   itemBuilder: (ctx, index) {
                     ActivityResponse activity = snap[index];
                     return InkWell(
                       onTap: () {
-                        MemberProfileScreen(memberId: activity.userId.validate()).launch(context);
+                        MemberProfileScreen(
+                                memberId: activity.userId.validate())
+                            .launch(context);
                       },
                       child: Column(
                         children: [
@@ -43,13 +48,39 @@ class LatestActivityComponent extends StatelessWidget {
                             mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              cachedImage(activity.userAvatar!.full.validate(), height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(20),
+                              if (activity.userAvatar!.full.validate() !=
+                                  'false')
+                                cachedImage(
+                                        activity.userAvatar!.full.validate(),
+                                        height: 40,
+                                        width: 40,
+                                        fit: BoxFit.cover)
+                                    .cornerRadiusWithClipRRect(20),
                               16.width,
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(parseHtmlString(activity.title.validate()), style: primaryTextStyle(), overflow: TextOverflow.ellipsis, maxLines: 2),
-                                  Text(convertToAgo(activity.date.validate()), style: secondaryTextStyle()),
+                                  if (activity.title.validate().isNotEmpty)
+                                    Text(
+                                        parseHtmlString(
+                                            activity.title.validate()),
+                                        style: primaryTextStyle(),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2)
+                                  else if (activity.content!.rendered
+                                      .validate()
+                                      .isNotEmpty)
+                                    Text(
+                                        unescape.convert(
+                                                '${activity.name.validate()} ') +
+                                            parseHtmlString(activity
+                                                .content!.rendered
+                                                .validate()),
+                                        style: primaryTextStyle(),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2),
+                                  Text(convertToAgo(activity.date.validate()),
+                                      style: secondaryTextStyle()),
                                 ],
                               ).expand(),
                             ],
@@ -64,8 +95,11 @@ class LatestActivityComponent extends StatelessWidget {
                 return NoDataWidget(title: language.noDataFound);
               }
             },
-            errorWidget: NoDataWidget(title: language.somethingWentWrong, imageWidget: NoDataLottieWidget()),
-            loadingWidget: LoadingWidget(isBlurBackground: false).paddingSymmetric(vertical: context.height() * 0.2),
+            errorWidget: NoDataWidget(
+                title: language.somethingWentWrong,
+                imageWidget: NoDataLottieWidget()),
+            loadingWidget: LoadingWidget(isBlurBackground: false)
+                .paddingSymmetric(vertical: context.height() * 0.2),
           ),
         ],
       ),

@@ -55,6 +55,7 @@ class _MyForumsScreenState extends State<MyForumsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Text(language.forums, style: boldTextStyle(size: 20)),
         centerTitle: true,
         leading: IconButton(

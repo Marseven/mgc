@@ -6,8 +6,10 @@ import 'package:socialv/main.dart';
 import 'package:socialv/models/common_models.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/profile/screens/edit_profile_screen.dart';
+import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class UserDetailBottomSheetWidget extends StatefulWidget {
   final VoidCallback? callback;
@@ -26,6 +28,7 @@ class _UserDetailBottomSheetWidgetState
   int selectedIndex = -1;
   bool isLoading = false;
   bool backToHome = true;
+  var unescape = HtmlUnescape();
 
   @override
   void initState() {
@@ -59,25 +62,38 @@ class _UserDetailBottomSheetWidgetState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        cachedImage(appStore.loginAvatarUrl,
-                                height: 62, width: 62, fit: BoxFit.cover)
-                            .cornerRadiusWithClipRRect(100),
-                        16.width,
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
+                        Row(
                           children: [
-                            Text(appStore.loginFullName,
-                                style: boldTextStyle(size: 18)),
-                            8.height,
-                            Text(appStore.loginEmail,
-                                style: secondaryTextStyle(),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1),
+                            cachedImage(appStore.loginAvatarUrl,
+                                    height: 62, width: 62, fit: BoxFit.cover)
+                                .cornerRadiusWithClipRRect(100),
+                            16.width,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(unescape.convert(appStore.loginFullName),
+                                    style: boldTextStyle(size: 18)),
+                                8.height,
+                                Text(appStore.loginEmail,
+                                    style: secondaryTextStyle(),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1),
+                              ],
+                            ),
                           ],
-                        ).expand(),
+                        ).onTap(() {
+                          finish(context);
+                          MemberProfileScreen(
+                                  memberId:
+                                      appStore.loginUserId.validate().toInt())
+                              .launch(context);
+                        },
+                            highlightColor: Colors.transparent,
+                            splashColor: Colors.transparent),
                         IconButton(
                           icon: Image.asset(ic_edit,
                               height: 16,
@@ -99,7 +115,7 @@ class _UserDetailBottomSheetWidgetState
                         return SettingItemWidget(
                           decoration: BoxDecoration(
                               color: selectedIndex == index
-                                  ? appColorPrimary.withAlpha(30)
+                                  ? context.primaryColor.withAlpha(30)
                                   : context.cardColor),
                           title: e.title.validate(),
                           titleTextStyle: boldTextStyle(size: 14),
@@ -108,6 +124,18 @@ class _UserDetailBottomSheetWidgetState
                               width: 22,
                               fit: BoxFit.fill,
                               color: appColorPrimary),
+                          trailing: e.isNew
+                              ? Container(
+                                  decoration: BoxDecoration(
+                                      color: appGreenColor.withAlpha(30),
+                                      borderRadius: radius()),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 4, horizontal: 10),
+                                  child: Text(language.lblNew,
+                                      style: boldTextStyle(
+                                          color: appGreenColor, size: 12)),
+                                )
+                              : Offstage(),
                           onTap: () async {
                             selectedIndex = index;
                             setState(() {});
@@ -128,7 +156,7 @@ class _UserDetailBottomSheetWidgetState
               ).expand(),
               Column(
                 children: [
-                  //VersionInfoWidget(prefixText: 'v'),
+                  VersionInfoWidget(prefixText: 'v'),
                   16.height,
                   TextButton(
                     onPressed: () {
@@ -142,7 +170,7 @@ class _UserDetailBottomSheetWidgetState
                       );
                     },
                     child: Text(language.logout,
-                        style: boldTextStyle(color: appColorPrimary)),
+                        style: boldTextStyle(color: context.primaryColor)),
                   ),
                   20.height,
                 ],

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:provider/provider.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/cart_badge_model.dart';
+import 'package:socialv/models/woo_commerce/cart_item_model.dart';
+import 'package:socialv/models/woo_commerce/cart_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/auth/screens/sign_in_screen.dart';
 import 'package:socialv/screens/dashboard_screen.dart';
@@ -17,23 +21,52 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
+List<CartItemModel> cartItemList = [];
+
 class _SplashScreenState extends State<SplashScreen> {
+  CartModel? cart;
+  bool isError = false;
+
+  int total = 0;
+
+  late CartBadge cartBadge;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialisez myState en utilisant Provider
+    cartBadge = Provider.of<CartBadge>(context);
+  }
+
   @override
   void initState() {
     setStatusBarColor(Colors.transparent);
     super.initState();
     init();
+    getCart();
+  }
 
-    if (isMobile) {
-      getPackageName().then((value) {
-        currentPackageName = value;
-      }).catchError((e) {
-        //
+  void getCart() async {
+    var count = 0;
+    await getCartDetails().then((value) {
+      cart = value;
+      cartItemList.addAll(value.items.validate());
+    }).catchError((e) {
+      isError = true;
+      toast(e.toString(), print: true);
+    });
+
+    cartItemList.forEach((element) {
+      setState(() {
+        count = count + element.quantity!.toInt();
       });
-    }
+    });
+    cartBadge.updateCartCount(count);
+    appStore.setWooCart(count);
   }
 
   Future<void> init() async {
+    getGeneralSettings();
+
     afterBuildCreated(() {
       appStore.setLanguage(getStringAsync(SharePreferencesKey.LANGUAGE,
           defaultValue: Constants.defaultLanguage));
@@ -69,6 +102,14 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  Future<void> getGeneralSettings() async {
+    await generalSettings().then((value) {
+      appStore
+          .setAuthVerificationEnable(value.isAccountVerificationRequire == 1);
+      pmpStore.setPmpEnable(value.isPaidMembershipEnable.validate());
+    }).catchError(onError);
+  }
+
   @override
   void setState(fn) {
     if (mounted) super.setState(fn);
@@ -83,11 +124,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Stack(
         alignment: Alignment.center,
         children: [
-          //Image.asset(SPLASH_SCREEN_IMAGE, height: context.height(), width: context.width(), fit: BoxFit.cover),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

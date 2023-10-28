@@ -9,6 +9,87 @@ part of 'app_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AppStore on AppStoreBase, Store {
+  late final _$filterContentAtom =
+      Atom(name: 'AppStoreBase.filterContent', context: context);
+
+  @override
+  bool get filterContent {
+    _$filterContentAtom.reportRead();
+    return super.filterContent;
+  }
+
+  @override
+  set filterContent(bool value) {
+    _$filterContentAtom.reportWrite(value, super.filterContent, () {
+      super.filterContent = value;
+    });
+  }
+
+  late final _$isAuthVerificationEnableAtom =
+      Atom(name: 'AppStoreBase.isAuthVerificationEnable', context: context);
+
+  @override
+  bool get isAuthVerificationEnable {
+    _$isAuthVerificationEnableAtom.reportRead();
+    return super.isAuthVerificationEnable;
+  }
+
+  @override
+  set isAuthVerificationEnable(bool value) {
+    _$isAuthVerificationEnableAtom
+        .reportWrite(value, super.isAuthVerificationEnable, () {
+      super.isAuthVerificationEnable = value;
+    });
+  }
+
+  late final _$isWebsocketEnableAtom =
+      Atom(name: 'AppStoreBase.isWebsocketEnable', context: context);
+
+  @override
+  int get isWebsocketEnable {
+    _$isWebsocketEnableAtom.reportRead();
+    return super.isWebsocketEnable;
+  }
+
+  @override
+  set isWebsocketEnable(int value) {
+    _$isWebsocketEnableAtom.reportWrite(value, super.isWebsocketEnable, () {
+      super.isWebsocketEnable = value;
+    });
+  }
+
+  late final _$isReactionEnableAtom =
+      Atom(name: 'AppStoreBase.isReactionEnable', context: context);
+
+  @override
+  int get isReactionEnable {
+    _$isReactionEnableAtom.reportRead();
+    return super.isReactionEnable;
+  }
+
+  @override
+  set isReactionEnable(int value) {
+    _$isReactionEnableAtom.reportWrite(value, super.isReactionEnable, () {
+      super.isReactionEnable = value;
+    });
+  }
+
+  late final _$defaultReactionAtom =
+      Atom(name: 'AppStoreBase.defaultReaction', context: context);
+
+  @override
+  ReactionsModel get defaultReaction {
+    _$defaultReactionAtom.reportRead();
+    return super.defaultReaction;
+  }
+
+  @override
+  set defaultReaction(ReactionsModel value) {
+    _$defaultReactionAtom.reportWrite(value, super.defaultReaction, () {
+      super.defaultReaction = value;
+    });
+  }
+
   late final _$giphyKeyAtom =
       Atom(name: 'AppStoreBase.giphyKey', context: context);
 
@@ -22,6 +103,22 @@ mixin _$AppStore on AppStoreBase, Store {
   set giphyKey(String value) {
     _$giphyKeyAtom.reportWrite(value, super.giphyKey, () {
       super.giphyKey = value;
+    });
+  }
+
+  late final _$iosGiphyKeyAtom =
+      Atom(name: 'AppStoreBase.iosGiphyKey', context: context);
+
+  @override
+  String get iosGiphyKey {
+    _$iosGiphyKeyAtom.reportRead();
+    return super.iosGiphyKey;
+  }
+
+  @override
+  set iosGiphyKey(String value) {
+    _$iosGiphyKeyAtom.reportWrite(value, super.iosGiphyKey, () {
+      super.iosGiphyKey = value;
     });
   }
 
@@ -92,13 +189,13 @@ mixin _$AppStore on AppStoreBase, Store {
       Atom(name: 'AppStoreBase.showWoocommerce', context: context);
 
   @override
-  bool get showWoocommerce {
+  int get showWoocommerce {
     _$showWoocommerceAtom.reportRead();
     return super.showWoocommerce;
   }
 
   @override
-  set showWoocommerce(bool value) {
+  set showWoocommerce(int value) {
     _$showWoocommerceAtom.reportWrite(value, super.showWoocommerce, () {
       super.showWoocommerce = value;
     });
@@ -108,13 +205,13 @@ mixin _$AppStore on AppStoreBase, Store {
       Atom(name: 'AppStoreBase.showStoryHighlight', context: context);
 
   @override
-  bool get showStoryHighlight {
+  int get showStoryHighlight {
     _$showStoryHighlightAtom.reportRead();
     return super.showStoryHighlight;
   }
 
   @override
-  set showStoryHighlight(bool value) {
+  set showStoryHighlight(int value) {
     _$showStoryHighlightAtom.reportWrite(value, super.showStoryHighlight, () {
       super.showStoryHighlight = value;
     });
@@ -360,6 +457,104 @@ mixin _$AppStore on AppStoreBase, Store {
     });
   }
 
+  late final _$isLMSEnableAtom =
+      Atom(name: 'AppStoreBase.isLMSEnable', context: context);
+
+  @override
+  int? get isLMSEnable {
+    _$isLMSEnableAtom.reportRead();
+    return super.isLMSEnable;
+  }
+
+  @override
+  set isLMSEnable(int? value) {
+    _$isLMSEnableAtom.reportWrite(value, super.isLMSEnable, () {
+      super.isLMSEnable = value;
+    });
+  }
+
+  late final _$isCourseEnableAtom =
+      Atom(name: 'AppStoreBase.isCourseEnable', context: context);
+
+  @override
+  int? get isCourseEnable {
+    _$isCourseEnableAtom.reportRead();
+    return super.isCourseEnable;
+  }
+
+  @override
+  set isCourseEnable(int? value) {
+    _$isCourseEnableAtom.reportWrite(value, super.isCourseEnable, () {
+      super.isCourseEnable = value;
+    });
+  }
+
+  late final _$displayPostCountAtom =
+      Atom(name: 'AppStoreBase.displayPostCount', context: context);
+
+  @override
+  int? get displayPostCount {
+    _$displayPostCountAtom.reportRead();
+    return super.displayPostCount;
+  }
+
+  @override
+  set displayPostCount(int? value) {
+    _$displayPostCountAtom.reportWrite(value, super.displayPostCount, () {
+      super.displayPostCount = value;
+    });
+  }
+
+  late final _$displayPostCommentsCountAtom =
+      Atom(name: 'AppStoreBase.displayPostCommentsCount', context: context);
+
+  @override
+  int? get displayPostCommentsCount {
+    _$displayPostCommentsCountAtom.reportRead();
+    return super.displayPostCommentsCount;
+  }
+
+  @override
+  set displayPostCommentsCount(int? value) {
+    _$displayPostCommentsCountAtom
+        .reportWrite(value, super.displayPostCommentsCount, () {
+      super.displayPostCommentsCount = value;
+    });
+  }
+
+  late final _$displayFriendRequestBtnAtom =
+      Atom(name: 'AppStoreBase.displayFriendRequestBtn', context: context);
+
+  @override
+  int? get displayFriendRequestBtn {
+    _$displayFriendRequestBtnAtom.reportRead();
+    return super.displayFriendRequestBtn;
+  }
+
+  @override
+  set displayFriendRequestBtn(int? value) {
+    _$displayFriendRequestBtnAtom
+        .reportWrite(value, super.displayFriendRequestBtn, () {
+      super.displayFriendRequestBtn = value;
+    });
+  }
+
+  late final _$isShopEnableAtom =
+      Atom(name: 'AppStoreBase.isShopEnable', context: context);
+
+  @override
+  int? get isShopEnable {
+    _$isShopEnableAtom.reportRead();
+    return super.isShopEnable;
+  }
+
+  @override
+  set isShopEnable(int? value) {
+    _$isShopEnableAtom.reportWrite(value, super.isShopEnable, () {
+      super.isShopEnable = value;
+    });
+  }
+
   late final _$recentMemberSearchListAtom =
       Atom(name: 'AppStoreBase.recentMemberSearchList', context: context);
 
@@ -410,6 +605,22 @@ mixin _$AppStore on AppStoreBase, Store {
     });
   }
 
+  late final _$suggestedGroupsListAtom =
+      Atom(name: 'AppStoreBase.suggestedGroupsList', context: context);
+
+  @override
+  List<SuggestedGroup> get suggestedGroupsList {
+    _$suggestedGroupsListAtom.reportRead();
+    return super.suggestedGroupsList;
+  }
+
+  @override
+  set suggestedGroupsList(List<SuggestedGroup> value) {
+    _$suggestedGroupsListAtom.reportWrite(value, super.suggestedGroupsList, () {
+      super.suggestedGroupsList = value;
+    });
+  }
+
   late final _$notificationCountAtom =
       Atom(name: 'AppStoreBase.notificationCount', context: context);
 
@@ -426,6 +637,50 @@ mixin _$AppStore on AppStoreBase, Store {
     });
   }
 
+  late final _$isMultiSelectAtom =
+      Atom(name: 'AppStoreBase.isMultiSelect', context: context);
+
+  @override
+  bool get isMultiSelect {
+    _$isMultiSelectAtom.reportRead();
+    return super.isMultiSelect;
+  }
+
+  @override
+  set isMultiSelect(bool value) {
+    _$isMultiSelectAtom.reportWrite(value, super.isMultiSelect, () {
+      super.isMultiSelect = value;
+    });
+  }
+
+  late final _$setFilterContentAsyncAction =
+      AsyncAction('AppStoreBase.setFilterContent', context: context);
+
+  @override
+  Future<void> setFilterContent(bool val, {bool isInitializing = false}) {
+    return _$setFilterContentAsyncAction
+        .run(() => super.setFilterContent(val, isInitializing: isInitializing));
+  }
+
+  late final _$setAuthVerificationEnableAsyncAction =
+      AsyncAction('AppStoreBase.setAuthVerificationEnable', context: context);
+
+  @override
+  Future<void> setAuthVerificationEnable(bool val) {
+    return _$setAuthVerificationEnableAsyncAction
+        .run(() => super.setAuthVerificationEnable(val));
+  }
+
+  late final _$setDefaultReactionAsyncAction =
+      AsyncAction('AppStoreBase.setDefaultReaction', context: context);
+
+  @override
+  Future<void> setDefaultReaction(ReactionsModel val,
+      {bool isInitializing = false}) {
+    return _$setDefaultReactionAsyncAction.run(
+        () => super.setDefaultReaction(val, isInitializing: isInitializing));
+  }
+
   late final _$setGiphyKeyAsyncAction =
       AsyncAction('AppStoreBase.setGiphyKey', context: context);
 
@@ -433,6 +688,15 @@ mixin _$AppStore on AppStoreBase, Store {
   Future<void> setGiphyKey(String val, {bool isInitializing = false}) {
     return _$setGiphyKeyAsyncAction
         .run(() => super.setGiphyKey(val, isInitializing: isInitializing));
+  }
+
+  late final _$setIOSGiphyKeyAsyncAction =
+      AsyncAction('AppStoreBase.setIOSGiphyKey', context: context);
+
+  @override
+  Future<void> setIOSGiphyKey(String val, {bool isInitializing = false}) {
+    return _$setIOSGiphyKeyAsyncAction
+        .run(() => super.setIOSGiphyKey(val, isInitializing: isInitializing));
   }
 
   late final _$setWooCurrencyAsyncAction =
@@ -566,6 +830,39 @@ mixin _$AppStore on AppStoreBase, Store {
       ActionController(name: 'AppStoreBase', context: context);
 
   @override
+  void setReactionsEnable(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setReactionsEnable');
+    try {
+      return super.setReactionsEnable(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setWebsocketEnable(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setWebsocketEnable');
+    try {
+      return super.setWebsocketEnable(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setMultiSelect(bool val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setMultiSelect');
+    try {
+      return super.setMultiSelect(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setNotificationCount(int value) {
     final _$actionInfo = _$AppStoreBaseActionController.startAction(
         name: 'AppStoreBase.setNotificationCount');
@@ -588,7 +885,73 @@ mixin _$AppStore on AppStoreBase, Store {
   }
 
   @override
-  void setShowWooCommerce(bool val) {
+  void setLMSEnable(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setLMSEnable');
+    try {
+      return super.setLMSEnable(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setCourseEnable(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setCourseEnable');
+    try {
+      return super.setCourseEnable(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setDisplayPostCount(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setDisplayPostCount');
+    try {
+      return super.setDisplayPostCount(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setDisplayPostCommentsCount(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setDisplayPostCommentsCount');
+    try {
+      return super.setDisplayPostCommentsCount(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setDisplayFriendRequestBtn(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setDisplayFriendRequestBtn');
+    try {
+      return super.setDisplayFriendRequestBtn(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setShopEnable(int val) {
+    final _$actionInfo = _$AppStoreBaseActionController.startAction(
+        name: 'AppStoreBase.setShopEnable');
+    try {
+      return super.setShopEnable(val);
+    } finally {
+      _$AppStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setShowWooCommerce(int val) {
     final _$actionInfo = _$AppStoreBaseActionController.startAction(
         name: 'AppStoreBase.setShowWooCommerce');
     try {
@@ -599,7 +962,7 @@ mixin _$AppStore on AppStoreBase, Store {
   }
 
   @override
-  void setShowStoryHighlight(bool val) {
+  void setShowStoryHighlight(int val) {
     final _$actionInfo = _$AppStoreBaseActionController.startAction(
         name: 'AppStoreBase.setShowStoryHighlight');
     try {
@@ -656,7 +1019,13 @@ mixin _$AppStore on AppStoreBase, Store {
   @override
   String toString() {
     return '''
+filterContent: ${filterContent},
+isAuthVerificationEnable: ${isAuthVerificationEnable},
+isWebsocketEnable: ${isWebsocketEnable},
+isReactionEnable: ${isReactionEnable},
+defaultReaction: ${defaultReaction},
 giphyKey: ${giphyKey},
+iosGiphyKey: ${iosGiphyKey},
 wooCurrency: ${wooCurrency},
 nonce: ${nonce},
 verificationStatus: ${verificationStatus},
@@ -678,10 +1047,18 @@ loginName: ${loginName},
 password: ${password},
 loginUserId: ${loginUserId},
 loginAvatarUrl: ${loginAvatarUrl},
+isLMSEnable: ${isLMSEnable},
+isCourseEnable: ${isCourseEnable},
+displayPostCount: ${displayPostCount},
+displayPostCommentsCount: ${displayPostCommentsCount},
+displayFriendRequestBtn: ${displayFriendRequestBtn},
+isShopEnable: ${isShopEnable},
 recentMemberSearchList: ${recentMemberSearchList},
 recentGroupsSearchList: ${recentGroupsSearchList},
 suggestedUserList: ${suggestedUserList},
-notificationCount: ${notificationCount}
+suggestedGroupsList: ${suggestedGroupsList},
+notificationCount: ${notificationCount},
+isMultiSelect: ${isMultiSelect}
     ''';
   }
 }

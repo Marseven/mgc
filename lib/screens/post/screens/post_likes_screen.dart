@@ -8,6 +8,7 @@ import 'package:socialv/models/posts/get_post_likes_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 import '../../../utils/app_constants.dart';
 
@@ -27,6 +28,7 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
   int mPage = 1;
   bool mIsLastPage = false;
   bool isError = false;
+  var unescape = HtmlUnescape();
 
   @override
   void initState() {
@@ -78,7 +80,7 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           title: Text(language.likes, style: boldTextStyle(size: 20)),
@@ -150,7 +152,8 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                          text: '${user.userName.validate()} ',
+                                          text: unescape.convert(
+                                              user.userName.validate()),
                                           style: boldTextStyle(
                                               size: 14,
                                               fontFamily: fontFamily)),
@@ -167,8 +170,11 @@ class _PostLikesScreenState extends State<PostLikesScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.start,
                                 ),
-                                Text(user.userMentionName.validate(),
-                                    style: secondaryTextStyle()),
+                                if (user.userMentionName.validate().isNotEmpty)
+                                  Text(
+                                      unescape.convert(
+                                          user.userMentionName.validate()),
+                                      style: secondaryTextStyle()),
                               ],
                               crossAxisAlignment: CrossAxisAlignment.start,
                             ).expand(),

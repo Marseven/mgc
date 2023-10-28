@@ -18,8 +18,7 @@ class AudioPostComponent extends StatefulWidget {
   State<AudioPostComponent> createState() => _AudioPostComponentState();
 }
 
-class _AudioPostComponentState extends State<AudioPostComponent>
-    with WidgetsBindingObserver {
+class _AudioPostComponentState extends State<AudioPostComponent> with WidgetsBindingObserver {
   AudioPlayer _player = AudioPlayer();
 
   @override
@@ -36,8 +35,7 @@ class _AudioPostComponentState extends State<AudioPostComponent>
   Future<void> init() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
-    _player.playbackEventStream.listen((event) {},
-        onError: (Object e, StackTrace stackTrace) {
+    _player.playbackEventStream.listen((event) {}, onError: (Object e, StackTrace stackTrace) {
       toast('A stream error occurred: $e');
     });
     try {
@@ -62,13 +60,11 @@ class _AudioPostComponentState extends State<AudioPostComponent>
     }
   }
 
-  Stream<PositionData> get _positionDataStream =>
-      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-          _player.positionStream,
-          _player.bufferedPositionStream,
-          _player.durationStream,
-          (position, bufferedPosition, duration) => PositionData(
-              position, bufferedPosition, duration ?? Duration.zero));
+  Stream<PositionData> get _positionDataStream => Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
+      _player.positionStream,
+      _player.bufferedPositionStream,
+      _player.durationStream,
+      (position, bufferedPosition, duration) => PositionData(position, bufferedPosition, duration ?? Duration.zero));
 
   @override
   void setState(fn) {
@@ -129,8 +125,7 @@ class ControlButtons extends StatelessWidget {
             final playerState = snapshot.data;
             final processingState = playerState?.processingState;
             final playing = playerState?.playing;
-            if (processingState == ProcessingState.loading ||
-                processingState == ProcessingState.buffering) {
+            if (processingState == ProcessingState.loading || processingState == ProcessingState.buffering) {
               return Container(
                 margin: const EdgeInsets.all(8.0),
                 width: 32.0,
@@ -208,15 +203,14 @@ class SeekBarState extends State<SeekBar> {
         SliderTheme(
           data: _sliderThemeData.copyWith(
             thumbShape: HiddenThumbComponentShape(),
-            activeTrackColor: appColorPrimary.withOpacity(0.5),
+            activeTrackColor: context.primaryColor.withOpacity(0.5),
             inactiveTrackColor: Colors.grey.shade300,
           ),
           child: ExcludeSemantics(
             child: Slider(
               min: 0.0,
               max: widget.duration.inMilliseconds.toDouble(),
-              value: min(widget.bufferedPosition.inMilliseconds.toDouble(),
-                  widget.duration.inMilliseconds.toDouble()),
+              value: min(widget.bufferedPosition.inMilliseconds.toDouble(), widget.duration.inMilliseconds.toDouble()),
               onChanged: (value) {
                 setState(() {
                   _dragValue = value;
@@ -236,15 +230,14 @@ class SeekBarState extends State<SeekBar> {
         ),
         SliderTheme(
           data: _sliderThemeData.copyWith(
-            activeTrackColor: appColorPrimary,
-            thumbColor: appColorPrimary,
+            activeTrackColor: context.primaryColor,
+            thumbColor: context.primaryColor,
             inactiveTrackColor: Colors.transparent,
           ),
           child: Slider(
             min: 0.0,
             max: widget.duration.inMilliseconds.toDouble(),
-            value: min(_dragValue ?? widget.position.inMilliseconds.toDouble(),
-                widget.duration.inMilliseconds.toDouble()),
+            value: min(_dragValue ?? widget.position.inMilliseconds.toDouble(), widget.duration.inMilliseconds.toDouble()),
             onChanged: (value) {
               setState(() {
                 _dragValue = value;
@@ -264,11 +257,7 @@ class SeekBarState extends State<SeekBar> {
         Positioned(
           right: 16.0,
           bottom: 0.0,
-          child: Text(
-              RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
-                      .firstMatch("$_remaining")
-                      ?.group(1) ??
-                  '$_remaining',
+          child: Text(RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$').firstMatch("$_remaining")?.group(1) ?? '$_remaining',
               style: Theme.of(context).textTheme.caption),
         ),
       ],
@@ -329,17 +318,15 @@ void showSliderDialog({
           child: Column(
             children: [
               Text('${snapshot.data?.toStringAsFixed(1)}$valueSuffix',
-                  style: boldTextStyle(
-                      color: appStore.isDarkMode ? bodyDark : bodyWhite,
-                      size: 20)),
+                  style: boldTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: 20)),
               Slider(
                 divisions: divisions,
                 min: min,
                 max: max,
                 value: snapshot.data ?? value,
                 onChanged: onChanged,
-                activeColor: appColorPrimary,
-                inactiveColor: appColorPrimary.withOpacity(0.5),
+                activeColor: context.primaryColor,
+                inactiveColor: context.primaryColor.withOpacity(0.5),
               ),
             ],
           ),

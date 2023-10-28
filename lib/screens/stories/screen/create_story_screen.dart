@@ -23,8 +23,9 @@ class CreateStoryScreen extends StatefulWidget {
   final String? categoryName;
   final File? categoryImage;
   final bool isHighlight;
+  final bool isCameraVideo;
 
-  const CreateStoryScreen({this.cameraImage, this.mediaList, this.categoryId, this.categoryName, this.categoryImage, this.isHighlight = false});
+  const CreateStoryScreen({this.cameraImage, this.mediaList, this.categoryId, this.categoryName, this.categoryImage, this.isHighlight = false, this.isCameraVideo = false});
 
   @override
   State<CreateStoryScreen> createState() => _CreateStoryScreenState();
@@ -49,11 +50,20 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   void initState() {
     super.initState();
     setStatusBarColor(Colors.transparent);
-    if (widget.cameraImage != null) {
+    if (widget.cameraImage != null && !widget.isCameraVideo) {
       mediaList.add(MediaSourceModel(
         mediaFile: widget.cameraImage!,
         extension: widget.cameraImage!.path.validate().split("/").last.split(".").last,
         mediaType: MediaTypes.photo,
+      ));
+      storyContentList.add(CreateStoryModel(storyDuration: storyDuration));
+    }
+
+    if (widget.cameraImage != null && widget.isCameraVideo) {
+      mediaList.add(MediaSourceModel(
+        mediaFile: widget.cameraImage!,
+        extension: widget.cameraImage!.path.validate().split("/").last.split(".").last,
+        mediaType: MediaTypes.video,
       ));
       storyContentList.add(CreateStoryModel(storyDuration: storyDuration));
     }
@@ -85,7 +95,11 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
             onPageChanged: (index) {
               selectedMediaIndex = index;
               log('storyContentList[index].storyLink.validate(): ${storyContentList[index].storyLink}');
-              if (storyContentList[index].storyText.validate().isNotEmpty) storyTextController.text = storyContentList[index].storyText.validate();
+              if (storyContentList[index].storyText.validate().isNotEmpty) {
+                storyTextController.text = storyContentList[index].storyText.validate();
+              } else {
+                storyTextController.text = '';
+              }
               linkText = storyContentList[index].storyLink != null ? storyContentList[index].storyLink.validate() : "";
               setState(() {});
             },
@@ -119,6 +133,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                   IconButton(
                     icon: Image.asset(ic_close_square, color: Colors.white, height: 30, width: 30, fit: BoxFit.cover),
                     onPressed: () {
+                      if (appStore.isLoading) appStore.setLoading(false);
                       finish(context);
                     },
                   ),
@@ -206,7 +221,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                 ],
               ),
             ),
-            padding: EdgeInsets.fromLTRB(8, 60, 8, 8),
+            padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -434,7 +449,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                               );
                             },
                           ).then((value) {
-                            if (status != null) {
+                            if (status != null && !appStore.isLoading) {
                               ifNotTester(() async {
                                 appStore.setLoading(true);
                                 uploadStory(
@@ -456,23 +471,25 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                             }
                           });
                         } else {
-                          ifNotTester(() async {
-                            appStore.setLoading(true);
-                            uploadStory(
-                              context,
-                              contentList: storyContentList,
-                              fileList: mediaList,
-                              isHighlight: widget.isHighlight,
-                              highlightId: widget.categoryId,
-                              highlightImage: widget.categoryImage,
-                              highlightName: widget.categoryName,
-                            ).then((value) {
-                              //status = null;
-                            }).catchError((e) {
-                              appStore.setLoading(false);
-                              toast(e.toString());
+                          if (!appStore.isLoading) {
+                            ifNotTester(() async {
+                              appStore.setLoading(true);
+                              uploadStory(
+                                context,
+                                contentList: storyContentList,
+                                fileList: mediaList,
+                                isHighlight: widget.isHighlight,
+                                highlightId: widget.categoryId,
+                                highlightImage: widget.categoryImage,
+                                highlightName: widget.categoryName,
+                              ).then((value) {
+                                //status = null;
+                              }).catchError((e) {
+                                appStore.setLoading(false);
+                                toast(e.toString());
+                              });
                             });
-                          });
+                          }
                         }
                       }),
                     ],

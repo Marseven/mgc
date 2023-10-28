@@ -16,13 +16,7 @@ class UpdateCommentComponent extends StatefulWidget {
   final Function(String)? callback;
   List<PostMediaModel>? medias;
 
-  UpdateCommentComponent(
-      {this.id,
-      this.activityId,
-      this.comment,
-      this.parentId,
-      this.callback,
-      this.medias});
+  UpdateCommentComponent({this.id, this.activityId, this.comment, this.parentId, this.callback, this.medias});
 
   @override
   State<UpdateCommentComponent> createState() => _UpdateCommentComponentState();
@@ -37,7 +31,7 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
   void initState() {
     super.initState();
     if (widget.comment != null) {
-      textController.text = widget.comment.validate();
+      textController.text = parseHtmlString(widget.comment.validate());
     }
   }
 
@@ -46,12 +40,7 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
       ifNotTester(() async {
         appStore.setLoading(true);
         finish(context);
-        await savePostComment(
-                postId: widget.activityId.validate(),
-                id: widget.id,
-                content: textController.text,
-                parentId: widget.parentId)
-            .then((value) async {
+        await savePostComment(postId: widget.activityId.validate(), id: widget.id, content: textController.text, parentId: widget.parentId).then((value) async {
           widget.callback?.call(textController.text);
           toast(language.commentUpdatedSuccessfully);
           appStore.setLoading(false);
@@ -65,19 +54,18 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
     }
   }
 
-  /// todo: remove media from component and refresh
-
   void deletePostMedia(PostMediaModel media) {
-    deleteMedia(id: media.id.validate().toString(), type: MediaTypes.gif)
-        .then((value) {
-      log(value);
-    }).catchError((e) {
-      toast(e.toString(), print: true);
+    ifNotTester(() {
+      deleteMedia(id: media.id.validate().toInt(), type: MediaTypes.gif).then((value) {
+        log(value);
+      }).catchError((e) {
+        toast(e.toString(), print: true);
+
+        widget.callback?.call(textController.text);
+
+        finish(context);
+      });
     });
-
-    widget.callback?.call(textController.text);
-
-    finish(context);
   }
 
   @override
@@ -90,8 +78,7 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(language.editComment,
-                style: boldTextStyle(color: appColorPrimary, size: 20)),
+            Text(language.editComment, style: boldTextStyle(color: context.primaryColor, size: 20)),
             16.height,
             AppTextField(
               controller: textController,
@@ -100,8 +87,7 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
               maxLines: 10,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.only(left: 12, bottom: 10, top: 10, right: 10),
+                contentPadding: EdgeInsets.only(left: 12, bottom: 10, top: 10, right: 10),
                 labelText: language.comment,
                 labelStyle: secondaryTextStyle(),
                 enabledBorder: OutlineInputBorder(
@@ -118,10 +104,7 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
                 ),
                 errorMaxLines: 2,
                 errorStyle: primaryTextStyle(color: Colors.red, size: 12),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: radius(),
-                    borderSide: BorderSide(
-                        color: context.scaffoldBackgroundColor, width: 0.0)),
+                focusedBorder: OutlineInputBorder(borderRadius: radius(), borderSide: BorderSide(color: context.scaffoldBackgroundColor, width: 0.0)),
                 filled: true,
                 fillColor: context.scaffoldBackgroundColor,
               ),
@@ -137,17 +120,11 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
 
                   return Stack(
                     children: [
-                      cachedImage(media.url.validate(),
-                              height: 100, fit: BoxFit.cover)
-                          .cornerRadiusWithClipRRect(commonRadius),
+                      cachedImage(media.url.validate(), height: 100, fit: BoxFit.cover).cornerRadiusWithClipRRect(commonRadius),
                       Positioned(
-                        child: Icon(Icons.cancel_outlined,
-                                color: appColorPrimary, size: 18)
-                            .onTap(() async {
+                        child: Icon(Icons.cancel_outlined, color: context.primaryColor, size: 18).onTap(() async {
                           deletePostMedia(media);
-                        },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent),
+                        }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
                         right: 4,
                         top: 4,
                       ),
@@ -172,7 +149,7 @@ class _UpdateCommentComponentState extends State<UpdateCommentComponent> {
                   textColor: Colors.white,
                   text: language.submit,
                   elevation: 0,
-                  color: appColorPrimary,
+                  color: context.primaryColor,
                   onTap: () {
                     updateComment();
                   },

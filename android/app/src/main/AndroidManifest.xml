@@ -1,12 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.iconic.socialv">
+    package="com.jobsconseil.mgc">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="Manga Golf club"
+        android:label="Manga Golf Club"
         android:usesCleartextTraffic="true">
 
         <activity
@@ -55,6 +55,6 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3144848441651574~8816429250" />
+            android:value="ca-app-pub-8466012735057920~2016124398" />
     </application>
 </manifest>

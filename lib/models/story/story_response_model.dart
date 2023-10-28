@@ -51,7 +51,6 @@ class StoryResponseModel {
   }
 }
 
-//type 'int' is not a subtype of type 'String?'
 class StoryItem {
   String? duration;
   int? id;

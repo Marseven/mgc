@@ -80,7 +80,7 @@ class _MemberFriendsScreenState extends State<MemberFriendsScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(color: context.iconColor),
@@ -97,9 +97,7 @@ class _MemberFriendsScreenState extends State<MemberFriendsScreen> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       onRefresh();
                     },
@@ -111,9 +109,7 @@ class _MemberFriendsScreenState extends State<MemberFriendsScreen> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         onRefresh();
                       },
@@ -146,38 +142,22 @@ class _MemberFriendsScreenState extends State<MemberFriendsScreen> {
                                 RichText(
                                   text: TextSpan(
                                     children: [
-                                      TextSpan(
-                                          text:
-                                              '${friend.userName.validate()} ',
-                                          style: boldTextStyle(
-                                              fontFamily: fontFamily)),
-                                      if (friend.isUserVerified.validate())
-                                        WidgetSpan(
-                                            child: Image.asset(ic_tick_filled,
-                                                height: 18,
-                                                width: 18,
-                                                color: blueTickColor,
-                                                fit: BoxFit.cover)),
+                                      TextSpan(text: '${friend.userName.validate()} ', style: boldTextStyle(fontFamily: fontFamily)),
+                                      if (friend.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
                                     ],
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.start,
                                 ),
-                                Text(friend.userMentionName.validate(),
-                                    style: secondaryTextStyle()),
+                                Text(friend.userMentionName.validate(), style: secondaryTextStyle()),
                               ],
                               crossAxisAlignment: CrossAxisAlignment.start,
                             ).expand(),
                           ],
                         ).onTap(() async {
-                          MemberProfileScreen(
-                                  memberId: friend.userId.validate())
-                              .launch(context);
-                        },
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors
-                                .transparent).paddingSymmetric(vertical: 8);
+                          MemberProfileScreen(memberId: friend.userId.validate()).launch(context);
+                        }, splashColor: Colors.transparent, highlightColor: Colors.transparent).paddingSymmetric(vertical: 8);
                       },
                       onNextPage: () {
                         if (!mIsLastPage) {
@@ -196,8 +176,7 @@ class _MemberFriendsScreenState extends State<MemberFriendsScreen> {
                 if (appStore.isLoading) {
                   return Positioned(
                     bottom: mPage != 1 ? 10 : null,
-                    child: LoadingWidget(
-                        isBlurBackground: mPage == 1 ? true : false),
+                    child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
                   );
                 } else {
                   return Offstage();

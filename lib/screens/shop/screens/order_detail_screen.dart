@@ -6,6 +6,7 @@ import 'package:socialv/main.dart';
 import 'package:socialv/models/woo_commerce/order_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/shop/components/cancel_order_bottomsheet.dart';
+import 'package:socialv/screens/shop/components/ebilling_component.dart';
 import 'package:socialv/screens/shop/components/price_widget.dart';
 import 'package:socialv/screens/shop/screens/product_detail_screen.dart';
 import 'package:socialv/utils/cached_network_image.dart';
@@ -68,7 +69,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               onAccept: (c) {
                 ifNotTester(() {
                   appStore.setLoading(true);
-                  cancelOrder(orderId: widget.orderDetails.id.validate(), note: text).then((value) {
+                  cancelOrder(
+                          orderId: widget.orderDetails.id.validate(),
+                          note: text)
+                      .then((value) {
                     toast(language.orderCancelledSuccessfully);
                     widget.orderDetails.status = OrderStatus.cancelled;
 
@@ -118,7 +122,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               child: PopupMenuButton(
                 enabled: !appStore.isLoading,
                 position: PopupMenuPosition.under,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(commonRadius)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(commonRadius)),
                 onSelected: (val) async {
                   if (val == 1) {
                     onDeleteOrder();
@@ -132,22 +137,35 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     value: 1,
                     child: Row(
                       children: [
-                        Image.asset(ic_delete, width: 20, height: 20, color: Colors.red, fit: BoxFit.cover),
+                        Image.asset(ic_delete,
+                            width: 20,
+                            height: 20,
+                            color: Colors.red,
+                            fit: BoxFit.cover),
                         8.width,
                         Text(language.deleteOrder, style: primaryTextStyle()),
                       ],
                     ),
                   ),
-                  if (widget.orderDetails.status.validate() != OrderStatus.cancelled &&
-                      widget.orderDetails.status.validate() != OrderStatus.refunded &&
-                      widget.orderDetails.status.validate() != OrderStatus.completed &&
-                      widget.orderDetails.status.validate() != OrderStatus.trash &&
-                      widget.orderDetails.status.validate() != OrderStatus.failed)
+                  if (widget.orderDetails.status.validate() !=
+                          OrderStatus.cancelled &&
+                      widget.orderDetails.status.validate() !=
+                          OrderStatus.refunded &&
+                      widget.orderDetails.status.validate() !=
+                          OrderStatus.completed &&
+                      widget.orderDetails.status.validate() !=
+                          OrderStatus.trash &&
+                      widget.orderDetails.status.validate() !=
+                          OrderStatus.failed)
                     PopupMenuItem(
                       value: 2,
                       child: Row(
                         children: [
-                          Image.asset(ic_close_square, width: 20, height: 20, color: Colors.red, fit: BoxFit.cover),
+                          Image.asset(ic_close_square,
+                              width: 20,
+                              height: 20,
+                              color: Colors.red,
+                              fit: BoxFit.cover),
                           8.width,
                           Text(language.cancelOrder, style: primaryTextStyle()),
                         ],
@@ -170,46 +188,81 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     children: [
                       Text('${language.orderStatus}:', style: boldTextStyle()),
                       Text(
-                        widget.orderDetails.status.validate().capitalizeFirstLetter(),
-                        style: boldTextStyle(color: context.primaryColor, size: 18),
+                        Helpers.statusOrder(
+                                widget.orderDetails.status.validate())
+                            .capitalizeFirstLetter(),
+                        style: boldTextStyle(
+                            color: context.primaryColor, size: 18),
                       ),
                     ],
                   ),
                   16.height,
                   Container(
-                    decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultAppButtonRadius)),
+                    decoration: BoxDecoration(
+                        color: context.cardColor,
+                        borderRadius: radius(defaultAppButtonRadius)),
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            Text('${language.orderNumber}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.orderNumber}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.id.validate().toString(), style: primaryTextStyle()).expand(),
+                            Text(widget.orderDetails.id.validate().toString(),
+                                    style: primaryTextStyle())
+                                .expand(),
                           ],
                         ),
                         8.height,
                         Row(
                           children: [
-                            Text('${language.date}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.date}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(formatDate(widget.orderDetails.dateCreated.validate().toString()), style: primaryTextStyle()).expand(),
+                            Text(
+                                    formatDate(widget.orderDetails.dateCreated
+                                        .validate()
+                                        .toString()),
+                                    style: primaryTextStyle())
+                                .expand(),
                           ],
                         ),
                         8.height,
                         Row(
                           children: [
-                            Text('${language.email}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.email}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(appStore.loginEmail, style: primaryTextStyle()).expand(),
+                            Text(appStore.loginEmail, style: primaryTextStyle())
+                                .expand(),
                           ],
                         ),
                         8.height,
                         Row(
                           children: [
-                            Text('${language.paymentMethod}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.paymentMethod}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.paymentMethodTitle.validate(), style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis).expand(),
+                            Text(
+                                    widget.orderDetails.paymentMethodTitle
+                                        .validate(),
+                                    style: primaryTextStyle(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis)
+                                .expand(),
                           ],
                         ),
                       ],
@@ -219,7 +272,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   Text('${language.products}:', style: boldTextStyle()),
                   16.height,
                   Container(
-                    decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultAppButtonRadius)),
+                    decoration: BoxDecoration(
+                        color: context.cardColor,
+                        borderRadius: radius(defaultAppButtonRadius)),
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
@@ -231,7 +286,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             return Row(
                               children: [
                                 cachedImage(
-                                  widget.orderDetails.lineItems![index].image!.src.validate(),
+                                  widget
+                                      .orderDetails.lineItems![index].image!.src
+                                      .validate(),
                                   height: 30,
                                   width: 30,
                                   fit: BoxFit.cover,
@@ -239,15 +296,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 8.width,
                                 Text(
                                   '${widget.orderDetails.lineItems![index].name.validate()} * ${widget.orderDetails.lineItems![index].quantity.validate()}',
-                                  style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                                  style: primaryTextStyle(
+                                      color: appStore.isDarkMode
+                                          ? bodyDark
+                                          : bodyWhite),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ).expand(),
-                                PriceWidget(price: widget.orderDetails.lineItems![index].total.validate()),
+                                PriceWidget(
+                                    price: widget
+                                        .orderDetails.lineItems![index].total
+                                        .validate()),
                               ],
                             ).paddingSymmetric(vertical: 6).onTap(() {
-                              ProductDetailScreen(id: widget.orderDetails.lineItems![index].productId.validate()).launch(context);
-                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
+                              ProductDetailScreen(
+                                      id: widget.orderDetails.lineItems![index]
+                                          .productId
+                                          .validate())
+                                  .launch(context);
+                            },
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent);
                           },
                         ),
                         10.height,
@@ -255,12 +324,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           children: [
                             Text(
                               '${language.shippingCost}:',
-                              style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                              style: primaryTextStyle(
+                                  color: appStore.isDarkMode
+                                      ? bodyDark
+                                      : bodyWhite),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ).expand(),
                             Wrap(
-                              children: widget.orderDetails.shippingLines.validate().map((e) {
+                              children: widget.orderDetails.shippingLines
+                                  .validate()
+                                  .map((e) {
                                 return PriceWidget(price: e.total.validate());
                               }).toList(),
                             ),
@@ -271,7 +345,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('${language.total}:', style: boldTextStyle()),
-                            PriceWidget(price: widget.orderDetails.total.validate()),
+                            PriceWidget(
+                                price: widget.orderDetails.total.validate()),
                           ],
                         ),
                       ],
@@ -281,70 +356,128 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   Text('${language.billingAddress}:', style: boldTextStyle()),
                   16.height,
                   Container(
-                    decoration: BoxDecoration(color: context.cardColor, borderRadius: radius(defaultAppButtonRadius)),
+                    decoration: BoxDecoration(
+                        color: context.cardColor,
+                        borderRadius: radius(defaultAppButtonRadius)),
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.name}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.name}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.billing!.firstName.validate().toString(), style: primaryTextStyle()),
+                            Text(
+                                widget.orderDetails.billing!.firstName
+                                    .validate()
+                                    .toString(),
+                                style: primaryTextStyle()),
                           ],
                         ),
                         8.height,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.company}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.company}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.billing!.company.validate().toString(), style: primaryTextStyle()),
+                            Text(
+                                widget.orderDetails.billing!.company
+                                    .validate()
+                                    .toString(),
+                                style: primaryTextStyle()),
                           ],
                         ),
                         8.height,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.address}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.address}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text('${widget.orderDetails.billing!.address_1.validate().toString()}, ${widget.orderDetails.billing!.address_2.validate().toString()}', style: primaryTextStyle()).expand(),
+                            Text('${widget.orderDetails.billing!.address_1.validate().toString()}, ${widget.orderDetails.billing!.address_2.validate().toString()}',
+                                    style: primaryTextStyle())
+                                .expand(),
                           ],
                         ),
                         8.height,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.city}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.city}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.billing!.city.validate().toString().capitalizeFirstLetter(), style: primaryTextStyle()),
+                            Text(
+                                widget.orderDetails.billing!.city
+                                    .validate()
+                                    .toString()
+                                    .capitalizeFirstLetter(),
+                                style: primaryTextStyle()),
                           ],
                         ),
                         8.height,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.state}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.state}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.billing!.state.validate().toString(), style: primaryTextStyle()),
+                            Text(
+                                widget.orderDetails.billing!.state
+                                    .validate()
+                                    .toString(),
+                                style: primaryTextStyle()),
                           ],
                         ),
                         8.height,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.country}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.country}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.billing!.country.validate().toString(), style: primaryTextStyle()),
+                            Text(
+                                widget.orderDetails.billing!.country
+                                    .validate()
+                                    .toString(),
+                                style: primaryTextStyle()),
                           ],
                         ),
                         8.height,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.phone}:', style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+                            Text('${language.phone}:',
+                                style: primaryTextStyle(
+                                    color: appStore.isDarkMode
+                                        ? bodyDark
+                                        : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.billing!.phone.validate().toString(), style: primaryTextStyle()).expand(),
+                            Text(
+                                    widget.orderDetails.billing!.phone
+                                        .validate()
+                                        .toString(),
+                                    style: primaryTextStyle())
+                                .expand(),
                           ],
                         ),
                       ],
@@ -353,7 +486,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ],
               ),
             ),
-            Observer(builder: (ctx) => LoadingWidget().visible(appStore.isLoading)),
+            Observer(
+                builder: (ctx) => LoadingWidget().visible(appStore.isLoading)),
           ],
         ),
       ),

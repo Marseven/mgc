@@ -120,7 +120,7 @@ class _HomeStoryComponentState extends State<HomeStoryComponent> with TickerProv
                             contentPadding: EdgeInsets.symmetric(vertical: 16),
                             title: Text(language.chooseAnAction, style: boldTextStyle()),
                             builder: (p0) {
-                              return FilePickerDialog(isSelected: true);
+                              return FilePickerDialog(isSelected: true, showCameraVideo: true);
                             },
                           );
 
@@ -129,6 +129,20 @@ class _HomeStoryComponentState extends State<HomeStoryComponent> with TickerProv
                               await getImageSource(isCamera: true).then((value) {
                                 appStore.setLoading(false);
                                 CreateStoryScreen(cameraImage: value).launch(context).then((value) {
+                                  if (value ?? false) {
+                                    list.clear();
+                                    getStories();
+                                  } else {
+                                    //
+                                  }
+                                });
+                              }).catchError((e) {
+                                appStore.setLoading(false);
+                              });
+                            } else if (file == FileTypes.CAMERA_VIDEO) {
+                              await getImageSource(isCamera: true, isVideo: true).then((value) {
+                                appStore.setLoading(false);
+                                CreateStoryScreen(cameraImage: value, isCameraVideo: true).launch(context).then((value) {
                                   if (value ?? false) {
                                     list.clear();
                                     getStories();

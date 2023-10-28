@@ -102,36 +102,54 @@ class _UserStoryScreenState extends State<UserStoryScreen> with SingleTickerProv
         contentPadding: EdgeInsets.symmetric(vertical: 16),
         title: Text(language.chooseAnAction, style: boldTextStyle()),
         builder: (p0) {
-          return FilePickerDialog(isSelected: true);
+          return FilePickerDialog(isSelected: true, showCameraVideo: true);
         },
       );
 
-      if (file == FileTypes.CAMERA) {
-        await getImageSource(isCamera: true).then((value) {
-          appStore.setLoading(false);
-          CreateStoryScreen(cameraImage: value).launch(context, duration: 500.milliseconds).then((value) {
-            if (value ?? false) {
-              getStories();
-              LiveStream().emit(GetUserStories);
-            }
-          });
-        }).catchError((e) {
-          appStore.setLoading(false);
-        });
-      } else {
-        await getMultipleImages().then((value) {
-          appStore.setLoading(false);
-
-          if (value.isNotEmpty)
-            CreateStoryScreen(mediaList: value).launch(context, duration: 500.milliseconds).then((value) {
+      if (file != null) {
+        if (file == FileTypes.CAMERA) {
+          await getImageSource(isCamera: true).then((value) {
+            appStore.setLoading(false);
+            CreateStoryScreen(cameraImage: value).launch(context).then((value) {
               if (value ?? false) {
+                list.clear();
                 getStories();
-                LiveStream().emit(GetUserStories);
+              } else {
+                //
               }
             });
-        }).catchError((e) {
-          appStore.setLoading(false);
-        });
+          }).catchError((e) {
+            appStore.setLoading(false);
+          });
+        } else if (file == FileTypes.CAMERA_VIDEO) {
+          await getImageSource(isCamera: true, isVideo: true).then((value) {
+            appStore.setLoading(false);
+            CreateStoryScreen(cameraImage: value, isCameraVideo: true).launch(context).then((value) {
+              if (value ?? false) {
+                list.clear();
+                getStories();
+              } else {
+                //
+              }
+            });
+          }).catchError((e) {
+            appStore.setLoading(false);
+          });
+        } else {
+          await getMultipleImages().then((value) {
+            appStore.setLoading(false);
+
+            if (value.isNotEmpty)
+              CreateStoryScreen(mediaList: value).launch(context).then((value) {
+                if (value ?? false) {
+                  list.clear();
+                  getStories();
+                }
+              });
+          }).catchError((e) {
+            appStore.setLoading(false);
+          });
+        }
       }
     }
   }
@@ -184,7 +202,7 @@ class _UserStoryScreenState extends State<UserStoryScreen> with SingleTickerProv
                     value: 1,
                     child: Text(language.myStories, style: primaryTextStyle()),
                   ),
-                if (currentValue != 2 && appStore.showStoryHighlight)
+                if (currentValue != 2 && appStore.showStoryHighlight == 1)
                   PopupMenuItem(
                     value: 2,
                     child: Text(language.highlightStories, style: primaryTextStyle()),

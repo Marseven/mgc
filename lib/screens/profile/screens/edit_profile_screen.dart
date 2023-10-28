@@ -50,8 +50,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     avatarUrl = appStore.loginAvatarUrl;
     nameCont.text = appStore.loginFullName;
-    nameCont.selection =
-        TextSelection.fromPosition(TextPosition(offset: nameCont.text.length));
+    nameCont.selection = TextSelection.fromPosition(TextPosition(offset: nameCont.text.length));
     setState(() {});
 
     await getMemberCoverImage(id: appStore.loginUserId).then((value) {
@@ -102,8 +101,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (avatarImage != null) {
         appStore.setLoading(true);
-        await attachMemberImage(id: appStore.loginUserId, image: avatarImage)
-            .then((value) {
+        await attachMemberImage(id: appStore.loginUserId, image: avatarImage).then((value) {
           init();
           if (cover == null) {
             appStore.setLoading(false);
@@ -117,9 +115,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (cover != null) {
         appStore.setLoading(true);
-        await attachMemberImage(
-                id: appStore.loginUserId, image: cover, isCover: true)
-            .then((value) {
+        await attachMemberImage(id: appStore.loginUserId, image: cover, isCover: true).then((value) {
           LiveStream().emit(OnAddPostProfile);
           appStore.setLoading(false);
           finish(context, true);
@@ -162,7 +158,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 },
                 child: Text(
                   language.update.capitalizeFirstLetter(),
-                  style: secondaryTextStyle(color: appColorPrimary),
+                  style: secondaryTextStyle(color: context.primaryColor),
                 ),
               ).paddingSymmetric(vertical: 8, horizontal: 8),
             ],
@@ -183,17 +179,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   width: context.width(),
                                   height: 220,
                                   fit: BoxFit.cover,
-                                ).cornerRadiusWithClipRRectOnly(
-                                  topLeft: defaultRadius.toInt(),
-                                  topRight: defaultRadius.toInt())
+                                ).cornerRadiusWithClipRRectOnly(topLeft: defaultRadius.toInt(), topRight: defaultRadius.toInt())
                               : Image.file(
                                   File(cover!.path.validate()),
                                   width: context.width(),
                                   height: 220,
                                   fit: BoxFit.cover,
-                                ).cornerRadiusWithClipRRectOnly(
-                                  topLeft: defaultRadius.toInt(),
-                                  topRight: defaultRadius.toInt()),
+                                ).cornerRadiusWithClipRRectOnly(topLeft: defaultRadius.toInt(), topRight: defaultRadius.toInt()),
                           Positioned(
                             right: 8,
                             top: 8,
@@ -202,25 +194,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 if (!appStore.isLoading) {
                                   FileTypes? file = await showInDialog(
                                     context,
-                                    contentPadding:
-                                        EdgeInsets.symmetric(vertical: 16),
-                                    title: Text(language.chooseAnAction,
-                                        style: boldTextStyle()),
+                                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                                    title: Text(language.chooseAnAction, style: boldTextStyle()),
                                     builder: (p0) {
-                                      return FilePickerDialog(
-                                          isSelected: !isCover);
+                                      return FilePickerDialog(isSelected: !isCover);
                                     },
                                   );
                                   if (file != null) {
                                     if (file == FileTypes.CANCEL) {
                                       ifNotTester(() async {
                                         appStore.setLoading(true);
-                                        await deleteMemberCoverImage(
-                                                id: appStore.loginUserId
-                                                    .toInt())
-                                            .then((value) {
-                                          toast(language
-                                              .coverImageRemovedSuccessfully);
+                                        await deleteMemberCoverImage(id: appStore.loginUserId.toInt()).then((value) {
+                                          toast(language.coverImageRemovedSuccessfully);
                                           init();
                                         }).catchError((e) {
                                           appStore.setLoading(false);
@@ -228,10 +213,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         });
                                       });
                                     } else {
-                                      cover = await getImageSource(
-                                          isCamera: file == FileTypes.CAMERA
-                                              ? true
-                                              : false);
+                                      cover = await getImageSource(isCamera: file == FileTypes.CAMERA ? true : false);
                                       setState(() {});
                                       appStore.setLoading(false);
                                     }
@@ -240,11 +222,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               },
                               child: Container(
                                 padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                    color: appColorPrimary,
-                                    borderRadius: radius(100)),
-                                child: Icon(Icons.edit_outlined,
-                                    color: Colors.white, size: 18),
+                                decoration: BoxDecoration(color: appColorPrimary, borderRadius: radius(100)),
+                                child: Icon(Icons.edit_outlined, color: Colors.white, size: 18),
                               ),
                             ),
                           ),
@@ -254,10 +233,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               clipBehavior: Clip.none,
                               children: [
                                 Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Colors.white, width: 2),
-                                      shape: BoxShape.circle),
+                                  decoration: BoxDecoration(border: Border.all(color: Colors.white, width: 2), shape: BoxShape.circle),
                                   child: avatarImage == null
                                       ? cachedImage(
                                           avatarUrl,
@@ -280,15 +256,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       if (!appStore.isLoading) {
                                         FileTypes? file = await showInDialog(
                                           context,
-                                          contentPadding: EdgeInsets.symmetric(
-                                              vertical: 16),
-                                          title: Text(language.chooseAnAction,
-                                              style: boldTextStyle()),
+                                          contentPadding: EdgeInsets.symmetric(vertical: 16),
+                                          title: Text(language.chooseAnAction, style: boldTextStyle()),
                                           builder: (p0) {
-                                            return FilePickerDialog(
-                                                isSelected: avatarUrl.contains(
-                                                    AppImages
-                                                        .defaultAvatarUrl));
+                                            return FilePickerDialog(isSelected: avatarUrl.contains(AppImages.defaultAvatarUrl));
                                           },
                                         );
 
@@ -296,24 +267,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           if (file == FileTypes.CANCEL) {
                                             ifNotTester(() async {
                                               appStore.setLoading(true);
-                                              await deleteMemberAvatarImage(
-                                                      id: appStore.loginUserId)
-                                                  .then((value) {
-                                                avatarUrl =
-                                                    appStore.loginAvatarUrl;
+                                              await deleteMemberAvatarImage(id: appStore.loginUserId).then((value) {
+                                                avatarUrl = appStore.loginAvatarUrl;
                                                 setState(() {});
                                               }).catchError((e) {
                                                 appStore.setLoading(false);
-                                                toast(language
-                                                    .somethingWentWrong);
+                                                toast(language.somethingWentWrong);
                                               });
                                             });
                                           } else {
-                                            avatarImage = await getImageSource(
-                                                isCamera:
-                                                    file == FileTypes.CAMERA
-                                                        ? true
-                                                        : false);
+                                            avatarImage = await getImageSource(isCamera: file == FileTypes.CAMERA ? true : false);
                                             setState(() {});
                                             appStore.setLoading(false);
                                           }
@@ -323,11 +286,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     child: Container(
                                       clipBehavior: Clip.antiAlias,
                                       padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                          color: appColorPrimary,
-                                          shape: BoxShape.circle),
-                                      child: Icon(Icons.edit_outlined,
-                                          color: Colors.white, size: 18),
+                                      decoration: BoxDecoration(color: appColorPrimary, shape: BoxShape.circle),
+                                      child: Icon(Icons.edit_outlined, color: Colors.white, size: 18),
                                     ),
                                   ),
                                 )
@@ -356,7 +316,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     if (fieldList.isNotEmpty)
                       Text(
                         '${language.profile} ${language.settings}',
-                        style: boldTextStyle(color: appColorPrimary),
+                        style: boldTextStyle(color: context.primaryColor),
                       ).paddingAll(16),
                     if (fieldList.isNotEmpty)
                       Theme(
@@ -369,18 +329,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 value: e.groupId.validate(),
                                 canTapOnHeader: true,
                                 backgroundColor: context.cardColor,
-                                headerBuilder:
-                                    (BuildContext context, bool isExpanded) {
+                                headerBuilder: (BuildContext context, bool isExpanded) {
                                   if (isExpanded) {
                                     group = e;
                                   }
                                   return ListTile(
                                     title: Text(
                                       e.groupName.validate(),
-                                      style: primaryTextStyle(
-                                          color: isExpanded
-                                              ? appColorPrimary
-                                              : context.iconColor),
+                                      style: primaryTextStyle(color: isExpanded ? context.primaryColor : context.iconColor),
                                     ),
                                   );
                                 },

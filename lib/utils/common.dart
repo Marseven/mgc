@@ -9,12 +9,17 @@ import 'package:html/parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/groups/group_response.dart';
+import 'package:socialv/models/lms/quiz_answers.dart';
 import 'package:socialv/models/members/member_response.dart';
 import 'package:socialv/models/posts/media_model.dart';
 import 'package:socialv/models/story/common_story_model.dart';
+import 'package:socialv/network/pmp_repositry.dart';
+import 'package:socialv/network/rest_apis.dart';
+import 'package:string_contains/string_contains.dart';
 
 import 'app_constants.dart';
 
@@ -40,10 +45,10 @@ InputDecoration inputDecoration(
     errorStyle: primaryTextStyle(color: Colors.red, size: 12),
     enabledBorder:
         UnderlineInputBorder(borderSide: BorderSide(color: dividerColor)),
-    focusedBorder:
-        UnderlineInputBorder(borderSide: BorderSide(color: appColorPrimary)),
-    border:
-        UnderlineInputBorder(borderSide: BorderSide(color: appColorPrimary)),
+    focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: context.primaryColor)),
+    border: UnderlineInputBorder(
+        borderSide: BorderSide(color: context.primaryColor)),
     focusedErrorBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 1.0)),
     errorBorder: UnderlineInputBorder(
@@ -52,16 +57,22 @@ InputDecoration inputDecoration(
   );
 }
 
-InputDecoration inputDecorationFilled(BuildContext context,
-    {String? label,
-    EdgeInsetsGeometry? contentPadding,
-    required Color fillColor,
-    Widget? prefix}) {
+InputDecoration inputDecorationFilled(
+  BuildContext context, {
+  String? label,
+  EdgeInsetsGeometry? contentPadding,
+  required Color fillColor,
+  Widget? prefix,
+  String? hint,
+  TextStyle? hintStyle,
+}) {
   return InputDecoration(
     fillColor: fillColor,
     filled: true,
     contentPadding: contentPadding ?? EdgeInsets.all(16),
-    labelText: label,
+    labelText: label ?? null,
+    hintText: hint ?? null,
+    hintStyle: hintStyle ?? secondaryTextStyle(weight: FontWeight.w600),
     labelStyle: secondaryTextStyle(weight: FontWeight.w600),
     errorStyle: primaryTextStyle(color: Colors.red, size: 12),
     enabledBorder: OutlineInputBorder(
@@ -92,7 +103,7 @@ Widget headerContainer({required Widget child, required BuildContext context}) {
       Container(
         width: context.width(),
         decoration: BoxDecoration(
-            color: appColorPrimary,
+            color: context.primaryColor,
             borderRadius:
                 radiusOnly(topLeft: defaultRadius, topRight: defaultRadius)),
         padding: EdgeInsets.all(22),
@@ -126,7 +137,7 @@ Widget appButton({
     textStyle: textStyle ?? boldTextStyle(color: Colors.white),
     onTap: onTap,
     elevation: 0,
-    color: color ?? appColorPrimary,
+    color: color ?? context.primaryColor,
     width: width ?? context.width() - 32,
     height: height ?? 56,
   );
@@ -157,8 +168,28 @@ String parseHtmlString(String? htmlString) {
   return parse(parse(htmlString).body!.text).documentElement!.text;
 }
 
+/*String parseHtmlString(String? htmlString) {
+  dom.Document document = parser.parse(htmlString);
+  String parsedText = '';
+
+  for (var element in document.body!.nodes) {
+    if (element is dom.Text) {
+      parsedText += element.text;
+
+      log('---------------- $parsedText');
+    }
+  }
+
+  return parsedText;
+}*/
+
 void onShareTap(BuildContext context) async {
-  Share.share('Share $APP_NAME app $playStoreBaseURL${await getPackageName()}');
+  if (isAndroid) {
+    Share.share(
+        'Share $APP_NAME app $playStoreBaseURL${await getPackageName()}');
+  } else {
+    Share.share('Share $APP_NAME app $IOS_APP_LINK');
+  }
 }
 
 String getFormattedDate(String date) =>
@@ -180,6 +211,17 @@ List<GroupResponse> getGroupListPref() {
         .map((i) => GroupResponse.fromJson(i))
         .toList();
   return [];
+}
+
+List<QuizAnswers> getLmsQuizListPref() {
+  if (getStringAsync(SharePreferencesKey.LMS_QUIZ_LIST).isNotEmpty) {
+    return (json.decode(getStringAsync(SharePreferencesKey.LMS_QUIZ_LIST))
+            as List)
+        .map((i) => QuizAnswers.fromJson(i))
+        .toList();
+  } else {
+    return [];
+  }
 }
 
 class TabIndicator extends Decoration {
@@ -225,6 +267,8 @@ Future<List<File>> getMultipleFiles({required MediaModel mediaType}) async {
       type = FileType.image;
     else if (mediaType.type == MediaTypes.video)
       type = FileType.video;
+    else if (mediaType.type == MediaTypes.audio)
+      type = FileType.audio;
     else
       type = FileType.custom;
   } else {
@@ -350,12 +394,33 @@ Future<List<MediaSourceModel>> getMultipleImages() async {
 String timeStampToDate(int time) {
   final DateTime input = DateTime.fromMillisecondsSinceEpoch(time * 1000);
 
-  return input.timeAgo;
+  int difference =
+      DateTime.now().millisecondsSinceEpoch - input.millisecondsSinceEpoch;
+  String result;
+
+  if (difference < 60000) {
+    result = countSeconds(difference);
+  } else if (difference < 3600000) {
+    result = countMinutes(difference);
+  } else if (difference < 86400000) {
+    result = countHours(difference);
+  } else if (difference < 604800000) {
+    result = countDays(difference);
+  } else if (difference / 1000 < 2419200) {
+    result = countWeeks(difference);
+  } else if (difference / 1000 < 31536000) {
+    result = countMonths(difference);
+  } else
+    result = countYears(difference);
+
+  return result != language.justNow.capitalizeFirstLetter()
+      ? '${language.ago.capitalizeFirstLetter()} ' + result
+      : result;
 }
 
 String getPrice(String price) {
-  if (price.length > 10) {
-    return price.substring(0, price.length - 3);
+  if (price.length > 6) {
+    return price.substring(0, price.length - 2);
   } else {
     return price;
   }
@@ -366,15 +431,18 @@ void setStatusBarColorBasedOnTheme() {
       appStore.isDarkMode ? appBackgroundColorDark : appLayoutBackground);
 }
 
-bool get isIqonicProduct => currentPackageName == APP_PACKAGE_NAME;
+Future<bool> get isIqonicProduct async =>
+    await getPackageName() == APP_PACKAGE_NAME;
 
 Future<GiphyGif?> selectGif({required BuildContext context}) async {
   GiphyGif? gif;
 
   await GiphyGet.getGif(
     context: context,
-    apiKey: getStringAsync(SharePreferencesKey.GIPHY_API_KEY),
-    tabColor: appColorPrimary,
+    apiKey: isIOS
+        ? getStringAsync(SharePreferencesKey.IOS_GIPHY_API_KEY)
+        : getStringAsync(SharePreferencesKey.GIPHY_API_KEY),
+    tabColor: context.primaryColor,
     debounceTimeInMilliseconds: 350,
     showEmojis: false,
     showStickers: false,
@@ -407,7 +475,7 @@ String socialvFormatTime(int timestamp) {
     result = countYears(difference);
 
   return result != language.justNow.capitalizeFirstLetter()
-      ? result + ' ${language.ago.toLowerCase()}'
+      ? '${language.ago.capitalizeFirstLetter()} ' + result
       : result;
 }
 
@@ -459,4 +527,126 @@ String countYears(int difference) {
   int count = (difference / 31536000000).truncate();
   return count.toString() +
       (count > 1 ? ' ${language.years}' : ' ${language.year}');
+}
+
+void initializeOneSignal() async {
+  OneSignal.shared
+      .setAppId(
+          getStringAsync(ONESIGNAL_APP_ID, defaultValue: ONESIGNAL_APP_ID))
+      .then((value) async {
+    OneSignal.shared.setNotificationOpenedHandler((openedResult) {
+      //
+    });
+
+    OneSignal.shared.setNotificationWillShowInForegroundHandler(
+        (OSNotificationReceivedEvent event) {
+      event.complete(event.notification);
+    });
+
+    OneSignal.shared.consentGranted(true);
+    OneSignal.shared.promptUserForPushNotificationPermission();
+
+    final status = await OneSignal.shared.getDeviceState();
+
+    log('--------------------------------');
+    log(status?.userId.validate());
+    if (status!.userId.validate().isNotEmpty)
+      setValue(
+          SharePreferencesKey.ONE_SIGNAL_PLAYER_ID, status.userId.validate());
+  });
+}
+
+String getPostContent(String? postContent) {
+  String content = '';
+
+  content = postContent
+      .validate()
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('[embed]', '<embed>')
+      .replaceAll('[/embed]', '</embed>')
+      .replaceAll('[caption]', '<caption>')
+      .replaceAll('[/caption]', '</caption>')
+      .replaceAll('[blockquote]', '<blockquote>')
+      .replaceAll('[/blockquote]', '</blockquote>')
+      .replaceAll('\t', '')
+      .replaceAll('\n', '');
+
+  return content;
+}
+
+Future<void> activeUser() async {
+  await updateActiveStatus().then((value) {
+    Future.delayed(Duration(minutes: updateActiveStatusDuration), () {
+      activeUser();
+    });
+  }).catchError((e) {
+    log('Error: ${e.toString()}');
+    Future.delayed(Duration(minutes: updateActiveStatusDuration), () {
+      activeUser();
+    });
+  });
+}
+
+Future<void> getNotificationCount() async {
+  await notificationCount().then((value) {
+    appStore.setNotificationCount(value.notificationCount.validate());
+    messageStore.setMessageCount(value.unreadMessagesCount.validate());
+    Future.delayed(Duration(minutes: updateActiveStatusDuration), () {
+      getNotificationCount();
+    });
+  }).catchError((e) {
+    log('Error: ${e.toString()}');
+    Future.delayed(Duration(minutes: updateActiveStatusDuration), () {
+      getNotificationCount();
+    });
+  });
+}
+
+String convertString({required String input, bool? isYoutube = false}) {
+  String output = input;
+  if (isYoutube == true) {
+    output = output.splitAfter('src=\"');
+    output = output.splitBefore('\" style=');
+  } else {
+    output = output.splitAfter('<a href=\"');
+    output = output.splitBefore('\" data-iframely-url');
+  }
+  return output;
+}
+
+String timeStampToDateFormat(int time) {
+  final DateTime input = DateTime.fromMillisecondsSinceEpoch(time * 1000);
+
+  return DateFormat.yMMMMd().format(input).toString();
+}
+
+/// pmp Functions
+
+void setRestrictions({String? levelId}) {
+  restrictions(levelId: levelId).then((value) {
+    if (value.status.validate()) {
+      pmpStore.setViewGroups(value.data!.pmproBpGroupsPageViewing == 1);
+      pmpStore.setViewSingleGroup(value.data!.pmproBpGroupSingleViewing == 1);
+      pmpStore.setCanCreateGroup(value.data!.pmproBpGroupCreation == 1);
+      pmpStore.setCanJoinGroup(value.data!.pmproBpGroupsJoin == 1);
+      pmpStore.setSendFriendRequest(value.data!.pmproBpSendFriendRequest == 1);
+      pmpStore.setSendFriendRequest(value.data!.pmproBpSendFriendRequest == 1);
+      pmpStore.setPrivateMessaging(value.data!.pmproBpPrivateMessaging == 1);
+      pmpStore.setMemberDirectory(value.data!.pmproBpMemberDirectory == 1);
+    }
+  }).catchError((e) {
+    log('Catch Error: ${e.toString()}');
+  });
+}
+
+extension FilteredString on String? {
+  String validateAndFilter() {
+    if (appStore.filterContent) {
+      return this.validate().cleanBadWords(keepFirstLastLetters: false);
+    } else {
+      return this.validate();
+    }
+  }
 }

@@ -7,6 +7,7 @@ import 'package:socialv/main.dart';
 import 'package:socialv/models/common_models.dart';
 import 'package:socialv/models/woo_commerce/order_model.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/shop/components/ebilling_component.dart';
 import 'package:socialv/screens/shop/components/price_widget.dart';
 import 'package:socialv/screens/shop/screens/order_detail_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
@@ -87,7 +88,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       onRefresh: () async {
         onRefresh();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -142,6 +143,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       padding: EdgeInsets.only(left: 16, right: 16, bottom: 50),
                       itemCount: orderList.length,
                       itemBuilder: (context, index) {
+                        print(Helpers.statusOrder(orderList[index].status));
                         return InkWell(
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
@@ -232,12 +234,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 Align(
                                   child: Container(
                                     decoration: BoxDecoration(
-                                        color: appColorPrimary,
+                                        color: context.primaryColor,
                                         borderRadius: radius(4)),
                                     child: Text(
-                                        orderList[index]
-                                            .status
-                                            .validate()
+                                        Helpers.statusOrder(orderList[index]
+                                                .status
+                                                .validate())
                                             .capitalizeFirstLetter(),
                                         style: secondaryTextStyle(
                                             color: Colors.white)),

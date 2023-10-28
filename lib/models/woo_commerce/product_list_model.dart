@@ -175,7 +175,7 @@ class ProductListModel {
       onSale: json['on_sale'],
       parentId: json['parent_id'],
       permalink: json['permalink'],
-      price: json['price'],
+      price: json['price'].toString(),
       priceHtml: json['price_html'],
       purchasable: json['purchasable'],
       purchaseNote: json['purchase_note'],

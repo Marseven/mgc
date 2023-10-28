@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/no_data_lottie_widget.dart';
 import 'package:socialv/main.dart';
@@ -14,16 +15,15 @@ class SearchMemberComponent extends StatelessWidget {
   final bool showRecent;
   final List<MemberResponse> memberList;
   final VoidCallback? callback;
-  final bool showActiveUser;
 
-  const SearchMemberComponent({required this.showRecent, required this.memberList, this.callback, this.showActiveUser = true});
+  const SearchMemberComponent({required this.showRecent, required this.memberList, this.callback});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showActiveUser)
+        if (showRecent)
           SnapHelperWidget<List<MemberResponse>>(
             future: getOnlineMembers(),
             onSuccess: (snap) {
@@ -45,7 +45,7 @@ class SearchMemberComponent extends StatelessWidget {
                             isRecent: false,
                             isActive: true,
                             id: member.id.validate(),
-                            name: member.name.validate(),
+                            name: member.name.validate().isNotEmpty ? member.name.validate() : member.mentionName.validate(),
                             image: member.avatarUrls!.full.validate(),
                             subTitle: member.lastActive.validate(),
                             isMember: true,
@@ -73,18 +73,11 @@ class SearchMemberComponent extends StatelessWidget {
                   ],
                 );
               } else {
-                return memberList.validate().isEmpty
-                    ? SizedBox(
-                        height: context.height() * 0.7,
-                        child: NoDataWidget(
-                          imageWidget: NoDataLottieWidget(),
-                          title: language.noRecentMembersSearched,
-                        ),
-                      ).visible(!appStore.isLoading)
-                    : Offstage();
+                return Offstage();
               }
             },
             loadingWidget: Offstage(),
+            errorWidget: Offstage(),
           ),
         if (showRecent && memberList.isNotEmpty) Text(language.recent, style: boldTextStyle()).paddingOnly(left: 16, right: 16, top: 8),
         if (memberList.isNotEmpty)
@@ -120,6 +113,16 @@ class SearchMemberComponent extends StatelessWidget {
               }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
             },
           ),
+        if (memberList.validate().isEmpty)
+          Observer(
+            builder: (_) => SizedBox(
+              height: context.height() * 0.7,
+              child: NoDataWidget(
+                imageWidget: NoDataLottieWidget(),
+                title: language.noMembersFound,
+              ),
+            ).visible(!appStore.isLoading),
+          )
       ],
     );
   }

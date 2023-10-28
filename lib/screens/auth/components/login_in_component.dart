@@ -3,6 +3,9 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/auth/components/successful_activation_dialog.dart';
+import 'package:socialv/screens/auth/components/verify_auth_key_component.dart';
+import 'package:socialv/screens/auth/screens/otp_login_screen.dart';
 import 'package:socialv/screens/auth/screens/forget_password_screen.dart';
 import 'package:socialv/screens/dashboard_screen.dart';
 import 'package:socialv/screens/post/screens/single_post_screen.dart';
@@ -35,12 +38,16 @@ class _LoginInComponentState extends State<LoginInComponent> {
   void initState() {
     super.initState();
 
+    init();
+  }
+
+  void init() async {
     if (appStore.doRemember) {
       nameCont.text = appStore.loginName;
       passwordCont.text = appStore.password;
-    } else if (isIqonicProduct) {
-      nameCont.text = ""; //DEMO_USER_EMAIL;
-      passwordCont.text = ""; //DEMO_USER_PASSWORD;
+    } else if (await isIqonicProduct) {
+      nameCont.text = DEMO_USER_EMAIL;
+      passwordCont.text = DEMO_USER_PASSWORD;
     } else {
       //
     }
@@ -51,12 +58,8 @@ class _LoginInComponentState extends State<LoginInComponent> {
 
     hideKeyboard(context);
 
-    await loginUser(request: req, isSocialLogin: isSocialLogin)
-        .then((value) async {
-      Map req = {
-        "player_id": getStringAsync(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID),
-        "add": 1
-      };
+    await loginUser(request: req, isSocialLogin: isSocialLogin).then((value) async {
+      Map req = {"player_id": getStringAsync(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID), "add": 1};
 
       await setPlayerId(req).then((value) {
         //
@@ -76,13 +79,10 @@ class _LoginInComponentState extends State<LoginInComponent> {
       appStore.setLoginUserId(value.id.toString());
       appStore.setLoginAvatarUrl(value.avatarUrls!.full.validate());
       appStore.setLoading(false);
-
       if (widget.activityId != null) {
-        SinglePostScreen(postId: widget.activityId.validate())
-            .launch(context, isNewTask: true);
+        SinglePostScreen(postId: widget.activityId.validate()).launch(context, isNewTask: true);
       } else {
-        push(DashboardScreen(),
-            isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
+        push(DashboardScreen(), isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
       }
     }).catchError((e) {
       appStore.setLoading(false);
@@ -113,6 +113,46 @@ class _LoginInComponentState extends State<LoginInComponent> {
     });
   }
 
+  void otpSignIn() async {
+    hideKeyboard(context);
+
+    OTPLoginScreen(activityId: widget.activityId).launch(context);
+  }
+
+  Future<void> showVerificationDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return VerifyAuthKeyComponent(
+          onSubmit: (text) {
+            verify(text);
+          },
+        );
+      },
+    ).then((value) {});
+  }
+
+  Future<void> verify(String authKey) async {
+    appStore.setLoading(true);
+
+    verifyKey(key: authKey).then((value) {
+      appStore.setLoading(false);
+      showSuccessfulActivationDialog();
+    }).catchError((e) {
+      appStore.setLoading(false);
+      toast(e.toString(), print: true);
+    });
+  }
+
+  Future<void> showSuccessfulActivationDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SuccessfulActivationDialog();
+      },
+    ).then((value) {});
+  }
+
   @override
   void setState(fn) {
     if (mounted) super.setState(fn);
@@ -129,8 +169,7 @@ class _LoginInComponentState extends State<LoginInComponent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               16.height,
-              Text(language.welcomeBack, style: boldTextStyle(size: 24))
-                  .paddingSymmetric(horizontal: 16),
+              Text(language.welcomeBack, style: boldTextStyle(size: 24)).paddingSymmetric(horizontal: 16),
               8.height,
               Text(
                 language.youHaveBeenMissed,
@@ -152,8 +191,7 @@ class _LoginInComponentState extends State<LoginInComponent> {
                         decoration: inputDecoration(
                           context,
                           label: '${language.username}/${language.email}',
-                          labelStyle:
-                              secondaryTextStyle(weight: FontWeight.w600),
+                          labelStyle: secondaryTextStyle(weight: FontWeight.w600),
                         ),
                       ).paddingSymmetric(horizontal: 16),
                       16.height,
@@ -163,14 +201,12 @@ class _LoginInComponentState extends State<LoginInComponent> {
                         focus: password,
                         textFieldType: TextFieldType.PASSWORD,
                         textStyle: boldTextStyle(),
-                        suffixIconColor:
-                            appStore.isDarkMode ? bodyDark : bodyWhite,
+                        suffixIconColor: appStore.isDarkMode ? bodyDark : bodyWhite,
                         decoration: inputDecoration(
                           context,
                           label: language.password,
                           contentPadding: EdgeInsets.all(0),
-                          labelStyle:
-                              secondaryTextStyle(weight: FontWeight.w600),
+                          labelStyle: secondaryTextStyle(weight: FontWeight.w600),
                         ),
                         isPassword: true,
                         onFieldSubmitted: (x) {
@@ -180,8 +216,7 @@ class _LoginInComponentState extends State<LoginInComponent> {
 
                             Map request = {
                               Users.username: nameCont.text.trim().validate(),
-                              Users.password:
-                                  passwordCont.text.trim().validate(),
+                              Users.password: passwordCont.text.trim().validate(),
                             };
                             login(req: request);
                           } else {
@@ -197,18 +232,15 @@ class _LoginInComponentState extends State<LoginInComponent> {
                             builder: (_) => Row(
                               children: [
                                 Checkbox(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: radius(2)),
-                                  activeColor: appColorPrimary,
+                                  shape: RoundedRectangleBorder(borderRadius: radius(2)),
+                                  activeColor: context.primaryColor,
                                   value: appStore.doRemember,
                                   onChanged: (val) {
                                     appStore.setRemember(!appStore.doRemember);
                                     setState(() {});
                                   },
                                 ),
-                                Text(language.rememberMe,
-                                        style: secondaryTextStyle())
-                                    .onTap(() {
+                                Text(language.rememberMe, style: secondaryTextStyle()).onTap(() {
                                   appStore.setRemember(!appStore.doRemember);
                                   setState(() {});
                                 }),
@@ -221,9 +253,7 @@ class _LoginInComponentState extends State<LoginInComponent> {
                             },
                             child: Text(
                               language.forgetPassword,
-                              style: secondaryTextStyle(
-                                  color: appColorPrimary,
-                                  fontStyle: FontStyle.italic),
+                              style: secondaryTextStyle(color: context.primaryColor, fontStyle: FontStyle.italic),
                             ),
                           ).paddingRight(8)
                         ],
@@ -233,14 +263,13 @@ class _LoginInComponentState extends State<LoginInComponent> {
                         context: context,
                         text: language.login.capitalizeFirstLetter(),
                         onTap: () {
-                          if (loginFormKey.currentState!.validate()) {
+                          if (loginFormKey.currentState!.validate() && !appStore.isLoading) {
                             loginFormKey.currentState!.save();
                             hideKeyboard(context);
 
                             Map request = {
                               Users.username: nameCont.text.trim().validate(),
-                              Users.password:
-                                  passwordCont.text.trim().validate(),
+                              Users.password: passwordCont.text.trim().validate(),
                             };
                             login(req: request);
                           } else {
@@ -252,27 +281,29 @@ class _LoginInComponentState extends State<LoginInComponent> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(language.dHaveAnAccount,
-                              style: secondaryTextStyle()),
+                          Text(language.dHaveAnAccount, style: secondaryTextStyle()),
                           4.width,
                           Text(
                             language.signUp,
-                            style: secondaryTextStyle(
-                                color: appColorPrimary,
-                                decoration: TextDecoration.underline),
+                            style: secondaryTextStyle(color: context.primaryColor, decoration: TextDecoration.underline),
                           ).onTap(() {
                             widget.callback?.call();
-                          },
-                              highlightColor: Colors.transparent,
-                              splashColor: Colors.transparent)
+                          }, highlightColor: Colors.transparent, splashColor: Colors.transparent)
                         ],
                       ),
-                      16.height,
-                      Row(
+                      if (appStore.isAuthVerificationEnable)
+                        InkWell(
+                          onTap: () {
+                            showVerificationDialog();
+                          },
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          child: Text(language.completeTheActivationText, style: secondaryTextStyle(color: context.primaryColor)),
+                        ).paddingOnly(top: 8),
+                      Column(
                         children: [
                           AppButton(
-                            shapeBorder: RoundedRectangleBorder(
-                                borderRadius: radius(defaultAppButtonRadius)),
+                            shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius)),
                             onTap: () {
                               appStore.setLoading(true);
                               googleSignIn();
@@ -283,43 +314,48 @@ class _LoginInComponentState extends State<LoginInComponent> {
                               children: [
                                 GoogleLogoWidget(size: 14),
                                 6.width,
-                                Text(language.signinWithGoogle,
-                                        style: secondaryTextStyle(),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis)
-                                    .flexible(),
+                                Text(language.signInWithGoogle, style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ],
                             ).center(),
                             elevation: 1,
                             color: context.cardColor,
-                          ).expand(),
-                          16.width,
+                          ),
                           if (isIOS)
                             AppButton(
-                              shapeBorder: RoundedRectangleBorder(
-                                  borderRadius: radius(defaultAppButtonRadius)),
+                              shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius)),
                               onTap: () {
                                 appStore.setLoading(true);
                                 appleSignIn();
                               },
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.apple,
-                                      color: context.iconColor, size: 22),
+                                  Icon(Icons.apple, color: context.iconColor, size: 22),
                                   6.width,
-                                  Text(language.signinWithApple,
-                                          style: secondaryTextStyle(),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis)
-                                      .flexible(),
+                                  Text(language.signInWithApple, style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                               elevation: 1,
                               color: context.cardColor,
-                            ).expand(),
+                            ).paddingTop(16),
+                          AppButton(
+                            shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius)),
+                            onTap: otpSignIn,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.phone_in_talk, color: context.primaryColor, size: 22),
+                                6.width,
+                                Text(language.signInWithOtp, style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              ],
+                            ),
+                            elevation: 1,
+                            color: context.cardColor,
+                          ).paddingTop(16),
                         ],
-                      ).paddingSymmetric(horizontal: 16),
+                      ).paddingSymmetric(horizontal: 16, vertical: 16),
                       50.height,
                     ],
                   ),

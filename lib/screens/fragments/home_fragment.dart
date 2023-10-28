@@ -52,8 +52,6 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
         if (widget.controller.position.pixels == widget.controller.position.maxScrollExtent) {
           if (!mIsLastPage) {
             mPage++;
-            setState(() {});
-
             future = getPostList();
           }
         }
@@ -61,14 +59,16 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
     });
 
     LiveStream().on(OnAddPost, (p0) {
+      appStore.setLoading(true);
       postList.clear();
       mPage = 1;
-      future = getPostList();
+      setState(() {});
+      future = getPostList(showLoader: true);
     });
   }
 
-  Future<List<PostModel>> getPostList() async {
-    appStore.setLoading(true);
+  Future<List<PostModel>> getPostList({bool showLoader = true}) async {
+    if (showLoader) appStore.setLoading(true);
     await getPost(page: mPage, type: PostRequestType.all).then((value) {
       if (mPage == 1) postList.clear();
 
@@ -81,7 +81,6 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
       isError = true;
       appStore.setLoading(false);
       toast(e.toString(), print: true);
-
       setState(() {});
     });
 
@@ -128,10 +127,18 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
                         mPage = 1;
                         future = getPostList();
                       },
+                      commentCallback: () {
+                        mPage = 1;
+                        future = getPostList(showLoader: false);
+                      },
                       showHidePostOption: true,
                     ).paddingSymmetric(horizontal: 8),
                     if ((index + 1) % 5 == 0) AdComponent(),
-                    if ((index + 1) == 3) SuggestedUserComponent(),
+                    if ((index + 1) == 3)
+                      if (pmpStore.pmpEnable)
+                        if (pmpStore.memberDirectory) SuggestedUserComponent() else Offstage()
+                      else
+                        SuggestedUserComponent(),
                   ],
                 );
               },
@@ -139,7 +146,7 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
             ),
           ],
         ),
-        if (!appStore.isLoading && isError)
+        if (!appStore.isLoading && isError && postList.isEmpty)
           SizedBox(
             height: context.height() * 0.8,
             child: NoDataWidget(
@@ -157,10 +164,16 @@ class _HomeFragmentState extends State<HomeFragment> with SingleTickerProviderSt
             height: context.height() * 0.8,
             child: InitialHomeComponent().center(),
           ),
-        Positioned(
-          bottom: mPage != 1 ? 8 : null,
-          child: Observer(builder: (_) => LoadingWidget(isBlurBackground: mPage == 1 ? true : false).center().visible(appStore.isLoading)),
-        ),
+        Observer(builder: (_) {
+          if (mPage != 1) {
+            return Positioned(
+              bottom: mPage != 1 ? 8 : null,
+              child: Observer(builder: (_) => LoadingWidget(isBlurBackground: false).center().visible(appStore.isLoading)),
+            );
+          } else {
+            return LoadingWidget().center().visible(appStore.isLoading);
+          }
+        }),
       ],
     );
   }

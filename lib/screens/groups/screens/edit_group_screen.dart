@@ -9,8 +9,11 @@ import 'package:socialv/main.dart';
 import 'package:socialv/models/groups/group_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/groups/components/create_group_step_one.dart';
+import 'package:socialv/screens/groups/screens/create_group_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+
+import 'edit_group_settings_screen.dart';
 
 class EditGroupScreen extends StatefulWidget {
   final int groupId;
@@ -39,6 +42,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
 
   bool isChange = false;
   bool detailsChanged = false;
+  bool enableForum = false;
 
   List<List<String>> get groupTypeRule => [
         [
@@ -123,6 +127,31 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
             elevation: 0,
             centerTitle: true,
             actions: [
+              cachedImage(
+                ic_setting,
+                color: appStore.isDarkMode ? bodyDark : bodyWhite,
+                height: 22,
+                width: 22,
+              ).paddingAll(8).onTap(
+                () {
+                  groupId = group.id.validate();
+
+                  log('group: ${group.id.validate()}');
+                  EditGroupSettingsScreen(
+                    groupId: group.id.validate(),
+                    groupInviteStatus: group.inviteStatus,
+                    isGalleryEnabled: group.isGalleryEnabled,
+                  ).launch(context).then(
+                    (value) {
+                      if (value ?? false) {
+                        isChange = true;
+                      }
+                    },
+                  );
+                },
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+              ),
               IconButton(
                 onPressed: () {
                   if (!appStore.isLoading)
@@ -355,12 +384,12 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Icon(Icons.circle, color: Colors.grey.shade500, size: 8).paddingTop(4),
-                                    4.width,
+                                    8.width,
                                     Text(e.validate(), style: secondaryTextStyle(size: 12)).expand(),
                                   ],
                                 ).paddingSymmetric(vertical: 2);
                               }).toList(),
-                            ),
+                            ).paddingOnly(right: 16),
                           ],
                         ).expand(),
                       ],
@@ -398,12 +427,12 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Icon(Icons.circle, color: Colors.grey.shade500, size: 8).paddingTop(4),
-                                    4.width,
+                                    8.width,
                                     Text(e.validate(), style: secondaryTextStyle(size: 12)).expand(),
                                   ],
                                 ).paddingSymmetric(vertical: 2);
                               }).toList(),
-                            ),
+                            ).paddingOnly(right: 16),
                           ],
                         ).expand(),
                       ],
@@ -441,12 +470,12 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Icon(Icons.circle, color: Colors.grey.shade500, size: 8).paddingTop(4),
-                                    4.width,
+                                    8.width,
                                     Text(e.validate(), style: secondaryTextStyle(size: 12)).expand(),
                                   ],
                                 ).paddingSymmetric(vertical: 2);
                               }).toList(),
-                            ),
+                            ).paddingOnly(right: 16),
                           ],
                         ).expand(),
                       ],
@@ -457,6 +486,28 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                         groupType = GroupType.HIDDEN;
                       });
                     }),
+                    16.height,
+                    Text(language.groupForum, style: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite, size: 18)).paddingSymmetric(horizontal: 16),
+                    10.height,
+                    Text(language.groupAsForumText, style: secondaryTextStyle()).paddingSymmetric(horizontal: 16),
+                    16.height,
+                    Row(
+                      children: [
+                        Checkbox(
+                          shape: RoundedRectangleBorder(borderRadius: radius(2)),
+                          activeColor: context.primaryColor,
+                          value: enableForum,
+                          onChanged: (val) {
+                            enableForum = !enableForum;
+                            setState(() {});
+                          },
+                        ),
+                        Text(language.wantGroupAsForum, style: secondaryTextStyle()).onTap(() {
+                          enableForum = !enableForum;
+                          setState(() {});
+                        }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
+                      ],
+                    ),
                   ],
                 ),
               ),

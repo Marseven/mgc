@@ -6,8 +6,10 @@ import 'package:socialv/main.dart';
 import 'package:socialv/models/groups/group_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/groups/components/group_card_component.dart';
+import 'package:socialv/screens/groups/components/initial_no_group_component.dart';
 import 'package:socialv/screens/groups/screens/create_group_screen.dart';
 import 'package:socialv/screens/groups/screens/group_detail_screen.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 
 import '../../../components/loading_widget.dart';
 import '../../../utils/app_constants.dart';
@@ -95,13 +97,17 @@ class _GroupScreenState extends State<GroupScreen> {
               if (widget.userId == null)
                 IconButton(
                   onPressed: () {
-                    CreateGroupScreen().launch(context).then((value) {
-                      if (value) {
-                        isChange = value;
-                        mPage = 1;
-                        future = getGroups();
-                      }
-                    });
+                    if (pmpStore.canCreateGroup) {
+                      CreateGroupScreen().launch(context).then((value) {
+                        if (value) {
+                          isChange = value;
+                          mPage = 1;
+                          future = getGroups();
+                        }
+                      });
+                    } else {
+                      MembershipPlansScreen().launch(context);
+                    }
                   },
                   icon: Image.asset(
                     ic_plus,
@@ -138,14 +144,7 @@ class _GroupScreenState extends State<GroupScreen> {
 
                   if (snap.hasData) {
                     if (snap.data.validate().isEmpty) {
-                      return NoDataWidget(
-                        imageWidget: NoDataLottieWidget(),
-                        title: isError ? language.somethingWentWrong : language.noDataFound,
-                        onRetry: () {
-                          onRefresh();
-                        },
-                        retryText: '   ${language.clickToRefresh}   ',
-                      ).center();
+                      return InitialNoGroupComponent(callback: onRefresh).center();
                     } else {
                       return AnimatedListView(
                         slideConfiguration: SlideConfiguration(
@@ -164,18 +163,21 @@ class _GroupScreenState extends State<GroupScreen> {
                               future = getGroups();
                             },
                           ).paddingSymmetric(vertical: 8).onTap(() {
-                            GroupDetailScreen(
-                              groupId: data.id.validate(),
-                              groupAvatarImage: data.groupAvatarImage,
-                              groupCoverImage: data.groupCoverImage,
-                              groupMemberCount: data.memberCount.validate().toInt(),
-                            ).launch(context).then((value) {
-                              if (value ?? false) {
-                                isChange = value;
-                                mPage = 1;
-                                future = getGroups();
-                              }
-                            });
+                            if (pmpStore.viewSingleGroup) {
+                              GroupDetailScreen(
+                                groupId: data.id.validate(),
+                                groupAvatarImage: data.groupAvatarImage,
+                                groupCoverImage: data.groupCoverImage,
+                              ).launch(context).then((value) {
+                                if (value ?? false) {
+                                  isChange = value;
+                                  mPage = 1;
+                                  future = getGroups();
+                                }
+                              });
+                            } else {
+                              MembershipPlansScreen().launch(context);
+                            }
                           }, splashColor: Colors.transparent, highlightColor: Colors.transparent);
                         },
                         onNextPage: () {

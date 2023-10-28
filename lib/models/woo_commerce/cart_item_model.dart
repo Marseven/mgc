@@ -23,7 +23,7 @@ class CartItemModel {
   String? sku;
   bool? soldIndividually;
   Totals? totals;
-  List<int>? variation;
+  //List<int>? variation;
   bool? isQuantityChanged;
 
   CartItemModel({
@@ -47,7 +47,7 @@ class CartItemModel {
     this.sku,
     this.soldIndividually,
     this.totals,
-    this.variation,
+    //this.variation,
     this.isQuantityChanged,
   });
 
@@ -73,7 +73,7 @@ class CartItemModel {
       sku: json['sku'],
       soldIndividually: json['sold_individually'],
       totals: json['totals'] != null ? Totals.fromJson(json['totals']) : null,
-      variation: json['variation'] != null ? List<int>.from(json['variation']) : null,
+      //variation: json['variation'] != null ? List<int>.from(json['variation']) : null,
     );
   }
 
@@ -115,9 +115,9 @@ class CartItemModel {
     if (this.totals != null) {
       data['totals'] = this.totals!.toJson();
     }
-    if (this.variation != null) {
+    /*if (this.variation != null) {
       data['variation'] = this.variation;
-    }
+    }*/
     return data;
   }
 }

@@ -3,11 +3,14 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/activity_response.dart';
 import 'package:socialv/models/groups/group_response.dart';
 import 'package:socialv/models/members/member_response.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 import 'package:socialv/screens/search/components/search_group_component.dart';
 import 'package:socialv/screens/search/components/search_member_component.dart';
+import 'package:socialv/screens/search/components/search_post_component.dart';
 
 import '../../utils/app_constants.dart';
 
@@ -23,8 +26,9 @@ class SearchFragment extends StatefulWidget {
 class _SearchFragmentState extends State<SearchFragment> with SingleTickerProviderStateMixin {
   List<MemberResponse> memberList = [];
   List<GroupResponse> groupList = [];
+  List<ActivityResponse> postList = [];
 
-  List<String> searchOptions = [language.members, language.groups];
+  List<String> searchOptions = [language.members, language.groups, language.posts];
 
   TextEditingController searchController = TextEditingController();
 
@@ -39,7 +43,13 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
   void initState() {
     super.initState();
 
-    dropdownValue = searchOptions.first;
+    if (pmpStore.memberDirectory) {
+      dropdownValue = searchOptions.first;
+    } else if (pmpStore.viewGroups) {
+      dropdownValue = searchOptions[1];
+    } else {
+      dropdownValue = searchOptions[2];
+    }
 
     widget.controller.addListener(() {
       if (widget.controller.position.pixels == widget.controller.position.maxScrollExtent) {
@@ -49,8 +59,10 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
 
           if (dropdownValue == searchOptions.first) {
             getMembersList(text: searchController.text.trim(), page: mPage);
-          } else {
+          } else if (dropdownValue == searchOptions[1]) {
             getGroups(text: searchController.text.trim(), page: mPage);
+          } else {
+            getPosts(text: searchController.text.trim(), page: mPage);
           }
         }
       }
@@ -104,6 +116,25 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
     setState(() {});
   }
 
+  Future<void> getPosts({String? text, int page = 1}) async {
+    if (text!.isEmpty) {
+      groupList.clear();
+    } else {
+      appStore.setLoading(true);
+      await searchPost(searchText: text, page: page).then((value) {
+        if (mPage == 1) postList.clear();
+        mIsLastPage = value.length != PER_PAGE;
+        postList.addAll(value);
+        setState(() {});
+
+        appStore.setLoading(false);
+      }).catchError((e) {
+        appStore.setLoading(false);
+        toast(e.toString(), print: true);
+      });
+    }
+  }
+
   void showClearTextIcon() {
     if (!hasShowClearTextIcon) {
       hasShowClearTextIcon = true;
@@ -143,8 +174,10 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
                     onChanged: (val) {
                       if (dropdownValue == searchOptions.first) {
                         getMembersList(text: val);
-                      } else {
+                      } else if (dropdownValue == searchOptions[1]) {
                         getGroups(text: val);
+                      } else {
+                        getPosts(text: val);
                       }
                     },
                     textFieldType: TextFieldType.USERNAME,
@@ -193,12 +226,26 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
                           style: primaryTextStyle(),
                           onChanged: (String? newValue) {
                             mPage = 1;
-                            dropdownValue = newValue.validate();
-                            setState(() {});
                             if (newValue == searchOptions.first) {
-                              getMembersList(text: searchController.text);
+                              if (pmpStore.memberDirectory) {
+                                getMembersList(text: searchController.text);
+                                dropdownValue = newValue.validate();
+                                setState(() {});
+                              } else {
+                                MembershipPlansScreen().launch(context);
+                              }
+                            } else if (newValue == searchOptions[1]) {
+                              if (pmpStore.viewGroups) {
+                                getGroups(text: searchController.text);
+                                dropdownValue = newValue.validate();
+                                setState(() {});
+                              } else {
+                                MembershipPlansScreen().launch(context);
+                              }
                             } else {
-                              getGroups(text: searchController.text);
+                              getPosts(text: searchController.text);
+                              dropdownValue = newValue.validate();
+                              setState(() {});
                             }
                           },
                           items: searchOptions.validate().map<DropdownMenuItem<String>>((String value) {
@@ -219,20 +266,21 @@ class _SearchFragmentState extends State<SearchFragment> with SingleTickerProvid
             if (dropdownValue == searchOptions.first)
               SearchMemberComponent(
                 memberList: memberList.isEmpty ? appStore.recentMemberSearchList : memberList,
-                showRecent: memberList.isEmpty ? true : false,
-                showActiveUser: memberList.isEmpty,
+                showRecent: memberList.isEmpty,
+                callback: () {
+                  setState(() {});
+                },
+              )
+            else if (dropdownValue == searchOptions[1])
+              SearchGroupComponent(
+                showRecent: groupList.isEmpty,
+                groupList: groupList.isEmpty ? appStore.recentGroupsSearchList : groupList,
                 callback: () {
                   setState(() {});
                 },
               )
             else
-              SearchGroupComponent(
-                showRecent: groupList.isEmpty ? true : false,
-                groupList: groupList.isEmpty ? appStore.recentGroupsSearchList : groupList,
-                callback: () {
-                  setState(() {});
-                },
-              ),
+              SearchPostComponent(postList: postList),
           ],
         ),
         Positioned(

@@ -62,8 +62,10 @@ class _ForumsFragment extends State<ForumsFragment> {
     });
 
     LiveStream().on(RefreshForumsFragment, (p0) {
+      appStore.setLoading(true);
       forumsList.clear();
       mPage = 1;
+      setState(() {});
       future = getForums();
     });
   }
@@ -231,10 +233,14 @@ class _ForumsFragment extends State<ForumsFragment> {
             Observer(
               builder: (_) {
                 if (appStore.isLoading) {
-                  return Positioned(
-                    bottom: mPage != 1 ? 10 : null,
-                    child: LoadingWidget(isBlurBackground: mPage == 1 ? true : false),
-                  );
+                  if (mPage != 1) {
+                    return Positioned(
+                      bottom: 10,
+                      child: LoadingWidget(isBlurBackground: false),
+                    );
+                  } else {
+                    return LoadingWidget(isBlurBackground: false).paddingTop(context.height() * 0.3);
+                  }
                 } else {
                   return Offstage();
                 }

@@ -5,6 +5,7 @@ import 'package:socialv/main.dart';
 import 'package:socialv/models/notifications/notification_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 import '../../../utils/app_constants.dart';
 
@@ -13,7 +14,7 @@ class RequestAcceptedNotificationComponent extends StatelessWidget {
   final VoidCallback? callback;
 
   RequestAcceptedNotificationComponent({required this.element, this.callback});
-
+  final unescape = HtmlUnescape();
   @override
   Widget build(BuildContext context) {
     return Observer(
@@ -24,17 +25,27 @@ class RequestAcceptedNotificationComponent extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+              cachedImage(element.itemImage,
+                      height: 40, width: 40, fit: BoxFit.cover)
+                  .cornerRadiusWithClipRRect(100),
               8.width,
               Column(
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: '${element.itemName.validate()} ',
-                      style: boldTextStyle(size: 14,fontFamily: fontFamily),
+                      text: unescape.convert('${element.itemName.validate()} '),
+                      style: boldTextStyle(size: 14, fontFamily: fontFamily),
                       children: [
-                        if (element.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
-                        TextSpan(text: ' ${language.acceptedYourRequest}', style: secondaryTextStyle(fontFamily: fontFamily)),
+                        if (element.isUserVerified.validate())
+                          WidgetSpan(
+                              child: Image.asset(ic_tick_filled,
+                                  height: 18,
+                                  width: 18,
+                                  color: blueTickColor,
+                                  fit: BoxFit.cover)),
+                        TextSpan(
+                            text: ' ${language.acceptedYourRequest}',
+                            style: secondaryTextStyle(fontFamily: fontFamily)),
                       ],
                     ),
                     maxLines: 2,
@@ -42,7 +53,8 @@ class RequestAcceptedNotificationComponent extends StatelessWidget {
                     textAlign: TextAlign.start,
                   ),
                   8.height,
-                  Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+                  Text(convertToAgo(element.date.validate()),
+                      style: secondaryTextStyle(size: 12)),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ).expand(),
@@ -57,7 +69,8 @@ class RequestAcceptedNotificationComponent extends StatelessWidget {
                     ifNotTester(() {
                       appStore.setLoading(true);
 
-                      deleteNotification(notificationId: element.id.toString()).then((value) {
+                      deleteNotification(notificationId: element.id.toString())
+                          .then((value) {
                         if (value.deleted.validate()) {
                           callback?.call();
                         }
@@ -72,7 +85,8 @@ class RequestAcceptedNotificationComponent extends StatelessWidget {
                   positiveText: language.remove,
                 );
             },
-            icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+            icon: Icon(Icons.delete_outline,
+                color: appStore.isDarkMode ? bodyDark : bodyWhite),
           )
         ],
       ).paddingAll(16),

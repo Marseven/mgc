@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:socialv/main.dart';
 import 'package:socialv/models/notifications/notification_model.dart';
 import 'package:socialv/screens/forums/screens/topic_detail_screen.dart';
 import 'package:socialv/screens/groups/screens/group_detail_screen.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 import 'package:socialv/screens/notification/components/member_verified_notification.dart';
+import 'package:socialv/screens/notification/components/reaction_notification_component.dart';
 import 'package:socialv/screens/notification/components/request_notification_component.dart';
 import 'package:socialv/screens/notification/components/comment_reply_notification_component.dart';
 import 'package:socialv/screens/notification/components/group_invite_notification_component.dart';
@@ -13,6 +16,8 @@ import 'package:socialv/screens/notification/components/mention_notification_com
 import 'package:socialv/screens/notification/components/promoted_to_admin_notification.dart';
 import 'package:socialv/screens/notification/components/request_accepted_notification_component.dart';
 import 'package:socialv/screens/notification/components/topic_reply_notification_component.dart';
+import 'package:socialv/screens/notification/components/share_post_notification_component.dart';
+import 'package:socialv/screens/post/screens/comment_screen.dart';
 import 'package:socialv/screens/post/screens/single_post_screen.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
@@ -35,7 +40,11 @@ class NotificationWidget extends StatelessWidget {
         if (notificationModel.action == NotificationAction.friendshipAccepted) {
           MemberProfileScreen(memberId: notificationModel.itemId.validate()).launch(context);
         } else {
-          GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+          if (pmpStore.viewSingleGroup) {
+            GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+          } else {
+            MembershipPlansScreen().launch(context);
+          }
         }
       });
     } else if (notificationModel.action == NotificationAction.membershipRequestRejected) {
@@ -45,9 +54,15 @@ class NotificationWidget extends StatelessWidget {
           callback.call();
         },
       ).onTap(() async {
-        GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+        if (pmpStore.viewSingleGroup) {
+          GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+        } else {
+          MembershipPlansScreen().launch(context);
+        }
       });
-    } else if (notificationModel.action == NotificationAction.commentReply || notificationModel.action == NotificationAction.updateReply || notificationModel.action == NotificationAction.actionActivityLiked) {
+    } else if (notificationModel.action == NotificationAction.commentReply ||
+        notificationModel.action == NotificationAction.updateReply ||
+        notificationModel.action == NotificationAction.actionActivityLiked) {
       return CommentReplyNotificationComponent(
         element: notificationModel,
         callback: () {
@@ -82,7 +97,11 @@ class NotificationWidget extends StatelessWidget {
           callback.call();
         },
       ).onTap(() async {
-        await GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+        if (pmpStore.viewSingleGroup) {
+          GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+        } else {
+          MembershipPlansScreen().launch(context);
+        }
       });
     } else if (notificationModel.action == NotificationAction.groupInvite) {
       return GroupInviteNotificationComponent(
@@ -91,9 +110,13 @@ class NotificationWidget extends StatelessWidget {
           callback.call();
         },
       ).onTap(() async {
-        await GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context).then((value) {
-          if (value ?? false) callback.call();
-        });
+        if (pmpStore.viewSingleGroup) {
+          GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context).then((value) {
+            if (value ?? false) callback.call();
+          });
+        } else {
+          MembershipPlansScreen().launch(context);
+        }
       });
     } else if (notificationModel.action == NotificationAction.memberPromotedToAdmin) {
       return PromotedToAdminNotification(
@@ -102,7 +125,11 @@ class NotificationWidget extends StatelessWidget {
           callback.call();
         },
       ).onTap(() async {
-        await GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+        if (pmpStore.viewSingleGroup) {
+          GroupDetailScreen(groupId: notificationModel.itemId.validate()).launch(context);
+        } else {
+          MembershipPlansScreen().launch(context);
+        }
       });
     } else if (notificationModel.component == Component.verifiedMember) {
       return MemberVerifiedNotification(
@@ -119,6 +146,37 @@ class NotificationWidget extends StatelessWidget {
         },
       ).onTap(() {
         TopicDetailScreen(topicId: notificationModel.itemId.validate()).launch(context);
+      });
+    } else if (notificationModel.action == NotificationAction.socialVSharePost) {
+      return SharePostNotificationComponent(
+        element: notificationModel,
+        callback: () {
+          callback.call();
+        },
+      ).onTap(() async {
+        SinglePostScreen(postId: notificationModel.itemId.validate()).launch(context);
+      });
+    } else if (notificationModel.action == NotificationAction.socialVSharePost) {
+      return SharePostNotificationComponent(
+        element: notificationModel,
+        callback: () {
+          callback.call();
+        },
+      ).onTap(() async {
+        SinglePostScreen(postId: notificationModel.itemId.validate()).launch(context);
+      });
+    } else if (notificationModel.action == NotificationAction.actionActivityReacted || notificationModel.action == NotificationAction.actionCommentActivityReacted) {
+      return ReactionNotificationComponent(
+        element: notificationModel,
+        callback: () {
+          callback.call();
+        },
+      ).onTap(() async {
+        if (notificationModel.action == NotificationAction.actionActivityReacted) {
+          SinglePostScreen(postId: notificationModel.itemId.validate()).launch(context);
+        } else {
+          CommentScreen(postId: notificationModel.itemId.validate()).launch(context);
+        }
       });
     } else {
       return Offstage();

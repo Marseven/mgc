@@ -138,7 +138,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(topic.title.validate(), style: boldTextStyle(size: 22)),
+                              Text(topic.title.validate().validateAndFilter(), style: boldTextStyle(size: 22)),
                               16.height,
                               Row(
                                 children: [

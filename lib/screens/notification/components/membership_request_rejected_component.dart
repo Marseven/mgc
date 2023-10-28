@@ -6,15 +6,18 @@ import 'package:socialv/models/notifications/notification_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class MembershipRequestRejectedComponent extends StatelessWidget {
   final NotificationModel element;
   final VoidCallback? callback;
 
-  const MembershipRequestRejectedComponent({required this.element, this.callback});
+  const MembershipRequestRejectedComponent(
+      {required this.element, this.callback});
 
   @override
   Widget build(BuildContext context) {
+    var unescape = HtmlUnescape();
     return Observer(
       builder: (_) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,16 +26,20 @@ class MembershipRequestRejectedComponent extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+              cachedImage(element.itemImage,
+                      height: 40, width: 40, fit: BoxFit.cover)
+                  .cornerRadiusWithClipRRect(100),
               8.width,
               Column(
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: '${element.itemName.validate()} ',
-                      style: boldTextStyle(size: 14,fontFamily: fontFamily),
+                      text: unescape.convert('${element.itemName.validate()} '),
+                      style: boldTextStyle(size: 14, fontFamily: fontFamily),
                       children: <TextSpan>[
-                        TextSpan(text: language.rejectedYourRequest, style: secondaryTextStyle(fontFamily: fontFamily)),
+                        TextSpan(
+                            text: language.rejectedYourRequest,
+                            style: secondaryTextStyle(fontFamily: fontFamily)),
                       ],
                     ),
                     maxLines: 2,
@@ -40,7 +47,8 @@ class MembershipRequestRejectedComponent extends StatelessWidget {
                     textAlign: TextAlign.start,
                   ),
                   8.height,
-                  Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+                  Text(convertToAgo(element.date.validate()),
+                      style: secondaryTextStyle(size: 12)),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ).expand(),
@@ -55,7 +63,8 @@ class MembershipRequestRejectedComponent extends StatelessWidget {
                     ifNotTester(() {
                       appStore.setLoading(true);
 
-                      deleteNotification(notificationId: element.id.toString()).then((value) {
+                      deleteNotification(notificationId: element.id.toString())
+                          .then((value) {
                         if (value.deleted.validate()) {
                           callback?.call();
                         }
@@ -70,7 +79,8 @@ class MembershipRequestRejectedComponent extends StatelessWidget {
                   positiveText: language.remove,
                 );
             },
-            icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+            icon: Icon(Icons.delete_outline,
+                color: appStore.isDarkMode ? bodyDark : bodyWhite),
           )
         ],
       ).paddingAll(16),

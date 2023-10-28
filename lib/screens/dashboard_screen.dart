@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:socialv/main.dart';
+import 'package:socialv/models/cart_badge_model.dart';
 import 'package:socialv/models/dashboard_api_response.dart';
+import 'package:socialv/models/pmp_models/membership_model.dart';
 import 'package:socialv/models/posts/post_in_list_model.dart';
+import 'package:socialv/models/reactions/reactions_model.dart';
+import 'package:socialv/network/pmp_repositry.dart';
 import 'package:socialv/network/rest_apis.dart';
-import 'package:socialv/screens/fragments/forums_fragment.dart';
+import 'package:socialv/screens/fragments/events_fragment.dart';
 import 'package:socialv/screens/fragments/home_fragment.dart';
 import 'package:socialv/screens/fragments/notification_fragment.dart';
 import 'package:socialv/screens/fragments/profile_fragment.dart';
 import 'package:socialv/screens/fragments/search_fragment.dart';
+import 'package:socialv/screens/groups/screens/group_detail_screen.dart';
 import 'package:socialv/screens/home/components/user_detail_bottomsheet_widget.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 import 'package:socialv/screens/notification/components/latest_activity_component.dart';
 import 'package:socialv/screens/post/screens/add_post_screen.dart';
+import 'package:socialv/screens/post/screens/comment_screen.dart';
+import 'package:socialv/screens/post/screens/single_post_screen.dart';
+import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/screens/shop/screens/shop_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:badges/badges.dart' as badges;
+
+import '../utils/chat_reaction_list.dart';
+import 'messages/screens/message_screen.dart';
 
 int selectedIndex = 0;
 
@@ -29,6 +44,7 @@ List<StoryActions>? storyActions;
 List<VisibilityOptions>? accountPrivacyVisibility;
 List<ReportType>? reportTypes;
 List<PostInListModel>? postInListDashboard;
+List<ReactionsModel> reactions = [];
 
 class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
@@ -41,6 +57,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   bool onAnimationEnd = true;
 
+  late bool _showCartBadge;
+
   List<Widget> appFragments = [];
 
   @override
@@ -51,6 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     super.initState();
     tabController = TabController(length: 5, vsync: this);
+    getChatEmojiList();
 
     init();
   }
@@ -59,10 +78,51 @@ class _DashboardScreenState extends State<DashboardScreen>
     appFragments.addAll([
       HomeFragment(controller: _controller),
       SearchFragment(controller: _controller),
-      ForumsFragment(controller: _controller),
+      EventsFragment(controller: _controller),
       NotificationFragment(controller: _controller),
       ProfileFragment(controller: _controller),
     ]);
+
+    afterBuildCreated(() {
+      if (isMobile) {
+        OneSignal.shared.setNotificationOpenedHandler(
+            (OSNotificationOpenedResult notification) async {
+          notification.notification.additionalData!.entries
+              .forEach((element) async {
+            if (element.key == "is_comment") {
+              int postId = notification.notification.additionalData!.entries
+                  .firstWhere((element) => element.key == 'post_id')
+                  .value;
+              if (postId != 0) {
+                CommentScreen(postId: postId).launch(context);
+              }
+            } else if (element.key == 'post_id') {
+              if (element.value.toString().toInt() != 0) {
+                SinglePostScreen(postId: element.value.toString().toInt())
+                    .launch(context);
+              }
+            } else if (element.key == 'user_id') {
+              MemberProfileScreen(memberId: element.value).launch(context);
+            } else if (element.key == 'group_id') {
+              if (pmpStore.viewSingleGroup) {
+                GroupDetailScreen(groupId: element.value).launch(context);
+              } else {
+                MembershipPlansScreen().launch(context);
+              }
+            } else if (element.key == 'thread_id') {
+              if (pmpStore.privateMessaging) {
+                MessageScreen().launch(context);
+              } else {
+                MembershipPlansScreen().launch(context);
+              }
+            }
+          });
+        });
+      }
+    });
+
+    await getReactionsList();
+    defaultReactionsList();
 
     _controller.addListener(() {
       //
@@ -91,24 +151,12 @@ class _DashboardScreenState extends State<DashboardScreen>
     setStatusBarColorBasedOnTheme();
 
     activeUser();
+    getNotificationCount();
     getMediaList();
-  }
-
-  Future<void> activeUser() async {
-    await updateActiveStatus().then((value) {
-      Future.delayed(Duration(minutes: updateActiveStatusDuration), () {
-        activeUser();
-      });
-    }).catchError((e) {
-      log('Error: ${e.toString()}');
-      Future.delayed(Duration(minutes: updateActiveStatusDuration), () {
-        activeUser();
-      });
-    });
+    if (pmpStore.pmpEnable) getUsersLevel();
   }
 
   Future<void> getMediaList() async {
-    appStore.setLoading(true);
     await getMediaTypes().then((value) {
       if (value.any((element) => element.type == MediaTypes.gif)) {
         appStore.setShowGif(true);
@@ -122,17 +170,56 @@ class _DashboardScreenState extends State<DashboardScreen>
   Future<void> getDetails() async {
     await getDashboardDetails().then((value) {
       appStore.setNotificationCount(value.notificationCount.validate());
+      appStore.setWebsocketEnable(value.isWebsocketEnable.validate());
       appStore.setVerificationStatus(value.verificationStatus.validate());
       visibilities = value.visibilities.validate();
       accountPrivacyVisibility = value.accountPrivacyVisibility.validate();
       reportTypes = value.reportTypes.validate();
       appStore.setShowStoryHighlight(value.isHighlightStoryEnable.validate());
       appStore.suggestedUserList = value.suggestedUser.validate();
-      appStore.setShowWooCommerce(value.isShopEnable.validate());
+      appStore.suggestedGroupsList = value.suggestedGroups.validate();
+      appStore.setShowWooCommerce(value.isWoocommerceEnable.validate());
       appStore.setWooCurrency(parseHtmlString(value.wooCurrency.validate()));
       appStore.setGiphyKey(parseHtmlString(value.giphyKey.validate()));
+      appStore.setReactionsEnable(value.isReactionEnable.validate());
+      appStore.setLMSEnable(value.isLMSEnable.validate());
+      appStore.setCourseEnable(value.isCourseEnable.validate());
+      appStore.setDisplayPostCount(value.displayPostCount.validate());
+      appStore.setDisplayPostCommentsCount(
+          value.displayPostCommentsCount.validate());
+      appStore
+          .setDisplayFriendRequestBtn(value.displayFriendRequestBtn.validate());
+      appStore.setShopEnable(value.isShopEnable.validate());
+      appStore.setIOSGiphyKey(parseHtmlString(value.iosGiphyKey.validate()));
+      messageStore.setMessageCount(value.unreadMessagesCount.validate());
       storyActions = value.storyActions.validate();
     }).catchError(onError);
+  }
+
+  Future<void> getReactionsList() async {
+    await getReactions().then((value) {
+      reactions = value;
+      log('Reactions: ${reactions.length}');
+    }).catchError((e) {
+      log('Error: ${e.toString()}');
+    });
+
+    log('Reactions: ${reactions.length}');
+
+    setState(() {});
+  }
+
+  Future<void> defaultReactionsList() async {
+    await getDefaultReaction().then((value) {
+      if (value.isNotEmpty) {
+        appStore.setDefaultReaction(value.first);
+      } else {
+        if (reactions.isNotEmpty) appStore.setDefaultReaction(reactions.first);
+      }
+    }).catchError((e) {
+      log('Error: ${e.toString()}');
+    });
+    setState(() {});
   }
 
   Future<void> postIn() async {
@@ -143,6 +230,25 @@ class _DashboardScreenState extends State<DashboardScreen>
     }).catchError(onError);
 
     setState(() {});
+  }
+
+  Future<void> getUsersLevel() async {
+    await getMembershipLevelForUser(userId: appStore.loginUserId.toInt())
+        .then((value) {
+      String? levelId;
+      if (value != null) {
+        MembershipModel membership = MembershipModel.fromJson(value);
+
+        levelId = membership.id;
+        setState(() {});
+        pmpStore.setPmpMembership(levelId.validate());
+      }
+
+      setRestrictions(levelId: levelId);
+    }).catchError((e) {
+      appStore.setLoading(false);
+      toast(e.toString(), print: true);
+    });
   }
 
   @override
@@ -158,8 +264,17 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.dispose();
   }
 
+  late CartBadge cartBadge;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialisez myState en utilisant Provider
+    cartBadge = Provider.of<CartBadge>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    _showCartBadge = cartBadge.cartCount > 0;
     return DoublePressBackWidget(
       onWillPop: () {
         if (selectedIndex != 0) {
@@ -185,7 +300,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
           return Future.value(true);
         },
-        color: appColorPrimary,
+        color: context.primaryColor,
         child: Scaffold(
           body: CustomScrollView(
             controller: _controller,
@@ -205,11 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     children: [
                       Image.asset(APP_ICON, width: 58),
                       4.width,
-                      // Text(APP_NAME,
-                      //     style: boldTextStyle(
-                      //         color: appColorSecondary,
-                      //         size: 24,
-                      //         fontFamily: fontFamily)),
+                      //Text(APP_NAME, style: boldTextStyle(color: context.primaryColor, size: 24, fontFamily: fontFamily)),
                     ],
                   ),
                   actions: [
@@ -231,45 +342,38 @@ class _DashboardScreenState extends State<DashboardScreen>
                           fit: BoxFit.fitWidth,
                           color: context.iconColor),
                     ),
-                    if (appStore.showWoocommerce)
+                    if (appStore.showWoocommerce == 1 &&
+                        appStore.isShopEnable == 1)
                       Stack(
                         alignment: AlignmentDirectional.center,
                         children: <Widget>[
-                          Image.asset(ic_bag,
-                                  height: 24,
-                                  width: 24,
-                                  fit: BoxFit.fitWidth,
-                                  color: context.iconColor)
-                              .onTap(() {
-                            ShopScreen().launch(context);
-                          },
-                                  splashColor: Colors.transparent,
-                                  highlightColor:
-                                      Colors.transparent).paddingSymmetric(
-                                  horizontal: 8),
-                          if (appStore.wooCart > 0)
-                            Positioned(
-                                top: 10.0,
-                                right: 1.0,
-                                child: Stack(
-                                  //alignment: AlignmentDirectional.topEnd,
-                                  children: <Widget>[
-                                    Icon(Icons.brightness_1,
-                                        size: 22.0, color: Colors.green[800]),
-                                    Positioned(
-                                        top: 5.0,
-                                        right: 5.5,
-                                        child: Center(
-                                          child: Text(
-                                            appStore.wooCart.toString(),
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10.0,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        )),
-                                  ],
-                                )),
+                          Stack(
+                            alignment: AlignmentDirectional.center,
+                            children: <Widget>[
+                              badges.Badge(
+                                badgeContent:
+                                    Text(cartBadge.cartCount.toString()),
+                                badgeStyle: badges.BadgeStyle(
+                                  badgeColor: appColorPrimary,
+                                ),
+                                showBadge: _showCartBadge,
+                                position: badges.BadgePosition.topEnd(
+                                    top: -10, end: -1),
+                                child: Image.asset(ic_bag,
+                                        height: 24,
+                                        width: 24,
+                                        fit: BoxFit.fitWidth,
+                                        color: context.iconColor)
+                                    .onTap(() {
+                                  ShopScreen().launch(context);
+                                },
+                                        splashColor: Colors.transparent,
+                                        highlightColor: Colors
+                                            .transparent).paddingSymmetric(
+                                        horizontal: 8),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     Observer(
@@ -278,6 +382,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         splashColor: Colors.transparent,
                         onPressed: () {
                           showModalBottomSheet(
+                            elevation: 0,
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
@@ -291,6 +396,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     Container(
                                       width: 45,
                                       height: 5,
+                                      //clipBehavior: Clip.hardEdge,
                                       decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(16),
@@ -298,6 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     ),
                                     8.height,
                                     Container(
+                                      clipBehavior: Clip.antiAliasWithSaveLayer,
                                       decoration: BoxDecoration(
                                         color: context.cardColor,
                                         borderRadius: BorderRadius.only(
@@ -324,7 +431,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   ],
                   bottom: TabBar(
-                    indicatorColor: appColorPrimary,
+                    indicatorColor: context.primaryColor,
                     controller: tabController,
                     onTap: (val) async {
                       selectedIndex = val;
@@ -341,7 +448,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           width: 24,
                           fit: BoxFit.cover,
                           color: selectedIndex == 0
-                              ? appColorPrimary
+                              ? context.primaryColor
                               : context.iconColor,
                         ).paddingSymmetric(vertical: 11),
                       ),
@@ -355,23 +462,21 @@ class _DashboardScreenState extends State<DashboardScreen>
                           width: 24,
                           fit: BoxFit.cover,
                           color: selectedIndex == 1
-                              ? appColorPrimary
+                              ? context.primaryColor
                               : context.iconColor,
                         ).paddingSymmetric(vertical: 11),
                       ),
                       Tooltip(
                         richMessage: TextSpan(
-                            text: language.forums,
+                            text: language.event,
                             style: secondaryTextStyle(color: Colors.white)),
                         child: Image.asset(
-                          selectedIndex == 2
-                              ? ic_three_user_filled
-                              : ic_three_user,
+                          selectedIndex == 2 ? ic_calendar : ic_calendar,
                           height: 28,
                           width: 28,
                           fit: BoxFit.fill,
                           color: selectedIndex == 2
-                              ? appColorPrimary
+                              ? context.primaryColor
                               : context.iconColor,
                         ).paddingSymmetric(vertical: 9),
                       ),
@@ -443,7 +548,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           width: 24,
                           fit: BoxFit.cover,
                           color: selectedIndex == 4
-                              ? appColorPrimary
+                              ? context.primaryColor
                               : context.iconColor,
                         ).paddingSymmetric(vertical: 11),
                       ),
@@ -464,10 +569,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           floatingActionButton: tabController.index == 3
               ? FloatingActionButton(
                   onPressed: () {
-                    //openWebPage(context, url: 'http://192.168.1.230/wp_themes/latest/socialv/atest');
-
                     showModalBottomSheet(
                       context: context,
+                      elevation: 0,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       transitionAnimationController: _animationController,
@@ -507,9 +611,53 @@ class _DashboardScreenState extends State<DashboardScreen>
                       height: 26,
                       fit: BoxFit.cover,
                       color: Colors.white),
-                  backgroundColor: appColorPrimary,
+                  backgroundColor: context.primaryColor,
                 )
-              : Offstage(),
+              : Observer(
+                  builder: (_) => Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      FloatingActionButton(
+                        onPressed: () {
+                          if (pmpStore.privateMessaging) {
+                            messageStore.setMessageCount(0);
+                            MessageScreen().launch(context);
+                          } else {
+                            MembershipPlansScreen().launch(context);
+                          }
+                        },
+                        child: cachedImage(ic_chat,
+                            width: 26,
+                            height: 26,
+                            fit: BoxFit.cover,
+                            color: Colors.white),
+                        backgroundColor: context.primaryColor,
+                      ),
+                      if (messageStore.messageCount != 0)
+                        Positioned(
+                          left: messageStore.messageCount.toString().length > 1
+                              ? -6
+                              : -4,
+                          top: -5,
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                                color: blueTickColor, shape: BoxShape.circle),
+                            child: Text(
+                              messageStore.messageCount.toString(),
+                              style: boldTextStyle(
+                                  color: Colors.white,
+                                  size: 10,
+                                  weight: FontWeight.w700,
+                                  letterSpacing: 0.7),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
         ),
       ),
     );

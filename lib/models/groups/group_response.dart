@@ -61,7 +61,7 @@ class GroupResponse {
       slug: json['slug'],
       status: json['status'],
       totalMemberCount: json['total_member_count'] != null ? json['total_member_count'] : null,
-      types: json['types'] != null ? (json['types'] as List).map((i) => i.fromJson(i)).toList() : null,
+      //types: json['types'] != null ? (json['types'] as List).map((i) => i.fromJson(i)).toList() : null,
     );
   }
 

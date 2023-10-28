@@ -20,12 +20,10 @@ class InitialTopicReplyComponent extends StatefulWidget {
   });
 
   @override
-  State<InitialTopicReplyComponent> createState() =>
-      _InitialTopicReplyComponentState();
+  State<InitialTopicReplyComponent> createState() => _InitialTopicReplyComponentState();
 }
 
-class _InitialTopicReplyComponentState
-    extends State<InitialTopicReplyComponent> {
+class _InitialTopicReplyComponentState extends State<InitialTopicReplyComponent> {
   final topicReplyFormKey = GlobalKey<FormState>();
 
   TextEditingController content = TextEditingController();
@@ -75,8 +73,7 @@ class _InitialTopicReplyComponentState
         children: [
           Text(widget.topicContent, style: secondaryTextStyle()),
           16.height,
-          Text('${language.replyTo}: ${widget.topicTitle}',
-              style: boldTextStyle()),
+          Text('${language.replyTo}: ${widget.topicTitle}', style: boldTextStyle()),
           16.height,
           AppTextField(
             controller: content,
@@ -84,8 +81,7 @@ class _InitialTopicReplyComponentState
             textInputAction: TextInputAction.done,
             textFieldType: TextFieldType.MULTILINE,
             textStyle: boldTextStyle(),
-            decoration: inputDecorationFilled(context,
-                fillColor: context.cardColor, label: language.writeAReply),
+            decoration: inputDecorationFilled(context, fillColor: context.cardColor, label: language.writeAReply),
             minLines: 5,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -95,6 +91,7 @@ class _InitialTopicReplyComponentState
             },
           ),
           16.height,
+
           AppTextField(
             controller: tags,
             keyboardType: TextInputType.multiline,
@@ -103,29 +100,25 @@ class _InitialTopicReplyComponentState
             textStyle: boldTextStyle(),
             minLines: 1,
             maxLines: 5,
-            decoration: inputDecorationFilled(context,
-                fillColor: context.cardColor, label: language.topicTags),
+            decoration: inputDecorationFilled(context, fillColor: context.cardColor, label: language.topicTags),
           ),
-          Text(language.notePleaseAddComma, style: secondaryTextStyle()),
+          Text(language.notePleaseAddComma,style: secondaryTextStyle()),
           16.height,
           Row(
             children: [
               Checkbox(
                 shape: RoundedRectangleBorder(borderRadius: radius(2)),
-                activeColor: appColorPrimary,
+                activeColor: context.primaryColor,
                 value: doNotify,
                 onChanged: (val) {
                   doNotify = !doNotify;
                   setState(() {});
                 },
               ),
-              Text(language.notifyMeText, style: secondaryTextStyle()).onTap(
-                  () {
+              Text(language.notifyMeText, style: secondaryTextStyle()).onTap(() {
                 doNotify = !doNotify;
                 setState(() {});
-              },
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent),
+              }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
             ],
           ),
           16.height,

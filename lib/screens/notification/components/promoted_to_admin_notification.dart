@@ -6,31 +6,35 @@ import 'package:socialv/models/notifications/notification_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class PromotedToAdminNotification extends StatelessWidget {
   final NotificationModel element;
   final VoidCallback? callback;
 
   PromotedToAdminNotification({this.callback, required this.element});
-
+  final unescape = HtmlUnescape();
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+        cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover)
+            .cornerRadiusWithClipRRect(100),
         8.width,
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${language.promotedToAdmin} ${element.itemName}',
+              unescape
+                  .convert('${language.promotedToAdmin} ${element.itemName}'),
               style: secondaryTextStyle(),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
             ),
             6.height,
-            Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+            Text(convertToAgo(element.date.validate()),
+                style: secondaryTextStyle(size: 12)),
           ],
         ).expand(),
         Observer(
@@ -43,7 +47,8 @@ class PromotedToAdminNotification extends StatelessWidget {
                     ifNotTester(() {
                       appStore.setLoading(true);
 
-                      deleteNotification(notificationId: element.id.toString()).then((value) {
+                      deleteNotification(notificationId: element.id.toString())
+                          .then((value) {
                         if (value.deleted.validate()) {
                           callback?.call();
                         }
@@ -58,7 +63,8 @@ class PromotedToAdminNotification extends StatelessWidget {
                   positiveText: language.remove,
                 );
             },
-            icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+            icon: Icon(Icons.delete_outline,
+                color: appStore.isDarkMode ? bodyDark : bodyWhite),
           ),
         ),
       ],

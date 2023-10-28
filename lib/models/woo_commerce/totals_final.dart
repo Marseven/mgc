@@ -6,7 +6,6 @@ class TotalsFinal {
   String? currencySuffix;
   String? currencySymbol;
   String? currencyThousandSeparator;
-  List<dynamic>? taxLines;
   String? totalDiscount;
   String? totalDiscountTax;
   String? totalFees;
@@ -26,7 +25,6 @@ class TotalsFinal {
       this.currencySuffix,
       this.currencySymbol,
       this.currencyThousandSeparator,
-      this.taxLines,
       this.totalDiscount,
       this.totalDiscountTax,
       this.totalFees,
@@ -47,7 +45,6 @@ class TotalsFinal {
       currencySuffix: json['currency_suffix'],
       currencySymbol: json['currency_symbol'],
       currencyThousandSeparator: json['currency_thousand_separator'],
-      taxLines: json['tax_lines'] != null ? (json['tax_lines'] as List).map((i) => i.fromJson(i)).toList() : null,
       totalDiscount: json['total_discount'],
       totalDiscountTax: json['total_discount_tax'],
       totalFees: json['total_fees'],
@@ -80,9 +77,6 @@ class TotalsFinal {
     data['total_shipping'] = this.totalShipping;
     data['total_shipping_tax'] = this.totalShippingTax;
     data['total_tax'] = this.totalTax;
-    if (this.taxLines != null) {
-      data['tax_lines'] = this.taxLines!.map((v) => v.toJson()).toList();
-    }
     return data;
   }
 }

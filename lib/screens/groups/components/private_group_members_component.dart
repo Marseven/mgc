@@ -13,8 +13,9 @@ class PrivateGroupMembersComponent extends StatefulWidget {
   final int groupId;
   final bool isAdmin;
   final int creatorId;
+  final VoidCallback? callback;
 
-  const PrivateGroupMembersComponent({required this.groupId, required this.isAdmin, required this.creatorId});
+  const PrivateGroupMembersComponent({required this.groupId, required this.isAdmin, required this.creatorId, this.callback});
 
   @override
   State<PrivateGroupMembersComponent> createState() => _PrivateGroupMembersComponentState();
@@ -135,6 +136,7 @@ class _PrivateGroupMembersComponentState extends State<PrivateGroupMembersCompon
                         callback: () {
                           mPage = 1;
                           future = getList();
+                          widget.callback?.call();
                         },
                       ).paddingSymmetric(vertical: 8);
                     },

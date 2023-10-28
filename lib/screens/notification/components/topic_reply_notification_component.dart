@@ -7,6 +7,7 @@ import 'package:socialv/screens/forums/screens/topic_detail_screen.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class TopicReplyNotificationComponent extends StatelessWidget {
   final NotificationModel element;
@@ -16,7 +17,8 @@ class TopicReplyNotificationComponent extends StatelessWidget {
 
   Future<void> delete() async {
     appStore.setLoading(true);
-    await deleteNotification(notificationId: element.id.toString().validate()).then((value) {
+    await deleteNotification(notificationId: element.id.toString().validate())
+        .then((value) {
       callback?.call();
     }).catchError((e) {
       appStore.setLoading(false);
@@ -26,6 +28,7 @@ class TopicReplyNotificationComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var unescape = HtmlUnescape();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -33,21 +36,38 @@ class TopicReplyNotificationComponent extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            cachedImage(element.secondaryItemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(20).onTap((){
-              MemberProfileScreen(memberId: element.secondaryItemId.validate()).launch(context);
-            },highlightColor: Colors.transparent,splashColor: Colors.transparent),
+            cachedImage(element.secondaryItemImage,
+                    height: 40, width: 40, fit: BoxFit.cover)
+                .cornerRadiusWithClipRRect(20)
+                .onTap(() {
+              MemberProfileScreen(memberId: element.secondaryItemId.validate())
+                  .launch(context);
+            },
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent),
             8.width,
             Column(
               children: [
                 RichText(
                   text: TextSpan(
-                    text: '${element.secondaryItemName.validate()} ',
+                    text: unescape
+                        .convert('${element.secondaryItemName.validate()} '),
                     style: boldTextStyle(size: 14, fontFamily: fontFamily),
                     children: [
-                      if (element.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
-
-                      TextSpan(text: ' ${language.repliedInTopic} ', style: secondaryTextStyle(fontFamily: fontFamily)),
-                      TextSpan(text: '${element.itemName} ', style: boldTextStyle(size: 14,fontFamily: fontFamily)),
+                      if (element.isUserVerified.validate())
+                        WidgetSpan(
+                            child: Image.asset(ic_tick_filled,
+                                height: 18,
+                                width: 18,
+                                color: blueTickColor,
+                                fit: BoxFit.cover)),
+                      TextSpan(
+                          text: ' ${language.repliedInTopic} ',
+                          style: secondaryTextStyle(fontFamily: fontFamily)),
+                      TextSpan(
+                          text: '${element.itemName} ',
+                          style:
+                              boldTextStyle(size: 14, fontFamily: fontFamily)),
                     ],
                   ),
                   maxLines: 2,
@@ -55,13 +75,15 @@ class TopicReplyNotificationComponent extends StatelessWidget {
                   textAlign: TextAlign.start,
                 ),
                 8.height,
-                Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+                Text(convertToAgo(element.date.validate()),
+                    style: secondaryTextStyle(size: 12)),
               ],
               crossAxisAlignment: CrossAxisAlignment.start,
             ).expand(),
           ],
-        ).onTap((){
-          TopicDetailScreen(topicId: element.topicId.validate()).launch(context);
+        ).onTap(() {
+          TopicDetailScreen(topicId: element.topicId.validate())
+              .launch(context);
         }).expand(),
         IconButton(
           onPressed: () async {
@@ -71,7 +93,8 @@ class TopicReplyNotificationComponent extends StatelessWidget {
                 ifNotTester(() {
                   appStore.setLoading(true);
 
-                  deleteNotification(notificationId: element.id.toString()).then((value) {
+                  deleteNotification(notificationId: element.id.toString())
+                      .then((value) {
                     if (value.deleted.validate()) {
                       callback?.call();
                     }
@@ -86,7 +109,8 @@ class TopicReplyNotificationComponent extends StatelessWidget {
               positiveText: language.remove,
             );
           },
-          icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+          icon: Icon(Icons.delete_outline,
+              color: appStore.isDarkMode ? bodyDark : bodyWhite),
         )
       ],
     ).paddingAll(16);

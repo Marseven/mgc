@@ -13,13 +13,19 @@ import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/post/components/comment_component.dart';
 import 'package:socialv/screens/post/components/post_component.dart';
 import 'package:socialv/screens/post/components/post_media_component.dart';
+import 'package:socialv/screens/post/components/reaction_button_widget.dart';
 import 'package:socialv/screens/post/components/update_comment_component.dart';
 import 'package:socialv/screens/post/screens/comment_screen.dart';
 import 'package:socialv/screens/post/screens/post_likes_screen.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
-import 'package:socialv/utils/html_widget.dart';
+
+import '../../../models/reactions/reactions_count_model.dart';
+import '../../dashboard_screen.dart';
+import '../components/post_content_component.dart';
+import '../components/post_reaction_component.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class SinglePostScreen extends StatefulWidget {
   final int postId;
@@ -37,6 +43,9 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
   PageController pageController = PageController();
 
   List<GetPostLikesModel> likeList = [];
+  List<Reactions> postReactionList = [];
+  bool? isReacted;
+  int postReactionCount = 0;
 
   bool isLike = false;
   int likeCount = 0;
@@ -44,6 +53,7 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
   bool isError = false;
   bool fetchPost = false;
   bool isChange = false;
+  var unescape = HtmlUnescape();
 
   @override
   void initState() {
@@ -59,8 +69,11 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
       post = value;
       likeCount = value.likeCount.validate();
       likeList = value.usersWhoLiked.validate();
-      isLike = value.isLiked.validate();
+      isLike = value.isLiked.validate() == 1;
       fetchPost = true;
+      postReactionList = value.reactions.validate();
+      isReacted = value.curUserReaction != null;
+      postReactionCount = value.reactionCount.validate();
       setState(() {});
       appStore.setLoading(false);
     }).catchError((e) {
@@ -73,6 +86,78 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
     return post;
   }
 
+  Future<void> postReaction({bool addReaction = false, int? reactionID}) async {
+    ifNotTester(() async {
+      if (addReaction) {
+        if (postReactionList.length < 3 && isReacted.validate()) {
+          if (postReactionList.any((element) =>
+              element.user!.id.validate().toString() == appStore.loginUserId)) {
+            int index = postReactionList.indexWhere((element) =>
+                element.user!.id.validate().toString() == appStore.loginUserId);
+            postReactionList[index].id = reactionID.validate().toString();
+            postReactionList[index].icon = reactions
+                .firstWhere((element) =>
+                    element.id == reactionID.validate().toString().validate())
+                .imageUrl
+                .validate();
+            postReactionList[index].reaction = reactions
+                .firstWhere((element) =>
+                    element.id == reactionID.validate().toString().validate())
+                .name
+                .validate();
+          } else {
+            postReactionList.add(
+              Reactions(
+                id: reactionID.validate().toString(),
+                icon: reactions
+                    .firstWhere((element) =>
+                        element.id ==
+                        reactionID.validate().toString().validate())
+                    .imageUrl
+                    .validate(),
+                reaction: reactions
+                    .firstWhere((element) =>
+                        element.id ==
+                        reactionID.validate().toString().validate())
+                    .name
+                    .validate(),
+                user: ReactedUser(
+                  id: appStore.loginUserId.validate().toInt(),
+                  displayName: unescape.convert(appStore.loginFullName),
+                ),
+              ),
+            );
+            postReactionCount++;
+          }
+        }
+        setState(() {});
+
+        await addPostReaction(
+                id: post.activityId.validate(),
+                reactionId: reactionID.validate(),
+                isComments: false)
+            .then((value) {
+          //
+        }).catchError((e) {
+          log('Error: ${e.toString()}');
+        });
+      } else {
+        postReactionList.removeWhere((element) =>
+            element.user!.id.validate().toString() == appStore.loginUserId);
+
+        postReactionCount--;
+        setState(() {});
+        await deletePostReaction(
+                id: post.activityId.validate(), isComments: false)
+            .then((value) {
+          //
+        }).catchError((e) {
+          log('Error: ${e.toString()}');
+        });
+      }
+    });
+  }
+
   Future<void> postLike() async {
     ifNotTester(() {
       isLike = !isLike;
@@ -83,7 +168,7 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
           likeList.add(GetPostLikesModel(
             userId: appStore.loginUserId,
             userAvatar: appStore.loginAvatarUrl,
-            userName: appStore.loginFullName,
+            userName: unescape.convert(appStore.loginFullName),
           ));
         }
         if (!isLike) {
@@ -134,7 +219,7 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
         onRefresh: () async {
           future = postDetail();
         },
-        color: appColorPrimary,
+        color: context.primaryColor,
         child: Scaffold(
           appBar: AppBar(
             title: Text(language.post, style: boldTextStyle(size: 20)),
@@ -182,6 +267,7 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
                       return !appStore.isLoading && !isError
                           ? SingleChildScrollView(
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
@@ -199,17 +285,19 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
                                           Row(
                                             children: [
                                               Text(
-                                                post.userName.validate(),
+                                                unescape.convert(
+                                                    post.userName.validate()),
                                                 style: boldTextStyle(),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ).flexible(),
-                                              Image.asset(ic_tick_filled,
-                                                      width: 18,
-                                                      height: 18,
-                                                      color: blueTickColor)
-                                                  .paddingSymmetric(
-                                                      horizontal: 4),
+                                              if (post.isUserVerified == 1)
+                                                Image.asset(ic_tick_filled,
+                                                        width: 18,
+                                                        height: 18,
+                                                        color: blueTickColor)
+                                                    .paddingSymmetric(
+                                                        horizontal: 4),
                                             ],
                                           ),
                                           Text(post.userEmail.validate(),
@@ -230,67 +318,52 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
                                       highlightColor: Colors.transparent),
                                   20.height,
                                   Divider(height: 0),
-                                  if (post.content.validate().isNotEmpty)
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: post.type ==
-                                              PostActivityType.newBlogPost
-                                          ? InkWell(
-                                              onTap: () async {
-                                                if (post.blogId != null) {
-                                                  appStore.setLoading(true);
-                                                  await wpPostById(
-                                                          postId: post.blogId
-                                                              .validate())
-                                                      .then((value) {
-                                                    appStore.setLoading(false);
-                                                    openWebPage(context,
-                                                        url: value.link
-                                                            .validate());
-                                                  }).catchError((e) {
-                                                    toast(language
-                                                        .canNotViewPost);
-                                                    appStore.setLoading(false);
-                                                  });
-                                                } else {
-                                                  toast(
-                                                      language.canNotViewPost);
-                                                }
-                                              },
-                                              highlightColor:
-                                                  Colors.transparent,
-                                              splashColor: Colors.transparent,
-                                              child: HtmlWidget(
-                                                  postContent:
-                                                      post.content.validate()),
-                                            )
-                                          : ReadMoreText(
-                                              parseHtmlString(post.content
-                                                  .validate()
-                                                  .replaceAll("\n", '')),
-                                              style: primaryTextStyle(),
-                                              trimLines: 3,
-                                              trimMode: TrimMode.Line,
-                                            ),
-                                    ).paddingSymmetric(
-                                        horizontal: 16, vertical: 8),
+                                  16.height,
+                                  PostContentComponent(
+                                      blogId: post.blogId,
+                                      postType: post.type,
+                                      hasMentions: post.hasMentions == 1,
+                                      postContent: post.content),
                                   PostMediaComponent(
-                                    mediaTitle: post.userName.validate(),
+                                    mediaTitle: unescape
+                                        .convert(post.userName.validate()),
                                     mediaType: post.mediaType,
                                     mediaList: post.medias,
                                     isFromPostDetail: true,
-                                  ),
+                                  ).paddingSymmetric(horizontal: 8),
                                   if (post.childPost != null)
                                     PostComponent(
                                         post: post.childPost!, childPost: true),
                                   Row(
                                     children: [
-                                      LikeButtonWidget(
-                                        onPostLike: () {
-                                          postLike();
-                                        },
-                                        isPostLiked: isLike,
-                                      ),
+                                      if (appStore.isReactionEnable == 1)
+                                        if (reactions.validate().isNotEmpty)
+                                          ReactionButton(
+                                            isComments: false,
+                                            isReacted: isReacted,
+                                            currentUserReaction:
+                                                post.curUserReaction,
+                                            onReacted: (id) {
+                                              isReacted = true;
+                                              postReaction(
+                                                  addReaction: true,
+                                                  reactionID: id);
+                                            },
+                                            onReactionRemoved: () {
+                                              isReacted = false;
+                                              postReaction(addReaction: false);
+                                            },
+                                          )
+                                        else
+                                          Offstage()
+                                      else
+                                        LikeButtonWidget(
+                                          key: ValueKey(isLike),
+                                          onPostLike: () {
+                                            postLike();
+                                          },
+                                          isPostLiked: isLike,
+                                        ),
                                       IconButton(
                                         onPressed: () {
                                           CommentScreen(
@@ -328,6 +401,12 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
                                     ],
                                   ).paddingSymmetric(horizontal: 16),
                                   12.height,
+                                  ThreeReactionComponent(
+                                    isComments: false,
+                                    id: post.activityId.validate(),
+                                    postReactionCount: postReactionCount,
+                                    postReactionList: postReactionList,
+                                  ).paddingSymmetric(horizontal: 16),
                                   if (likeList.isNotEmpty)
                                     Row(
                                       children: [
@@ -365,8 +444,8 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
                                                 fontFamily: fontFamily),
                                             children: <TextSpan>[
                                               TextSpan(
-                                                  text:
-                                                      ' ${likeList.first.userName.validate()}',
+                                                  text: unescape.convert(
+                                                      ' ${likeList.first.userName.validate()}'),
                                                   style: boldTextStyle(
                                                       size: 12,
                                                       fontFamily: fontFamily)),
@@ -397,7 +476,6 @@ class _SinglePostScreenState extends State<SinglePostScreen> {
                                             highlightColor: Colors.transparent)
                                       ],
                                     ).paddingSymmetric(horizontal: 16),
-                                  16.height,
                                   if (post.commentCount.validate() > 0)
                                     Align(
                                       alignment: Alignment.centerLeft,

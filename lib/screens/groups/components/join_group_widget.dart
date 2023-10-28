@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/membership/screens/membership_plans_screen.dart';
 
 import '../../../utils/app_constants.dart';
 
@@ -55,7 +56,7 @@ class _JoinGroupWidgetState extends State<JoinGroupWidget> {
                 elevation: 0,
                 shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
                 text: language.confirm,
-                textStyle: secondaryTextStyle(color: Colors.white, size: 14),
+                textStyle: secondaryTextStyle(color: appStore.isDarkMode ? context.primaryColor : Colors.white, size: 14),
                 onTap: () async {
                   ifNotTester(() async {
                     appStore.setLoading(true);
@@ -100,16 +101,20 @@ class _JoinGroupWidgetState extends State<JoinGroupWidget> {
         text: language.joinGroup,
         textStyle: boldTextStyle(color: Colors.white),
         onTap: () {
-          ifNotTester(() {
-            appStore.setLoading(true);
-            joinPublicGroup(groupId: widget.groupId).then((value) {
-              widget.callback?.call();
-              setState(() {});
-            }).catchError((e) {
-              appStore.setLoading(false);
-              toast(e.toString(), print: true);
+          if (pmpStore.canJoinGroup) {
+            ifNotTester(() {
+              appStore.setLoading(true);
+              joinPublicGroup(groupId: widget.groupId).then((value) {
+                widget.callback?.call();
+                setState(() {});
+              }).catchError((e) {
+                appStore.setLoading(false);
+                toast(e.toString(), print: true);
+              });
             });
-          });
+          } else {
+            MembershipPlansScreen().launch(context);
+          }
         },
         width: context.width() - 64,
       ).paddingSymmetric(vertical: 20);
@@ -122,17 +127,21 @@ class _JoinGroupWidgetState extends State<JoinGroupWidget> {
         onTap: () {
           ifNotTester(() {
             if (widget.isRequestSent.validate() == 0) {
-              isRequested = true;
-              setState(() {});
-
-              Map request = {"group_id": widget.groupId};
-              sendGroupMembershipRequest(request).then((value) {
-                widget.callback?.call();
-              }).catchError((e) {
-                isRequested = false;
+              if (pmpStore.canJoinGroup) {
+                isRequested = true;
                 setState(() {});
-                toast(e.toString(), print: true);
-              });
+
+                Map request = {"group_id": widget.groupId};
+                sendGroupMembershipRequest(request).then((value) {
+                  widget.callback?.call();
+                }).catchError((e) {
+                  isRequested = false;
+                  setState(() {});
+                  toast(e.toString(), print: true);
+                });
+              } else {
+                MembershipPlansScreen().launch(context);
+              }
             } else {
               isRequested = false;
               rejectGroupMembershipRequest(requestId: widget.isRequestSent.validate()).then((value) {

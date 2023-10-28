@@ -3,13 +3,15 @@ import 'package:socialv/models/common_models/content.dart';
 class Embedded {
   List<Author>? author;
   List<FeaturedMedia>? featuredMedia;
+  List<List<dynamic>>? wpTerms;
 
-  Embedded({this.author, this.featuredMedia});
+  Embedded({this.author, this.featuredMedia, this.wpTerms});
 
   factory Embedded.fromJson(Map<String, dynamic> json) {
     return Embedded(
       author: json['author'] != null ? (json['author'] as List).map((i) => Author.fromJson(i)).toList() : null,
       featuredMedia: json['wp:featuredmedia'] != null ? (json['wp:featuredmedia'] as List).map((i) => FeaturedMedia.fromJson(i)).toList() : null,
+      wpTerms: json['wp:term'] != null ? (json['wp:term'] as List).map((i) => (i as List).toList()).toList() : null,
     );
   }
 
@@ -18,6 +20,9 @@ class Embedded {
 
     if (this.author != null) {
       data['author'] = this.author!.map((v) => v.toJson()).toList();
+    }
+    if (this.wpTerms != null) {
+      data['wp:term'] = this.wpTerms;
     }
 
     return data;
@@ -34,8 +39,9 @@ class Author {
   String? name;
   String? slug;
   String? url;
+  bool? is_user_verified;
 
-  Author({this.acf, this.avatar_urls, this.description, this.id, this.is_super_admin, this.link, this.name, this.slug, this.url});
+  Author({this.acf, this.avatar_urls, this.description, this.id, this.is_super_admin, this.link, this.name, this.slug, this.url, this.is_user_verified});
 
   factory Author.fromJson(Map<String, dynamic> json) {
     return Author(
@@ -48,6 +54,7 @@ class Author {
       name: json['name'],
       slug: json['slug'],
       url: json['url'],
+      is_user_verified: json['is_user_verified'],
     );
   }
 
@@ -60,6 +67,7 @@ class Author {
     data['name'] = this.name;
     data['slug'] = this.slug;
     data['url'] = this.url;
+    data['is_user_verified'] = this.is_user_verified;
 
     if (this.acf != null) {
       data['acf'] = this.acf!.map((v) => v.toJson()).toList();
@@ -71,61 +79,6 @@ class Author {
     return data;
   }
 }
-
-/*class Replies {
-  List<dynamic>? acf;
-  int? author;
-  String? author_name;
-  String? author_url;
-  Content? content;
-  String? date;
-  int? id;
-  String? link;
-  int? parent;
-  String? type;
-  AvatarUrls? author_avatar_urls;
-
-  Replies({this.acf, this.author, this.author_avatar_urls, this.author_name, this.author_url, this.content, this.date, this.id, this.link, this.parent, this.type});
-
-  factory Replies.fromJson(Map<String, dynamic> json) {
-    return Replies(
-      acf: json['acf'] != null ? (json['acf'] as List).map((i) => i.fromJson(i)).toList() : null,
-      author: json['author'],
-      author_avatar_urls: json['author_avatar_urls'] != null ? AvatarUrls.fromJson(json['author_avatar_urls']) : null,
-      author_name: json['author_name'],
-      author_url: json['author_url'],
-      content: json['content'] != null ? Content.fromJson(json['content']) : null,
-      date: json['date'],
-      id: json['id'],
-      link: json['link'],
-      parent: json['parent'],
-      type: json['type'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['author'] = this.author;
-    data['author_name'] = this.author_name;
-    data['author_url'] = this.author_url;
-    data['date'] = this.date;
-    data['id'] = this.id;
-    data['link'] = this.link;
-    data['parent'] = this.parent;
-    data['type'] = this.type;
-
-    if (this.acf != null) {
-      data['acf'] = this.acf!.map((v) => v.toJson()).toList();
-    }
-    if (this.author_avatar_urls != null) {
-      data['author_avatar_urls'] = this.author_avatar_urls!.toJson();
-    }
-    if (this.content != null) {
-      data['content'] = this.content!.toJson();
-    }
-    return data;
-  }
-}*/
 
 class FeaturedMedia {
   List<dynamic>? acf;
@@ -209,6 +162,33 @@ class AvatarUrls {
     data['24'] = this.twentyFour;
     data['48'] = this.fortyEight;
     data['96'] = this.ninetySix;
+    return data;
+  }
+}
+
+class WpTermsModel {
+  int? id;
+  String? link;
+  String? name;
+  String? taxonomy;
+
+  WpTermsModel({this.id, this.link, this.name, this.taxonomy});
+
+  factory WpTermsModel.fromJson(Map<String, dynamic> json) {
+    return WpTermsModel(
+      id: json['id'],
+      link: json['link'],
+      name: json['name'],
+      taxonomy: json['taxonomy'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['link'] = this.link;
+    data['name'] = this.name;
+    data['taxonomy'] = this.taxonomy;
     return data;
   }
 }

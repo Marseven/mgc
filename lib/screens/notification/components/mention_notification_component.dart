@@ -7,13 +7,14 @@ import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class MentionNotificationComponent extends StatelessWidget {
   final NotificationModel element;
   final VoidCallback? callback;
 
   MentionNotificationComponent({required this.element, this.callback});
-
+  final unescape = HtmlUnescape();
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -21,7 +22,9 @@ class MentionNotificationComponent extends StatelessWidget {
       children: [
         Row(
           children: [
-            cachedImage(element.secondaryItemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+            cachedImage(element.secondaryItemImage,
+                    height: 40, width: 40, fit: BoxFit.cover)
+                .cornerRadiusWithClipRRect(100),
             8.width,
             Column(
               children: [
@@ -29,12 +32,29 @@ class MentionNotificationComponent extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       WidgetSpan(
-                        child: Text('${element.secondaryItemName.validate()} ', style: boldTextStyle(size: 14,fontFamily: fontFamily)).onTap(() {
-                          MemberProfileScreen(memberId: element.secondaryItemId.validate()).launch(context);
-                        }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
+                        child: Text(
+                                unescape.convert(
+                                    '${element.secondaryItemName.validate()} '),
+                                style: boldTextStyle(
+                                    size: 14, fontFamily: fontFamily))
+                            .onTap(() {
+                          MemberProfileScreen(
+                                  memberId: element.secondaryItemId.validate())
+                              .launch(context);
+                        },
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent),
                       ),
-                      if (element.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
-                      TextSpan(text: ' ${language.mentionedYou}', style: secondaryTextStyle(fontFamily: fontFamily)),
+                      if (element.isUserVerified.validate())
+                        WidgetSpan(
+                            child: Image.asset(ic_tick_filled,
+                                height: 18,
+                                width: 18,
+                                color: blueTickColor,
+                                fit: BoxFit.cover)),
+                      TextSpan(
+                          text: ' ${language.mentionedYou}',
+                          style: secondaryTextStyle(fontFamily: fontFamily)),
                     ],
                   ),
                   maxLines: 2,
@@ -42,7 +62,8 @@ class MentionNotificationComponent extends StatelessWidget {
                   textAlign: TextAlign.start,
                 ),
                 6.height,
-                Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+                Text(convertToAgo(element.date.validate()),
+                    style: secondaryTextStyle(size: 12)),
               ],
               crossAxisAlignment: CrossAxisAlignment.start,
             ).expand(),
@@ -58,7 +79,8 @@ class MentionNotificationComponent extends StatelessWidget {
                     ifNotTester(() {
                       appStore.setLoading(true);
 
-                      deleteNotification(notificationId: element.id.toString()).then((value) {
+                      deleteNotification(notificationId: element.id.toString())
+                          .then((value) {
                         if (value.deleted.validate()) {
                           callback?.call();
                         }
@@ -73,7 +95,8 @@ class MentionNotificationComponent extends StatelessWidget {
                   positiveText: language.remove,
                 );
             },
-            icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+            icon: Icon(Icons.delete_outline,
+                color: appStore.isDarkMode ? bodyDark : bodyWhite),
           ),
         ),
       ],

@@ -74,7 +74,7 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
         mPage = 1;
         future = blockedList();
       },
-      color: appColorPrimary,
+      color: context.primaryColor,
       child: Scaffold(
         appBar: AppBar(
           title: Text(language.blockedAccounts, style: boldTextStyle(size: 20)),
@@ -96,9 +96,7 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                 if (snap.hasError) {
                   return NoDataWidget(
                     imageWidget: NoDataLottieWidget(),
-                    title: isError
-                        ? language.somethingWentWrong
-                        : language.noDataFound,
+                    title: isError ? language.somethingWentWrong : language.noDataFound,
                     onRetry: () {
                       mPage = 1;
                       future = blockedList();
@@ -111,9 +109,7 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                   if (snap.data.validate().isEmpty) {
                     return NoDataWidget(
                       imageWidget: NoDataLottieWidget(),
-                      title: isError
-                          ? language.somethingWentWrong
-                          : language.noDataFound,
+                      title: isError ? language.somethingWentWrong : language.noDataFound,
                       onRetry: () {
                         mPage = 1;
                         future = blockedList();
@@ -123,8 +119,7 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                   } else {
                     return AnimatedListView(
                       shrinkWrap: true,
-                      slideConfiguration: SlideConfiguration(
-                          delay: 80.milliseconds, verticalOffset: 300),
+                      slideConfiguration: SlideConfiguration(delay: 80.milliseconds, verticalOffset: 300),
                       physics: AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.only(left: 16, right: 16, bottom: 50),
                       itemCount: membersList.length,
@@ -140,19 +135,13 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                               width: 40,
                               fit: BoxFit.cover,
                             ).cornerRadiusWithClipRRect(100).onTap(() async {
-                              MemberProfileScreen(
-                                      memberId: user.userId.validate().toInt())
-                                  .launch(context)
-                                  .then((value) {
+                              MemberProfileScreen(memberId: user.userId.validate().toInt()).launch(context).then((value) {
                                 if (value ?? false) {
                                   mPage = 1;
                                   future = blockedList();
                                 }
                               });
-                            },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors
-                                    .transparent).paddingSymmetric(vertical: 8),
+                            }, splashColor: Colors.transparent, highlightColor: Colors.transparent).paddingSymmetric(vertical: 8),
                             20.width,
                             InkWell(
                               child: Column(
@@ -160,37 +149,22 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                                   RichText(
                                     text: TextSpan(
                                       children: [
-                                        TextSpan(
-                                            text:
-                                                '${user.userName.validate()} ',
-                                            style: boldTextStyle(
-                                                fontFamily: fontFamily)),
-                                        if (user.isUserVerified.validate())
-                                          WidgetSpan(
-                                              child: Image.asset(ic_tick_filled,
-                                                  height: 18,
-                                                  width: 18,
-                                                  color: blueTickColor,
-                                                  fit: BoxFit.cover)),
+                                        TextSpan(text: '${user.userName.validate()} ', style: boldTextStyle(fontFamily: fontFamily)),
+                                        if (user.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
                                       ],
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.start,
                                   ),
-                                  Text(user.userMentionName.validate(),
-                                      style: secondaryTextStyle()),
+                                  Text(user.userMentionName.validate(), style: secondaryTextStyle()),
                                 ],
                                 crossAxisAlignment: CrossAxisAlignment.start,
                               ),
                               highlightColor: Colors.transparent,
                               splashColor: Colors.transparent,
                               onTap: () {
-                                MemberProfileScreen(
-                                        memberId:
-                                            user.userId.validate().toInt())
-                                    .launch(context)
-                                    .then((value) {
+                                MemberProfileScreen(memberId: user.userId.validate().toInt()).launch(context).then((value) {
                                   if (value ?? false) {
                                     mPage = 1;
                                     future = blockedList();
@@ -202,9 +176,8 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                               style: ButtonStyle(
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        defaultAppButtonRadius),
-                                    side: BorderSide(color: appColorPrimary),
+                                    borderRadius: BorderRadius.circular(defaultAppButtonRadius),
+                                    side: BorderSide(color: context.primaryColor),
                                   ),
                                 ),
                               ),
@@ -214,8 +187,7 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                                   builder: (BuildContext context) {
                                     return UnblockMemberDialog(
                                       name: user.userName.validate(),
-                                      mentionName:
-                                          user.userMentionName.validate(),
+                                      mentionName: user.userMentionName.validate(),
                                       id: user.userId.validate().toInt(),
                                       callback: () {
                                         future = blockedList();
@@ -224,9 +196,7 @@ class _BlockedAccountsState extends State<BlockedAccounts> {
                                   },
                                 );
                               },
-                              child: Text(language.unblock,
-                                  style: primaryTextStyle(
-                                      size: 14, color: appColorPrimary)),
+                              child: Text(language.unblock, style: primaryTextStyle(size: 14, color: context.primaryColor)),
                             ),
                           ],
                         );

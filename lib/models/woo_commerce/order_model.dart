@@ -103,10 +103,12 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       links: json['_links'] != null ? Links.fromJson(json['_links']) : null,
-      billing: json['billing'] != null ? BillingAddressModel.fromJson(json['billing']) : null,
+      billing: json['billing'] != null
+          ? BillingAddressModel.fromJson(json['billing'])
+          : null,
       cartHash: json['cart_hash'],
       cartTax: json['cart_tax'],
-      couponLines: json['coupon_lines'] != null ? (json['coupon_lines'] as List).map((i) => i.fromJson(i)).toList() : null,
+      couponLines: json['coupon_lines'] != null ? json['coupon_lines'] : null,
       createdVia: json['created_via'],
       currency: json['currency'],
       currencySymbol: json['currency_symbol'],
@@ -124,10 +126,14 @@ class OrderModel {
       datePaidGmt: json['date_paid_gmt'],
       discountTax: json['discount_tax'],
       discountTotal: json['discount_total'],
-      feeLines: json['fee_lines'] != null ? (json['fee_lines'] as List).map((i) => i.fromJson(i)).toList() : null,
+      feeLines: json['fee_lines'] != null ? json['fee_lines'] : null,
       id: json['id'],
       isEditable: json['is_editable'],
-      lineItems: json['line_items'] != null ? (json['line_items'] as List).map((i) => LineItem.fromJson(i)).toList() : null,
+      lineItems: json['line_items'] != null
+          ? (json['line_items'] as List)
+              .map((i) => LineItem.fromJson(i))
+              .toList()
+          : null,
       needsPayment: json['needs_payment'],
       needsProcessing: json['needs_processing'],
       number: json['number'],
@@ -137,17 +143,23 @@ class OrderModel {
       paymentMethodTitle: json['payment_method_title'],
       paymentUrl: json['payment_url'],
       pricesIncludeTax: json['prices_include_tax'],
-      refunds: json['refunds'] != null ? (json['refunds'] as List).map((i) => i.fromJson(i)).toList() : null,
-      shipping: json['shipping'] != null ? BillingAddressModel.fromJson(json['shipping']) : null,
+      refunds: json['refunds'] != null ? json['refunds'] : null,
+      shipping: json['shipping'] != null
+          ? BillingAddressModel.fromJson(json['shipping'])
+          : null,
       shippingTax: json['shipping_tax'],
       shippingTotal: json['shipping_total'],
       status: json['status'],
-      taxLines: json['tax_lines'] != null ? (json['tax_lines'] as List).map((i) => i.fromJson(i)).toList() : null,
+      taxLines: json['tax_lines'] != null ? json['tax_lines'] : null,
       total: json['total'],
       totalTax: json['total_tax'],
       transactionId: json['transaction_id'],
       version: json['version'],
-      shippingLines: json['shipping_lines'] != null ? (json['shipping_lines'] as List).map((i) => ShippingLinesModel.fromJson(i)).toList() : null,
+      shippingLines: json['shipping_lines'] != null
+          ? (json['shipping_lines'] as List)
+              .map((i) => ShippingLinesModel.fromJson(i))
+              .toList()
+          : null,
     );
   }
 
@@ -214,7 +226,8 @@ class OrderModel {
       data['line_items'] = this.lineItems!.map((v) => v.toJson()).toList();
     }
     if (this.shippingLines != null) {
-      data['shipping_lines'] = this.shippingLines!.map((v) => v.toJson()).toList();
+      data['shipping_lines'] =
+          this.shippingLines!.map((v) => v.toJson()).toList();
     }
     if (this.refunds != null) {
       data['refunds'] = this.refunds!.map((v) => v.toJson()).toList();
@@ -235,7 +248,6 @@ class LineItem {
   ImageModel? image;
   String? name;
   String? parentName;
-  int? price;
   int? productId;
   int? quantity;
   String? sku;
@@ -247,7 +259,21 @@ class LineItem {
   String? totalTax;
   int? variationId;
 
-  LineItem({this.id, this.image, this.name, this.parentName, this.price, this.productId, this.quantity, this.sku, this.subtotal, this.subtotalTax, this.taxClass, this.taxes, this.total, this.totalTax, this.variationId});
+  LineItem(
+      {this.id,
+      this.image,
+      this.name,
+      this.parentName,
+      this.productId,
+      this.quantity,
+      this.sku,
+      this.subtotal,
+      this.subtotalTax,
+      this.taxClass,
+      this.taxes,
+      this.total,
+      this.totalTax,
+      this.variationId});
 
   factory LineItem.fromJson(Map<String, dynamic> json) {
     return LineItem(
@@ -255,14 +281,15 @@ class LineItem {
       image: json['image'] != null ? ImageModel.fromJson(json['image']) : null,
       name: json['name'],
       parentName: json['parent_name'],
-      price: json['price'],
       productId: json['product_id'],
       quantity: json['quantity'],
       sku: json['sku'],
       subtotal: json['subtotal'],
       subtotalTax: json['subtotal_tax'],
       taxClass: json['tax_class'],
-      taxes: json['taxes'] != null ? (json['taxes'] as List).map((i) => i.fromJson(i)).toList() : null,
+      taxes: json['taxes'] != null
+          ? (json['taxes'] as List).map((i) => i.fromJson(i)).toList()
+          : null,
       total: json['total'],
       totalTax: json['total_tax'],
       variationId: json['variation_id'],
@@ -273,7 +300,6 @@ class LineItem {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
-    data['price'] = this.price;
     data['product_id'] = this.productId;
     data['quantity'] = this.quantity;
     data['sku'] = this.sku;

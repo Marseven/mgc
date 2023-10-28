@@ -20,24 +20,27 @@ class ActivityResponse {
   String? type;
   AvatarUrls? userAvatar;
   int? userId;
+  String? name;
 
-  ActivityResponse(
-      {this.links,
-      this.bpGiphy,
-      this.component,
-      this.content,
-      this.date,
-      this.dateGmt,
-      this.favorited,
-      this.id,
-      this.link,
-      this.primaryItemId,
-      this.secondaryItemId,
-      this.status,
-      this.title,
-      this.type,
-      this.userAvatar,
-      this.userId});
+  ActivityResponse({
+    this.links,
+    this.bpGiphy,
+    this.component,
+    this.content,
+    this.date,
+    this.dateGmt,
+    this.favorited,
+    this.id,
+    this.link,
+    this.primaryItemId,
+    this.secondaryItemId,
+    this.status,
+    this.title,
+    this.type,
+    this.userAvatar,
+    this.userId,
+    this.name,
+  });
 
   factory ActivityResponse.fromJson(Map<String, dynamic> json) {
     return ActivityResponse(
@@ -57,6 +60,7 @@ class ActivityResponse {
       type: json['type'],
       userAvatar: json['user_avatar'] != null ? AvatarUrls.fromJson(json['user_avatar']) : null,
       userId: json['user_id'],
+      name: json['name'],
     );
   }
 
@@ -75,6 +79,7 @@ class ActivityResponse {
     data['title'] = this.title;
     data['type'] = this.type;
     data['user_id'] = this.userId;
+    data['name'] = this.name;
     if (this.links != null) {
       data['_links'] = this.links!.toJson();
     }

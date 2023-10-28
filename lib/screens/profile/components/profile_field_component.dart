@@ -32,17 +32,13 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
 
   Future<void> init() async {
     if (widget.field.type == FieldType.selectBox) {
-      if (widget.field.options.validate().isNotEmpty &&
-          widget.field.value.validate().isEmpty) {
+      if (widget.field.options.validate().isNotEmpty && widget.field.value.validate().isEmpty) {
         //selectedValue = widget.field.options.validate().first;
       } else {
-        selectedValue = widget.field.options
-            .validate()
-            .firstWhere((element) => element.name == widget.field.value);
+        selectedValue = widget.field.options.validate().firstWhere((element) => element.name == widget.field.value);
       }
     } else if (widget.field.type == FieldType.datebox) {
-      if (widget.field.value.validate().isNotEmpty)
-        controller.text = widget.field.value.validate().substring(0, 10);
+      if (widget.field.value.validate().isNotEmpty) controller.text = widget.field.value.validate().substring(0, 10);
     } else {
       if (widget.field.label == 'Name' && widget.field.value!.isEmpty) {
         controller.text = appStore.loginFullName;
@@ -64,12 +60,9 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
       widget.count = widget.count + 1;
     }
 
-    if (widget.field.type == FieldType.textBox ||
-        widget.field.type == FieldType.url) {
+    if (widget.field.type == FieldType.textBox || widget.field.type == FieldType.url) {
       return Container(
-        decoration: BoxDecoration(
-            color: context.scaffoldBackgroundColor,
-            borderRadius: radius(defaultAppButtonRadius)),
+        decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(defaultAppButtonRadius)),
         child: AppTextField(
           enabled: !appStore.isLoading,
           controller: controller,
@@ -83,22 +76,12 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
             labelText: widget.field.label,
             labelStyle: secondaryTextStyle(weight: FontWeight.w600),
             errorStyle: primaryTextStyle(color: Colors.red, size: 12),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            disabledBorder: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            border: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.0)),
-            errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.0)),
+            enabledBorder: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            disabledBorder: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            focusedBorder: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            border: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red, width: 1.0)),
+            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red, width: 1.0)),
             alignLabelWithHint: true,
           ),
           onChanged: (text) {
@@ -108,8 +91,7 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
               name = controller.text;
             }
 
-            if (widget.field.type == FieldType.url ||
-                group.groupName == ProfileFields.socialNetworks) {
+            if (widget.field.type == FieldType.url || group.groupName == ProfileFields.socialNetworks) {
               if (controller.text.validateURL()) {
                 group.fields![group.fields!.indexOf(widget.field)].value = text;
                 isDetailChange = true;
@@ -128,8 +110,7 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
               name = controller.text;
             }
 
-            if (widget.field.type == FieldType.url ||
-                group.groupName == ProfileFields.socialNetworks) {
+            if (widget.field.type == FieldType.url || group.groupName == ProfileFields.socialNetworks) {
               if (controller.text.validateURL()) {
                 group.fields![group.fields!.indexOf(widget.field)].value = text;
                 isDetailChange = true;
@@ -147,16 +128,11 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
     } else if (widget.field.type == FieldType.textarea) {
       return Container(
         padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-            color: context.scaffoldBackgroundColor,
-            borderRadius: radius(defaultAppButtonRadius)),
+        decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(defaultAppButtonRadius)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.field.label.validate(),
-                style: secondaryTextStyle(
-                    weight: FontWeight.w600,
-                    color: appStore.isDarkMode ? bodyDark : bodyWhite)),
+            Text(widget.field.label.validate(), style: secondaryTextStyle(weight: FontWeight.w600, color: appStore.isDarkMode ? bodyDark : bodyWhite)),
             AppTextField(
               enabled: !appStore.isLoading,
               isValidationRequired: widget.field.isRequired.validate(),
@@ -183,42 +159,32 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
     } else if (widget.field.type == FieldType.selectBox) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-            color: context.scaffoldBackgroundColor,
-            borderRadius: radius(defaultAppButtonRadius)),
+        decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(defaultAppButtonRadius)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.field.label.validate(),
-                style: secondaryTextStyle(weight: FontWeight.w600)),
+            Text(widget.field.label.validate(), style: secondaryTextStyle(weight: FontWeight.w600)),
             IgnorePointer(
               ignoring: appStore.isLoading,
               child: DropdownButton<OptionField>(
                 borderRadius: BorderRadius.circular(commonRadius),
                 value: selectedValue,
-                icon: Icon(Icons.arrow_drop_down,
-                    color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                icon: Icon(Icons.arrow_drop_down, color: appStore.isDarkMode ? bodyDark : bodyWhite),
                 elevation: 16,
                 isExpanded: true,
                 style: primaryTextStyle(),
-                underline: Container(height: 2, color: appColorPrimary),
+                underline: Container(height: 2, color: context.primaryColor),
                 onChanged: (OptionField? newValue) {
                   selectedValue = newValue!;
-                  group.fields![group.fields!.indexOf(widget.field)].value =
-                      selectedValue!.name;
+                  group.fields![group.fields!.indexOf(widget.field)].value = selectedValue!.name;
                   isDetailChange = true;
                   setState(() {});
                 },
-                hint: Text(
-                    '${language.select} ${widget.field.label.validate()}',
-                    style: secondaryTextStyle(weight: FontWeight.w600)),
-                items: widget.field.options
-                    .validate()
-                    .map<DropdownMenuItem<OptionField>>((e) {
+                hint: Text('${language.select} ${widget.field.label.validate()}', style: secondaryTextStyle(weight: FontWeight.w600)),
+                items: widget.field.options.validate().map<DropdownMenuItem<OptionField>>((e) {
                   return DropdownMenuItem<OptionField>(
                     value: e,
-                    child: Text('${e.name.validate()}',
-                        overflow: TextOverflow.ellipsis, maxLines: 1),
+                    child: Text('${e.name.validate()}', overflow: TextOverflow.ellipsis, maxLines: 1),
                   );
                 }).toList(),
               ),
@@ -227,14 +193,10 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
         ),
       );
     } else if (widget.field.type == FieldType.datebox) {
-      DateTime dateTime = widget.field.value!.isNotEmpty
-          ? DateTime.parse(widget.field.value.validate())
-          : DateTime.now();
+      DateTime dateTime = widget.field.value!.isNotEmpty ? DateTime.parse(widget.field.value.validate()) : DateTime.now().subtract(Duration(days: 1));
 
       return Container(
-        decoration: BoxDecoration(
-            color: context.scaffoldBackgroundColor,
-            borderRadius: radius(defaultAppButtonRadius)),
+        decoration: BoxDecoration(color: context.scaffoldBackgroundColor, borderRadius: radius(defaultAppButtonRadius)),
         child: AppTextField(
           enabled: !appStore.isLoading,
           isValidationRequired: widget.field.isRequired.validate(),
@@ -248,22 +210,12 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
             labelText: widget.field.label,
             labelStyle: secondaryTextStyle(weight: FontWeight.w600),
             errorStyle: primaryTextStyle(color: Colors.red, size: 12),
-            disabledBorder: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            border: OutlineInputBorder(
-                borderRadius: radius(defaultAppButtonRadius),
-                borderSide: BorderSide(color: context.cardColor)),
-            focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.0)),
-            errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.0)),
+            disabledBorder: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            enabledBorder: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            focusedBorder: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            border: OutlineInputBorder(borderRadius: radius(defaultAppButtonRadius), borderSide: BorderSide(color: context.cardColor)),
+            focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red, width: 1.0)),
+            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red, width: 1.0)),
             alignLabelWithHint: true,
           ),
           onTap: () async {
@@ -272,7 +224,7 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
                 context: context,
                 initialDate: dateTime,
                 firstDate: DateTime(1900),
-                lastDate: DateTime.now().subtract(Duration(days: 1)),
+                  lastDate: DateTime.now().subtract(Duration(days: 1)),
                 builder: (context, child) {
                   return Theme(
                     data: Theme.of(context).copyWith(
@@ -288,12 +240,11 @@ class _ProfileFieldComponentState extends State<ProfileFieldComponent> {
 
             if (datePick != null && datePick != dateTime) {
               setState(() {
-                controller.text = DateFormat("yyyy-MM-dd").format(datePick);
+                controller.text = DateFormat(DATE_FORMAT_4).format(datePick);
               });
             }
 
-            group.fields![group.fields!.indexOf(widget.field)].value =
-                DateFormat("yyyy-MM-dd HH:mm:ss").format(datePick!);
+            group.fields![group.fields!.indexOf(widget.field)].value = DateFormat(DATE_FORMAT_1).format(datePick!);
             isDetailChange = true;
           },
           onFieldSubmitted: (text) {

@@ -3,18 +3,29 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:socialv/app_theme.dart';
 import 'package:socialv/language/app_localizations.dart';
 import 'package:socialv/language/languages.dart';
+import 'package:socialv/models/cart_badge_model.dart';
 import 'package:socialv/models/common_models.dart';
 import 'package:socialv/screens/splash_screen.dart';
+import 'package:socialv/services/login_service.dart';
 import 'package:socialv/store/app_store.dart';
+import 'package:socialv/store/lms_store.dart';
+import 'package:socialv/store/message_store.dart';
+import 'package:socialv/store/pmp_store.dart';
 import 'package:socialv/utils/app_constants.dart';
 
 AppStore appStore = AppStore();
+LmsStore lmsStore = LmsStore();
+MessageStore messageStore = MessageStore();
+PmpStore pmpStore = PmpStore();
+
+LoginService loginService = LoginService();
 
 late BaseLanguage language;
 
@@ -35,21 +46,16 @@ void main() async {
   defaultRadius = 32.0;
   defaultAppButtonRadius = 12;
 
-  await OneSignal.shared.setAppId(ONESIGNAL_APP_ID);
-  OneSignal.shared.setNotificationOpenedHandler((openedResult) {
-    //
-  });
+  initializeOneSignal();
 
-  final status = await OneSignal.shared.getDeviceState();
-  setValue(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID, status?.userId.validate());
-
-  OneSignal.shared.setNotificationWillShowInForegroundHandler(
-      (OSNotificationReceivedEvent event) {
-    event.complete(event.notification);
-  });
   exitFullScreen();
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CartBadge(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -93,51 +99,76 @@ class _MyAppState extends State<MyApp> {
             .setLoginUserId(getStringAsync(SharePreferencesKey.LOGIN_USER_ID));
         appStore.setLoginAvatarUrl(
             getStringAsync(SharePreferencesKey.LOGIN_AVATAR_URL));
-        appStore.setWooCart(0);
+        messageStore
+            .setBmSecretKey(getStringAsync(SharePreferencesKey.BM_SECRET_KEY));
+
+        messageStore
+            .setUserNameKey(getStringAsync(SharePreferencesKey.USERNAME_KEY));
+        messageStore.setUserAvatarKey(
+            getStringAsync(SharePreferencesKey.USER_AVATAR_KEY));
       }
 
+      appStore.setFilterContent(
+          getBoolAsync(SharePreferencesKey.FILTER_CONTENT, defaultValue: true));
       if (getMemberListPref().isNotEmpty)
         appStore.recentMemberSearchList.addAll(getMemberListPref());
       if (getGroupListPref().isNotEmpty)
         appStore.recentGroupsSearchList.addAll(getGroupListPref());
+
+      if (getLmsQuizListPref().isNotEmpty) {
+        lmsStore.quizList.addAll(getLmsQuizListPref());
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) => MaterialApp(
-        navigatorKey: navigatorKey,
-        title: APP_NAME,
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: appStore.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-        home: SplashScreen(),
-        supportedLocales: LanguageDataModel.languageLocales(),
-        localizationsDelegates: [
-          AppLocalizations(),
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        localeResolutionCallback: (locale, supportedLocales) => locale,
-        locale: Locale(appStore.selectedLanguage
-            .validate(value: Constants.defaultLanguage)),
-        onGenerateRoute: (settings) {
-          String pathComponents = settings.name!.split('/').last;
+    return Portal(
+      child: Observer(
+        builder: (_) => MaterialApp(
+          builder: (context, child) {
+            return ScrollConfiguration(behavior: MyBehavior(), child: child!);
+          },
+          navigatorKey: navigatorKey,
+          title: APP_NAME,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: appStore.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: SplashScreen(),
+          supportedLocales: LanguageDataModel.languageLocales(),
+          localizationsDelegates: [
+            AppLocalizations(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          localeResolutionCallback: (locale, supportedLocales) => locale,
+          locale: Locale(appStore.selectedLanguage
+              .validate(value: Constants.defaultLanguage)),
+          onGenerateRoute: (settings) {
+            String pathComponents = settings.name!.split('/').last;
 
-          if (pathComponents.isInt) {
-            return MaterialPageRoute(
-              builder: (context) {
-                return SplashScreen(activityId: pathComponents.toInt());
-              },
-            );
-          } else {
-            return MaterialPageRoute(builder: (_) => SplashScreen());
-          }
-        },
+            if (pathComponents.isInt) {
+              return MaterialPageRoute(
+                builder: (context) {
+                  return SplashScreen(activityId: pathComponents.toInt());
+                },
+              );
+            } else {
+              return MaterialPageRoute(builder: (_) => SplashScreen());
+            }
+          },
+        ),
       ),
     );
+  }
+}
+
+class MyBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }

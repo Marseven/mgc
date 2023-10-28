@@ -8,6 +8,7 @@ import 'package:socialv/screens/post/screens/single_post_screen.dart';
 import 'package:socialv/screens/profile/screens/member_profile_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class CommentReplyNotificationComponent extends StatelessWidget {
   final NotificationModel element;
@@ -17,19 +18,22 @@ class CommentReplyNotificationComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var unescape = HtmlUnescape();
     return InkWell(
       onTap: () {
         SinglePostScreen(postId: element.itemId.validate()).launch(context);
       },
       onLongPress: () {
-        if (element.action == NotificationAction.actionActivityLiked && element.itemImage!.isNotEmpty) {
+        if (element.action == NotificationAction.actionActivityLiked &&
+            element.itemImage!.isNotEmpty) {
           showConfirmDialogCustom(
             context,
             onAccept: (c) {
               ifNotTester(() {
                 appStore.setLoading(true);
 
-                deleteNotification(notificationId: element.id.toString()).then((value) {
+                deleteNotification(notificationId: element.id.toString())
+                    .then((value) {
                   if (value.deleted.validate()) {
                     callback?.call();
                   }
@@ -51,7 +55,9 @@ class CommentReplyNotificationComponent extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              cachedImage(element.secondaryItemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+              cachedImage(element.secondaryItemImage,
+                      height: 40, width: 40, fit: BoxFit.cover)
+                  .cornerRadiusWithClipRRect(100),
               8.width,
               Column(
                 children: [
@@ -59,13 +65,30 @@ class CommentReplyNotificationComponent extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         WidgetSpan(
-                          child: Text('${element.secondaryItemName.validate()} ', style: boldTextStyle(size: 14,fontFamily: fontFamily)).onTap(() {
-                            MemberProfileScreen(memberId: element.secondaryItemId.validate()).launch(context);
-                          }, splashColor: Colors.transparent, highlightColor: Colors.transparent),
+                          child: Text(
+                                  unescape.convert(
+                                      '${element.secondaryItemName.validate()} '),
+                                  style: boldTextStyle(
+                                      size: 14, fontFamily: fontFamily))
+                              .onTap(() {
+                            MemberProfileScreen(
+                                    memberId:
+                                        element.secondaryItemId.validate())
+                                .launch(context);
+                          },
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent),
                         ),
-                        if (element.isUserVerified.validate()) WidgetSpan(child: Image.asset(ic_tick_filled, height: 18, width: 18, color: blueTickColor, fit: BoxFit.cover)),
+                        if (element.isUserVerified.validate())
+                          WidgetSpan(
+                              child: Image.asset(ic_tick_filled,
+                                  height: 18,
+                                  width: 18,
+                                  color: blueTickColor,
+                                  fit: BoxFit.cover)),
                         TextSpan(
-                          text: element.action == NotificationAction.actionActivityLiked
+                          text: element.action ==
+                                  NotificationAction.actionActivityLiked
                               ? ' ${language.likedPost} '
                               : element.action == NotificationAction.updateReply
                                   ? ' ${language.commentedPost} '
@@ -79,14 +102,18 @@ class CommentReplyNotificationComponent extends StatelessWidget {
                     textAlign: TextAlign.start,
                   ),
                   6.height,
-                  Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+                  Text(convertToAgo(element.date.validate()),
+                      style: secondaryTextStyle(size: 12)),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ).expand(),
             ],
           ).expand(),
-          element.action == NotificationAction.actionActivityLiked && element.itemImage!.isNotEmpty
-              ? cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(commonRadius)
+          element.action == NotificationAction.actionActivityLiked &&
+                  element.itemImage!.isNotEmpty
+              ? cachedImage(element.itemImage,
+                      height: 40, width: 40, fit: BoxFit.cover)
+                  .cornerRadiusWithClipRRect(commonRadius)
               : Observer(
                   builder: (_) => IconButton(
                     onPressed: () {
@@ -96,7 +123,9 @@ class CommentReplyNotificationComponent extends StatelessWidget {
                           ifNotTester(() {
                             appStore.setLoading(true);
 
-                            deleteNotification(notificationId: element.id.toString()).then((value) {
+                            deleteNotification(
+                                    notificationId: element.id.toString())
+                                .then((value) {
                               if (value.deleted.validate()) {
                                 callback?.call();
                               }
@@ -111,7 +140,8 @@ class CommentReplyNotificationComponent extends StatelessWidget {
                         positiveText: language.remove,
                       );
                     },
-                    icon: Icon(Icons.delete_outline, color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                    icon: Icon(Icons.delete_outline,
+                        color: appStore.isDarkMode ? bodyDark : bodyWhite),
                   ),
                 ),
         ],

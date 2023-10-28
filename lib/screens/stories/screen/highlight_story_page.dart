@@ -5,8 +5,8 @@ import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/story/highlight_stories_model.dart';
 import 'package:socialv/network/rest_apis.dart';
-import 'package:socialv/screens/post/components/video_post_component.dart';
 import 'package:socialv/screens/post/screens/video_post_screen.dart';
+import 'package:socialv/screens/stories/component/story_video_component.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 import 'package:story_time/story_time.dart';
@@ -117,14 +117,7 @@ class HighlightStoryPageState extends State<HighlightStoryPage> {
                                 return LoadingWidget();
                               },
                             )
-                          : StoryVideoPostComponent(
-                              videoURl: story.storyMedia.validate(),
-                              callBack: () {
-                                int duration = widget.stories[userIndex].items.validate()[storyIndex].duration.validate().toInt();
-
-                                indicatorAnimationController.value = IndicatorAnimationCommand(duration: Duration(seconds: duration), resume: true);
-                              },
-                            ),
+                          : StoryVideoPostComponent(videoURl: story.storyMedia.validate()),
                     ),
                     Container(
                       decoration: BoxDecoration(
@@ -274,7 +267,7 @@ class HighlightStoryPageState extends State<HighlightStoryPage> {
                       if (story.mediaType == MediaTypes.video)
                         TextButton(
                           onPressed: () {
-                            VideoPostScreen(story.storyMedia.validate(), user.categoryName.validate()).launch(context);
+                            VideoPostScreen(story.storyMedia.validate()).launch(context);
                           },
                           child: Text(language.viewVideo, style: boldTextStyle(color: Colors.white)),
                         ),

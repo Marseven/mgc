@@ -5,16 +5,19 @@ import 'package:socialv/models/notifications/notification_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class GroupInviteNotificationComponent extends StatelessWidget {
   final NotificationModel element;
   final VoidCallback? callback;
 
-  const GroupInviteNotificationComponent({required this.element, this.callback});
+  const GroupInviteNotificationComponent(
+      {required this.element, this.callback});
 
   Future<void> delete() async {
     appStore.setLoading(true);
-    await deleteNotification(notificationId: element.id.toString().validate()).then((value) {
+    await deleteNotification(notificationId: element.id.toString().validate())
+        .then((value) {
       callback?.call();
     }).catchError((e) {
       appStore.setLoading(false);
@@ -24,16 +27,20 @@ class GroupInviteNotificationComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var unescape = HtmlUnescape();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(100),
+        cachedImage(element.itemImage, height: 40, width: 40, fit: BoxFit.cover)
+            .cornerRadiusWithClipRRect(100),
         8.width,
         Column(
           children: [
-            Text('${language.inviteFrom} ${element.itemName}', style: secondaryTextStyle()),
+            Text(unescape.convert('${language.inviteFrom} ${element.itemName}'),
+                style: secondaryTextStyle()),
             6.height,
-            Text(convertToAgo(element.date.validate()), style: secondaryTextStyle(size: 12)),
+            Text(convertToAgo(element.date.validate()),
+                style: secondaryTextStyle(size: 12)),
             16.height,
             Row(
               children: [
@@ -45,7 +52,9 @@ class GroupInviteNotificationComponent extends StatelessWidget {
                     ifNotTester(() async {
                       appStore.setLoading(true);
 
-                      await acceptGroupInvite(id: element.secondaryItemId.validate().toString()).then((value) async {
+                      await acceptGroupInvite(
+                              id: element.secondaryItemId.validate().toString())
+                          .then((value) async {
                         callback?.call();
                       }).catchError((e) {
                         if (e.toString() != errorInternetNotAvailable) {
@@ -65,12 +74,15 @@ class GroupInviteNotificationComponent extends StatelessWidget {
                 AppButton(
                   shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
                   text: language.delete,
-                  textStyle: secondaryTextStyle(color: appColorPrimary, size: 14),
+                  textStyle:
+                      secondaryTextStyle(color: appColorPrimary, size: 14),
                   onTap: () async {
                     ifNotTester(() async {
                       appStore.setLoading(true);
 
-                      await rejectGroupInvite(id: element.secondaryItemId.validate()).then((value) async {
+                      await rejectGroupInvite(
+                              id: element.secondaryItemId.validate())
+                          .then((value) async {
                         delete();
                       }).catchError((e) {
                         if (e.toString() != errorInternetNotAvailable) {
@@ -83,7 +95,9 @@ class GroupInviteNotificationComponent extends StatelessWidget {
                     });
                   },
                   elevation: 0,
-                  color: element.isNew.validate() == 1 ? context.scaffoldBackgroundColor : context.cardColor,
+                  color: element.isNew.validate() == 1
+                      ? context.scaffoldBackgroundColor
+                      : context.cardColor,
                   height: 32,
                 ),
               ],
