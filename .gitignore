@@ -31,6 +31,8 @@
 .pub/
 /build/
 
+/lib/congif.dart
+
 # Web related
 
 # Symbolication related
