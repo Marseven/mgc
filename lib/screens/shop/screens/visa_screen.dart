@@ -234,7 +234,7 @@ class _VisaScreenState extends State<VisaScreen> {
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest request) {
             if (request.url.startsWith(
-                'https://test.billing-easy.net?invoice=$bill_id&operator=ORABANK_NG&redirect=1')) {
+                'https://staging.billing-easy.net?invoice=$bill_id&operator=ORABANK_NG&redirect=1')) {
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
@@ -242,7 +242,7 @@ class _VisaScreenState extends State<VisaScreen> {
         ),
       )
       ..loadRequest(Uri.parse(
-          'https://test.billing-easy.net?invoice=$bill_id&operator=ORABANK_NG&redirect=1'));
+          'https://staging.billing-easy.net?invoice=$bill_id&operator=ORABANK_NG&redirect=1'));
 
     return WillPopScope(
         onWillPop: () {

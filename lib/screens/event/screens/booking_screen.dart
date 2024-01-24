@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/components/no_data_lottie_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/common_models.dart';
-import 'package:socialv/models/woo_commerce/order_model.dart';
+import 'package:socialv/models/mec/booking_model.dart';
+import 'package:socialv/models/mec/event_detail_model.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/event/screens/booking_detail_screen.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';
-import 'package:socialv/screens/shop/components/price_widget.dart';
-import 'package:socialv/screens/shop/screens/order_detail_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 
@@ -21,8 +22,9 @@ class BookingsScreen extends StatefulWidget {
 }
 
 class _BookingsScreenState extends State<BookingsScreen> {
-  List<OrderModel> orderList = [];
-  late Future<List<OrderModel>> future;
+  List<BookingModel> bookingList = [];
+  late Future<List<BookingModel>> future;
+  late EventDetailModel event;
 
   List<FilterModel> filterOptions = getOrderStatus();
   FilterModel? dropDownValue;
@@ -33,25 +35,20 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   @override
   void initState() {
-    future = getOrders();
+    future = getBookings();
+
     super.initState();
   }
 
-  Future<List<OrderModel>> getOrders({String? status}) async {
+  Future<List<BookingModel>> getBookings({String? status}) async {
     appStore.setLoading(true);
 
-    await getOrderList(status: status == null ? OrderStatus.any : status)
+    await getBookingList(status: status == null ? OrderStatus.any : status)
         .then((value) {
-      if (mPage == 1) orderList.clear();
-
-      value.forEach((element) {
-        element.shippingLines!.forEach((e) {
-          log(e.total);
-        });
-      });
+      if (mPage == 1) bookingList.clear();
 
       mIsLastPage = value.length != 20;
-      orderList.addAll(value);
+      bookingList.addAll(value);
       setState(() {});
 
       appStore.setLoading(false);
@@ -62,13 +59,35 @@ class _BookingsScreenState extends State<BookingsScreen> {
       toast(e.toString(), print: true);
     });
 
-    return orderList;
+    await fetchEventDetailsForBookings(bookingList);
+
+    return bookingList;
+  }
+
+  Future<void> fetchEventDetailsForBookings(
+      List<BookingModel> bookingList) async {
+    appStore.setLoading(true);
+    for (var booking in bookingList) {
+      try {
+        EventDetailModel event =
+            await getEventDetail(eventId: booking.eventId.toInt());
+        setState(() {
+          booking.event = event; // Ajoutez l'événement à l'objet Booking
+        });
+      } catch (e) {
+        isError = true;
+        setState(() {});
+        appStore.setLoading(false);
+        toast(e.toString(), print: true);
+      }
+    }
+    appStore.setLoading(false);
   }
 
   Future<void> onRefresh() async {
     isError = false;
     mPage = 1;
-    future = getOrders();
+    future = getBookings();
   }
 
   @override
@@ -98,13 +117,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
             },
           ),
           titleSpacing: 0,
-          title: Text(language.myOrders, style: boldTextStyle(size: 22)),
+          title: Text('Mes Réservations', style: boldTextStyle(size: 22)),
           elevation: 0,
           centerTitle: true,
         ),
         body: Stack(
           children: [
-            FutureBuilder<List<OrderModel>>(
+            FutureBuilder<List<BookingModel>>(
               future: future,
               builder: (ctx, snap) {
                 if (snap.hasError) {
@@ -141,19 +160,28 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       ),
                       physics: AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.only(left: 16, right: 16, bottom: 50),
-                      itemCount: orderList.length,
+                      itemCount: bookingList.length,
                       itemBuilder: (context, index) {
-                        print(Helpers.statusOrder(orderList[index].status));
+                        print(Helpers.statusOrder(bookingList[index].status));
+                        DateTime dateB = DateTime.parse(
+                            bookingList[index].bookDate.toString());
+                        String bookdate =
+                            DateFormat('dd MMMM yyyy', 'fr_FR').format(dateB);
+                        DateTime dateS = DateTime.parse(
+                            bookingList[index].event!.start.toString());
+                        String start = DateFormat('dd-MM-yyyy').format(dateS);
                         return InkWell(
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           onTap: () {
-                            OrderDetailScreen(orderDetails: orderList[index])
+                            BookingDetailScreen(
+                                    booking: bookingList[index],
+                                    event: bookingList[index].event!)
                                 .launch(context)
                                 .then((value) {
                               if (value ?? false) {
                                 mPage = 1;
-                                getOrders();
+                                getBookings();
                               }
                             });
                           },
@@ -170,10 +198,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text('${language.orderNumber}: ',
+                                        Text('N° de la Réservation: ',
                                             style: boldTextStyle(size: 14)),
                                         Text(
-                                            orderList[index]
+                                            bookingList[index]
                                                 .id
                                                 .validate()
                                                 .toString(),
@@ -184,49 +212,36 @@ class _BookingsScreenState extends State<BookingsScreen> {
                                       children: [
                                         Text('${language.date}: ',
                                             style: boldTextStyle(size: 14)),
-                                        Text(
-                                            formatDate(orderList[index]
-                                                .dateCreated
-                                                .validate()),
+                                        Text(bookdate,
                                             style: secondaryTextStyle()),
                                       ],
                                     ),
                                     10.height,
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: orderList[index]
-                                          .lineItems
-                                          .validate()
-                                          .length,
-                                      itemBuilder: (ctx, i) {
-                                        LineItem orderItem = orderList[index]
-                                            .lineItems
-                                            .validate()[i];
-                                        return Row(
-                                          children: [
-                                            cachedImage(
-                                              orderItem.image!.src.validate(),
-                                              height: 30,
-                                              width: 30,
-                                              fit: BoxFit.cover,
-                                            ).cornerRadiusWithClipRRect(
-                                                commonRadius),
-                                            10.width,
-                                            Text('${orderItem.name.validate()}*${orderItem.quantity.validate()}',
-                                                    style: secondaryTextStyle())
-                                                .expand(),
-                                          ],
-                                        ).paddingSymmetric(vertical: 4);
-                                      },
-                                    ),
+                                    Row(
+                                      children: [
+                                        cachedImage(
+                                          bookingList[index]
+                                              .event!
+                                              .featuredImage!
+                                              .full
+                                              .validate(),
+                                          height: 30,
+                                          width: 30,
+                                          fit: BoxFit.cover,
+                                        ).cornerRadiusWithClipRRect(
+                                            commonRadius),
+                                        10.width,
+                                        Text('${bookingList[index].event!.title.validate()}',
+                                                style: secondaryTextStyle())
+                                            .expand(),
+                                      ],
+                                    ).paddingSymmetric(vertical: 4),
                                     Divider(height: 28),
                                     Row(
                                       children: [
-                                        Text('${language.total}: ',
+                                        Text('Date de l\'évènement : ',
                                             style: boldTextStyle()),
-                                        PriceWidget(
-                                            price: orderList[index].total),
+                                        Text(start, style: boldTextStyle()),
                                       ],
                                     ),
                                   ],
@@ -237,9 +252,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
                                         color: context.primaryColor,
                                         borderRadius: radius(4)),
                                     child: Text(
-                                        Helpers.statusOrder(orderList[index]
-                                                .status
-                                                .validate())
+                                        Helpers.statusOrder(
+                                                bookingList[index].status)
                                             .capitalizeFirstLetter(),
                                         style: secondaryTextStyle(
                                             color: Colors.white)),
@@ -256,7 +270,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       onNextPage: () {
                         if (!mIsLastPage) {
                           mPage++;
-                          future = getOrderList();
+                          future = getBookingList();
                         }
                       },
                     ).paddingTop(80);
@@ -283,7 +297,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         dropDownValue = newValue!;
 
                         mPage = 1;
-                        future = getOrders(status: newValue.value);
+                        future = getBookings(status: newValue.value);
 
                         setState(() {});
                       },

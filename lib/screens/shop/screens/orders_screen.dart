@@ -5,6 +5,7 @@ import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/components/no_data_lottie_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/common_models.dart';
+import 'package:socialv/models/mec/booking_model.dart';
 import 'package:socialv/models/woo_commerce/order_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';

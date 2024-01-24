@@ -10,18 +10,14 @@ import 'package:provider/provider.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/cart_badge_model.dart';
-import 'package:socialv/models/woo_commerce/billing_address_model.dart';
-import 'package:socialv/models/woo_commerce/cart_item_model.dart';
 import 'package:socialv/models/woo_commerce/cart_model.dart';
 import 'package:socialv/models/woo_commerce/payment_model.dart';
 import 'package:socialv/network/rest_apis.dart';
 import 'package:socialv/screens/settings/screens/edit_shop_details_screen.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';
-import 'package:socialv/screens/shop/components/price_widget.dart';
 import 'package:socialv/screens/shop/screens/order_detail_screen.dart';
 import 'package:socialv/screens/shop/screens/visa_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
-import 'package:socialv/utils/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 
 class EbillingScreen extends StatefulWidget {
@@ -173,7 +169,6 @@ class _EbillingScreenState extends State<EbillingScreen> {
     });
     var credentials = username + ':' + sharedkey;
     List<int> mydataint = utf8.encode(credentials);
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_operator == Operator.airtelmoney) {
       var check_number = Helpers.verifyNumberGabon(airtelmoney.text);
       if (check_number == null) {
@@ -260,7 +255,7 @@ class _EbillingScreenState extends State<EbillingScreen> {
       }
     } else if (_operator == Operator.visamastercard) {
       VisaScreen(
-        cartDetails: cart!,
+        cartDetails: cart,
         bill_id: bill_id,
         order: order,
       ).launch(context).then((value) async {

@@ -10,35 +10,36 @@ import 'package:provider/provider.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/cart_badge_model.dart';
-import 'package:socialv/models/woo_commerce/billing_address_model.dart';
-import 'package:socialv/models/woo_commerce/cart_item_model.dart';
+import 'package:socialv/models/mec/booking_model.dart';
+import 'package:socialv/models/mec/event_detail_model.dart';
 import 'package:socialv/models/woo_commerce/cart_model.dart';
 import 'package:socialv/models/woo_commerce/payment_model.dart';
 import 'package:socialv/network/rest_apis.dart';
-import 'package:socialv/screens/settings/screens/edit_shop_details_screen.dart';
+import 'package:socialv/screens/event/screens/booking_detail_screen.dart';
+import 'package:socialv/screens/event/screens/visa_screen.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';
-import 'package:socialv/screens/shop/components/price_widget.dart';
 import 'package:socialv/screens/shop/screens/order_detail_screen.dart';
-import 'package:socialv/screens/shop/screens/visa_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
-import 'package:socialv/utils/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 
-class EbillingScreen extends StatefulWidget {
-  final CartModel cartDetails;
-  final bill_id;
-  final order;
+class EbillingBookScreen extends StatefulWidget {
+  final String billId;
+  final BookingModel booking;
+  final EventDetailModel event;
 
-  EbillingScreen(
-      {required this.cartDetails, required this.bill_id, required this.order});
+  EbillingBookScreen({
+    required this.billId,
+    required this.booking,
+    required this.event,
+  });
 
   @override
-  State<EbillingScreen> createState() => _EbillingScreenState();
+  State<EbillingBookScreen> createState() => _EbillingBookScreenState();
 }
 
 enum Operator { airtelmoney, moovmoney, visamastercard }
 
-class _EbillingScreenState extends State<EbillingScreen> {
+class _EbillingBookScreenState extends State<EbillingBookScreen> {
   late CartModel cart;
 
   bool isError = false;
@@ -58,26 +59,25 @@ class _EbillingScreenState extends State<EbillingScreen> {
   bool _isLoading = false;
   bool _retry = false;
 
-  var bill_id;
-  var order;
+  var billId;
+  var booking;
+  var event;
   var msisdn;
-  var payment_system_name;
+  var paymentSystemName;
   var url = Uri.parse(Helpers.baseUrl + '/api/v1/merchant/e_bills');
   var username = "JOBS";
   var sharedkey = "6fb9b1b9-8119-4142-9cc1-96db5267631e";
 
   Operator? _operator = Operator.airtelmoney;
 
-  Timer? _check_timer;
+  Timer? _checkTimer;
   int _start = 80;
 
   @override
   void initState() {
-    cart = widget.cartDetails;
-    billingAddress = widget.cartDetails.billingAddress!;
-    bill_id = widget.bill_id;
-    order = widget.order;
-    print(bill_id);
+    billId = widget.billId;
+    booking = widget.booking;
+    event = widget.event;
     super.initState();
     init();
   }
@@ -96,22 +96,6 @@ class _EbillingScreenState extends State<EbillingScreen> {
       isPaymentGatewayLoading = false;
       toast(e.toString(), print: true);
       setState(() {});
-    });
-  }
-
-  Future<void> getCart({String? orderBy}) async {
-    appStore.setLoading(true);
-
-    await getCartDetails().then((value) {
-      cart = value;
-      billingAddress = value.billingAddress!;
-      setState(() {});
-
-      appStore.setLoading(false);
-    }).catchError((e) {
-      isError = true;
-      appStore.setLoading(false);
-      toast(e.toString(), print: true);
     });
   }
 
@@ -173,15 +157,14 @@ class _EbillingScreenState extends State<EbillingScreen> {
     });
     var credentials = username + ':' + sharedkey;
     List<int> mydataint = utf8.encode(credentials);
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_operator == Operator.airtelmoney) {
-      var check_number = Helpers.verifyNumberGabon(airtelmoney.text);
-      if (check_number == null) {
+      var checkNumber = Helpers.verifyNumberGabon(airtelmoney.text);
+      if (checkNumber == null) {
         msisdn = airtelmoney.text;
-        payment_system_name = "airtelmoney";
+        paymentSystemName = "airtelmoney";
         var url = Uri.parse(Helpers.baseUrl +
             '/api/v1/merchant/e_bills/' +
-            bill_id +
+            billId +
             '/ussd_push');
 
         var response = await http.post(url,
@@ -192,17 +175,17 @@ class _EbillingScreenState extends State<EbillingScreen> {
                   'Basic ' + base64.encode(mydataint),
             },
             body: jsonEncode(<String, String>{
-              "payment_system_name": payment_system_name,
+              "payment_system_name": paymentSystemName,
               "payer_msisdn": msisdn,
             }));
 
         print(json.decode(response.body));
 
-        _check_timer = Timer.periodic(
+        _checkTimer = Timer.periodic(
             const Duration(seconds: 10), (Timer t) => checkBilling());
 
         if (_start == 0) {
-          _check_timer!.cancel();
+          _checkTimer!.cancel();
           setState(() {
             _isLoading = false;
             _start = 80;
@@ -214,16 +197,16 @@ class _EbillingScreenState extends State<EbillingScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: Colors.redAccent,
-            content: Text(check_number, style: TextStyle(fontSize: 16))));
+            content: Text(checkNumber, style: TextStyle(fontSize: 16))));
       }
     } else if (_operator == Operator.moovmoney) {
-      var check_number = Helpers.verifyNumberGabon(moovmoney.text);
-      if (check_number == null) {
+      var checkNumber = Helpers.verifyNumberGabon(moovmoney.text);
+      if (checkNumber == null) {
         msisdn = moovmoney.text;
-        payment_system_name = "moovmoney4";
+        paymentSystemName = "moovmoney4";
         var url = Uri.parse(Helpers.baseUrl +
             '/api/v1/merchant/e_bills/' +
-            bill_id +
+            billId +
             '/ussd_push');
 
         var response = await http.post(url,
@@ -234,17 +217,17 @@ class _EbillingScreenState extends State<EbillingScreen> {
                   'Basic ' + base64.encode(mydataint),
             },
             body: jsonEncode(<String, String>{
-              "payment_system_name": payment_system_name,
+              "payment_system_name": paymentSystemName,
               "payer_msisdn": msisdn,
             }));
 
         print(json.decode(response.body));
 
-        _check_timer = Timer.periodic(
+        _checkTimer = Timer.periodic(
             const Duration(seconds: 10), (Timer t) => checkBilling());
 
         if (_start == 0) {
-          _check_timer!.cancel();
+          _checkTimer!.cancel();
           setState(() {
             _isLoading = false;
             _start = 80;
@@ -256,99 +239,63 @@ class _EbillingScreenState extends State<EbillingScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: Colors.redAccent,
-            content: Text(check_number, style: TextStyle(fontSize: 16))));
+            content: Text(checkNumber, style: TextStyle(fontSize: 16))));
       }
     } else if (_operator == Operator.visamastercard) {
-      VisaScreen(
-        cartDetails: cart!,
-        bill_id: bill_id,
-        order: order,
-      ).launch(context).then((value) async {
-        if (value ?? false) {
-          await getCart();
-        }
-      });
+      VisaBookScreen(
+        event: event,
+        billId: billId,
+        booking: booking,
+      );
     }
   }
 
   void checkBilling() async {
-    var url =
-        Uri.parse(Helpers.baseUrl + '/api/v1/merchant/e_bills/' + bill_id);
+    // var url = Uri.parse(Helpers.baseUrl + '/api/v1/merchant/e_bills/' + billId);
 
-    var credentials = username + ':' + sharedkey;
-    List<int> mydataint = utf8.encode(credentials);
-    var response = await http.get(url, headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Accept': 'application/json',
-      HttpHeaders.authorizationHeader: 'Basic ' + base64.encode(mydataint),
+    // var credentials = username + ':' + sharedkey;
+    // List<int> mydataint = utf8.encode(credentials);
+    // var response = await http.get(url, headers: <String, String>{
+    //   'Content-Type': 'application/json; charset=UTF-8',
+    //   'Accept': 'application/json',
+    //   HttpHeaders.authorizationHeader: 'Basic ' + base64.encode(mydataint),
+    // });
+
+    await getBooking(booking: widget.booking.id.toInt()).then((value) {
+      setState(() {});
+      booking = value;
+    }).catchError((e) {
+      log('Error: ${e.toString()}');
+      setState(() {});
     });
 
-    var result = jsonDecode(response.body);
-    print(result);
-
-    if (result["state"] == "processed" || result["state"] == "paid") {
+    if (booking.status == "completed") {
       setState(() {
         _isLoading = false;
       });
-      _check_timer!.cancel();
-
-      cart.items!.forEach((element) {
-        removeCartItem(productKey: element.key.validate()).then((value) {
-          log('removed');
-        }).catchError((e) {
-          //
-        });
-      });
-
-      cart.coupons!.forEach((coupon) {
-        removeCoupon(code: coupon.code.validate()).then((value) {
-          log('Coupon removed');
-        }).catchError((e) {
-          log('error remove coupon: ${e.toString()}');
-        });
-      });
-
-      cartBadge.updateCartCount(0);
-      appStore.setWooCart(0);
-
-      await getOrderList(status: OrderStatus.any).then((value) {
-        value.forEach((element) {
-          if (element.id == order.id) {
-            setState(() {
-              order = element;
-            });
-          }
-        });
-      }).catchError((e) {
-        isError = true;
-        appStore.setLoading(false);
-        toast(e.toString(), print: true);
-      });
+      _checkTimer!.cancel();
 
       appStore.setLoading(false);
       finish(context);
-      finish(context);
 
-      OrderDetailScreen(orderDetails: order).launch(context);
+      BookingDetailScreen(
+        booking: booking,
+        event: event,
+      ).launch(context);
 
       //message
-      toast('Commande payée avec succès.');
+      toast('Réservation payée avec succès.');
     } else {
       _start = _start - 10;
     }
 
     if (_start == 0) {
-      _check_timer!.cancel();
+      _checkTimer!.cancel();
       setState(() {
         _isLoading = false;
         _retry = true;
         _start = 80;
       });
-      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      //     backgroundColor: Colors.redAccent,
-      //     content: Text(
-      //         result["message"] + " Veuillez réessayer s'il vous plaît !",
-      //         style: TextStyle(fontSize: 16))));
     }
   }
 
@@ -362,7 +309,7 @@ class _EbillingScreenState extends State<EbillingScreen> {
     appStore.setLoading(false);
     airtelmoney.dispose();
     moovmoney.dispose();
-    _check_timer!.cancel();
+    _checkTimer!.cancel();
     super.dispose();
   }
 
@@ -638,21 +585,7 @@ class _EbillingScreenState extends State<EbillingScreen> {
                           context: context,
                           text: !_retry ? "Payer" : "Réessayer",
                           onTap: () async {
-                            if (cart.items.validate().isNotEmpty) {
-                              if (cart.billingAddress!.address_1.validate().isNotEmpty ||
-                                  cart.billingAddress!.address_2
-                                      .validate()
-                                      .isNotEmpty ||
-                                  cart.billingAddress!.city
-                                      .validate()
-                                      .isNotEmpty) {
-                                _payer(context);
-                              } else {
-                                toast(language.pleaseEnterValidBilling);
-                              }
-                            } else {
-                              toast(language.yourCartIsCurrentlyEmpty);
-                            }
+                            _payer(context);
                           },
                         ),
                   50.height,
@@ -668,8 +601,3 @@ class _EbillingScreenState extends State<EbillingScreen> {
     );
   }
 }
-//     .catchError((e) {
-// isPaymentGatewayLoading = false;
-// toast(e.toString(), print: true);
-// setState(() {});
-// });

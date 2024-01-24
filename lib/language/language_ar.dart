@@ -2262,4 +2262,42 @@ class LanguageAr extends BaseLanguage {
 
   @override
   String get addPostContent => 'الرجاء إضافة بعض المحتوى لنشر منشورك.';
+
+  @override
+  String get cancelBookingMessageSix => "Ordre passé par erreur";
+
+  @override
+  String get cancelBookingMessageFive =>
+      "Mauvaise revue des amis / parents après avoir commandé le produit.";
+
+  @override
+  String get cancelBookingMessageFour =>
+      "Le prix du produit a chuté en raison des ventes / réductions et les clients souhaitent l'obtenir à un prix moindre";
+
+  @override
+  String get cancelBookingMessageThree =>
+      "Alternative moins chère disponible pour un prix moindre";
+
+  @override
+  String get cancelBookingMessageTwo => "Le produit n'est plus nécessaire";
+
+  @override
+  String get cancelBookingMessageOne =>
+      "Le produit est livré à une mauvaise adresse";
+
+  @override
+  String get bookingCancelledSuccessfully => 'Commander annulé avec succès';
+
+  @override
+  String get deleteBookingConfirmation =>
+      "Êtes-vous sûr de vouloir déplacer cette commande à la poubelle?";
+
+  @override
+  String get bookingDeletedSuccessfully => "Commander avec succès";
+
+  @override
+  String get cancelBooking => "annuler la commande";
+
+  @override
+  String get deleteBooking => "Supprimer la commande";
 }

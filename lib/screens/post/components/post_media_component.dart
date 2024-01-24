@@ -12,6 +12,9 @@ import 'package:socialv/screens/post/screens/video_post_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 import 'package:html_unescape/html_unescape.dart';
+import 'package:pdf_render/pdf_render.dart';
+import 'package:pdf_render/pdf_render_widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class PostMediaComponent extends StatefulWidget {
   final String? mediaType;
@@ -69,7 +72,9 @@ class _PostMediaComponentState extends State<PostMediaComponent> {
                 ? 300
                 : widget.mediaType == MediaTypes.video
                     ? 250
-                    : 200,
+                    : widget.mediaType == MediaTypes.doc
+                        ? 500
+                        : 200,
             width: context.width(),
             child: PageView.builder(
               controller: pageController,
@@ -117,22 +122,33 @@ class _PostMediaComponentState extends State<PostMediaComponent> {
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent);
                 } else if (widget.mediaType == MediaTypes.doc) {
+                  final controller = PdfViewerController();
+
                   return Container(
                     margin: EdgeInsets.symmetric(horizontal: 8),
                     padding: EdgeInsets.symmetric(vertical: 40),
+                    height: 300,
+                    width: context.width() - 32,
                     decoration: BoxDecoration(
-                        borderRadius: radius(defaultAppButtonRadius)),
-                    child: cachedImage(
-                      ic_document,
-                      color: appStore.isDarkMode ? bodyDark : bodyWhite,
+                      borderRadius: radius(defaultAppButtonRadius),
+                    ),
+                    child: PdfViewer.openFutureFile(
+                      () async => (await DefaultCacheManager().getSingleFile(
+                              widget.mediaList
+                                  .validate()[index]
+                                  .url
+                                  .validate()))
+                          .path,
+                      viewerController: controller,
+                      params: const PdfViewerParams(
+                        padding: 0,
+                        minScale: 5.0,
+                      ),
                     ),
                   ).onTap(() {
                     PDFScreen(
-                            docURl: widget.mediaList
-                                .validate()[index]
-                                .url
-                                .validate())
-                        .launch(context);
+                      docURl: widget.mediaList.validate()[index].url.validate(),
+                    ).launch(context);
                   },
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent);

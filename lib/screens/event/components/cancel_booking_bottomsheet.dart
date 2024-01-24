@@ -2,26 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/main.dart';
 
-class CancelOrderBottomSheet extends StatefulWidget {
-  final int orderId;
+class CancelBookingBottomSheet extends StatefulWidget {
+  final int booking;
   final Function(String)? callback;
 
-  const CancelOrderBottomSheet({required this.orderId, this.callback});
+  const CancelBookingBottomSheet({required this.booking, this.callback});
 
   @override
-  State<CancelOrderBottomSheet> createState() => _CancelOrderBottomSheetState();
+  State<CancelBookingBottomSheet> createState() =>
+      _CancelBookingBottomSheetState();
 }
 
-class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
-  List<String> cancelOrderList = [language.cancelOrderMessageOne, language.cancelOrderMessageTwo, language.cancelOrderMessageThree, language.cancelOrderMessageFour, language.cancelOrderMessageFive, language.cancelOrderMessageSix];
+class _CancelBookingBottomSheetState extends State<CancelBookingBottomSheet> {
+  List<String> cancelBookingList = [
+    language.cancelBookingMessageOne,
+    language.cancelBookingMessageTwo,
+    language.cancelBookingMessageThree,
+    language.cancelBookingMessageFour,
+    language.cancelBookingMessageFive,
+    language.cancelBookingMessageSix
+  ];
 
-  String cancelOrderReason = "";
-  int cancelOrderIndex = 0;
+  String cancelBookingReason = "";
+  int cancelBookingIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    cancelOrderReason = cancelOrderList.first;
+    cancelBookingReason = cancelBookingList.first;
   }
 
   @override
@@ -39,13 +47,15 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
           Container(
             width: 45,
             height: 5,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Colors.white),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16), color: Colors.white),
           ),
           8.height,
           Container(
             decoration: BoxDecoration(
               color: context.cardColor,
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
             ),
             padding: EdgeInsets.all(16),
             child: Column(
@@ -55,7 +65,8 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(language.reasonForCancellation, style: boldTextStyle()).expand(),
+                    Text(language.reasonForCancellation, style: boldTextStyle())
+                        .expand(),
                     Icon(Icons.close).onTap(() {
                       finish(context);
                     })
@@ -65,13 +76,13 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: cancelOrderList.length,
+                  itemCount: cancelBookingList.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () {
-                        cancelOrderReason = cancelOrderList[index];
-                        print(cancelOrderReason);
-                        cancelOrderIndex = index;
+                        cancelBookingReason = cancelBookingList[index];
+                        print(cancelBookingReason);
+                        cancelBookingIndex = index;
                         setState(() {});
                       },
                       child: Row(
@@ -82,15 +93,21 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                             decoration: boxDecorationWithRoundedCorners(
                               borderRadius: radius(4),
                               border: Border.all(color: context.primaryColor),
-                              backgroundColor: cancelOrderIndex == index ? context.primaryColor : context.cardColor,
+                              backgroundColor: cancelBookingIndex == index
+                                  ? context.primaryColor
+                                  : context.cardColor,
                             ),
                             width: 16,
                             height: 16,
-                            child: Icon(Icons.done, size: 12, color: context.cardColor),
+                            child: Icon(Icons.done,
+                                size: 12, color: context.cardColor),
                             margin: EdgeInsets.only(top: 4),
                           ),
                           4.width,
-                          Text(cancelOrderList[index], style: primaryTextStyle()).paddingLeft(8).expand(),
+                          Text(cancelBookingList[index],
+                                  style: primaryTextStyle())
+                              .paddingLeft(8)
+                              .expand(),
                         ],
                       ).paddingSymmetric(vertical: 8),
                     );
@@ -100,12 +117,12 @@ class _CancelOrderBottomSheetState extends State<CancelOrderBottomSheet> {
                 AppButton(
                   width: context.width(),
                   textStyle: primaryTextStyle(color: white),
-                  text: language.cancelOrder,
+                  text: language.cancelBooking,
                   color: context.primaryColor,
                   onTap: () {
                     finish(context);
 
-                    widget.callback?.call(cancelOrderReason);
+                    widget.callback?.call(cancelBookingReason);
                   },
                 ),
                 20.height,

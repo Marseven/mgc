@@ -135,7 +135,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     Map req = {
       "player_id": getStringAsync(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID),
-      "add": 1
+      "add": 1,
+      "user_id": appStore.loginUserId,
     };
 
     await setPlayerId(req).then((value) {

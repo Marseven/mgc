@@ -17,7 +17,6 @@ import 'package:socialv/screens/settings/screens/edit_shop_details_screen.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';
 import 'package:socialv/screens/shop/components/price_widget.dart';
 import 'package:socialv/screens/shop/screens/ebilling_screen.dart';
-import 'package:socialv/screens/shop/screens/order_detail_screen.dart';
 import 'package:socialv/utils/app_constants.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 import 'package:http/http.dart' as http;
@@ -143,7 +142,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               "sms": false,
               "payer_email": cart.billingAddress!.email.validate().toString(),
               "payer_msisdn": cart.billingAddress!.phone.validate().toString(),
-              "amount": value.total.validate(),
+              "amount": cart.totals!.totalPrice.validate(),
               "short_description": "Paiement MGC pour commande N°" +
                   value.id.validate().toString(),
               "external_reference": value.id.validate().toString(),
@@ -158,9 +157,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
         appStore.setLoading(false);
         finish(context);
-        finish(context);
         EbillingScreen(
-          cartDetails: cart!,
+          cartDetails: cart,
           bill_id: bill_id,
           order: value,
         ).launch(context).then((value) async {

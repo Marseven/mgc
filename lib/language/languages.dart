@@ -677,9 +677,23 @@ abstract class BaseLanguage {
 
   String get cancelOrderMessageOne;
 
+  String get cancelBookingMessageSix;
+
+  String get cancelBookingMessageFive;
+
+  String get cancelBookingMessageFour;
+
+  String get cancelBookingMessageThree;
+
+  String get cancelBookingMessageTwo;
+
+  String get cancelBookingMessageOne;
+
   String get shippingCost;
 
   String get deleteOrder;
+
+  String get deleteBooking;
 
   String get no;
 
@@ -692,6 +706,12 @@ abstract class BaseLanguage {
   String get pleaseEnterValidBilling;
 
   String get cancelOrder;
+
+  String get deleteBookingConfirmation;
+
+  String get bookingDeletedSuccessfully;
+
+  String get cancelBooking;
 
   String get hiddenPostText;
 
@@ -876,6 +896,8 @@ abstract class BaseLanguage {
   String get orderDetails;
 
   String get orderCancelledSuccessfully;
+
+  String get bookingCancelledSuccessfully;
 
   String get cancelOrderConfirmation;
 

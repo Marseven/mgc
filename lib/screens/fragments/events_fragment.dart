@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/components/no_data_lottie_widget.dart';
@@ -207,25 +208,35 @@ class _EventsFragment extends State<EventsFragment> {
                       itemCount: eventsList.length,
                       itemBuilder: (context, index) {
                         EventModel data = eventsList[index];
-
+                        print(data);
+                        // Date à formater
+                        DateTime dateS = DateTime.parse(data.start.toString());
+                        String start = DateFormat('dd-MM-yyyy').format(dateS);
+                        DateTime dateE = DateTime.parse(data.end.toString());
+                        String end = DateFormat('dd-MM-yyyy').format(dateE);
                         var description = parse(data.content.rendered);
                         String parsedstring = description.documentElement!.text;
                         return InkWell(
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           onTap: () {
-                            // EventDetailScreen(
-                            //   id: data.id.validate(),
-                            // ).launch(context).then((value) {
-                            //   if (value ?? false) {
-                            //     mPage = 1;
-                            //     future = getEvents();
-                            //   }
-                            // });
+                            EventDetailScreen(
+                              id: data.id.validate(),
+                            ).launch(context).then((value) {
+                              if (value ?? false) {
+                                mPage = 1;
+                                future = getEvents();
+                              }
+                            });
                           },
                           child: EventsCardComponent(
                             title: data.title.rendered,
-                            description: parsedstring,
+                            description: parsedstring.length > 100
+                                ? parsedstring.substring(0, 100) + '...'
+                                : parsedstring,
+                            start: start,
+                            end: end,
+                            picture: data.featureImage,
                           ),
                         );
                       },

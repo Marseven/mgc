@@ -197,6 +197,10 @@ class APIEndPoint {
   static const getPaymentMethods = 'wc/v3/payment_gateways';
   static const categories = 'wc/v3/products/categories';
   static const orders = 'wc/v3/orders';
+  static const booking = 'mec-api/booking';
+  static const bookings = 'mec-api/bookings';
+  static const price = 'mec-api/price';
+  static const prices = 'mec-api/prices';
   static const customers = 'wc/v3/customers';
   static const storeNonce = 'socialv-api/api/v1/socialv/get-store-api-nonce';
   static const wishlist = 'socialv-api/api/v1/socialv/get-wishlist-product';
@@ -206,7 +210,9 @@ class APIEndPoint {
   static const productDetails =
       'socialv-api/api/v1/socialv/get-product-details';
   static const countries = 'wc/v3/data/countries';
-  static const events = 'wp/v2/mec-events/';
+  static const events = 'mec-api/events';
+  static const event = 'mec-api/event';
+  static const eventRegister = 'mec-api/register';
   static const forums = 'socialv-api/api/v1/socialv/get-all-forums';
   static const forumDetails = 'socialv-api/api/v1/socialv/get-forum-details';
   static const subscribeForum = 'socialv-api/api/v1/socialv/subscribe';

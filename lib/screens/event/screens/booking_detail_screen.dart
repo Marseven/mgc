@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
-import 'package:socialv/models/woo_commerce/order_model.dart';
+import 'package:socialv/models/mec/booking_model.dart';
+import 'package:socialv/models/mec/event_detail_model.dart';
 import 'package:socialv/network/rest_apis.dart';
-import 'package:socialv/screens/shop/components/cancel_order_bottomsheet.dart';
+import 'package:socialv/screens/event/components/cancel_booking_bottomsheet.dart';
+import 'package:socialv/screens/event/screens/event_detail_screen.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';
-import 'package:socialv/screens/shop/components/price_widget.dart';
-import 'package:socialv/screens/shop/screens/product_detail_screen.dart';
 import 'package:socialv/utils/cached_network_image.dart';
 
 import '../../../utils/app_constants.dart';
 
 class BookingDetailScreen extends StatefulWidget {
-  final OrderModel orderDetails;
+  final EventDetailModel event;
+  final BookingModel booking;
 
-  const BookingDetailScreen({required this.orderDetails});
+  const BookingDetailScreen({
+    required this.event,
+    required this.booking,
+  });
 
   @override
   State<BookingDetailScreen> createState() => _BookingDetailScreenState();
@@ -30,13 +35,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     if (mounted) super.setState(fn);
   }
 
-  Future<void> onDeleteOrder() async {
+  Future<void> onDeleteBooking() async {
     showConfirmDialogCustom(
       context,
       onAccept: (c) {
         ifNotTester(() {
           appStore.setLoading(true);
-          deleteOrder(orderId: widget.orderDetails.id.validate()).then((value) {
+          deleteBooking(booking: widget.booking.id.validate().toInt())
+              .then((value) {
             toast(language.orderDeletedSuccessfully);
             appStore.setLoading(false);
 
@@ -49,37 +55,33 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         });
       },
       dialogType: DialogType.CONFIRMATION,
-      title: language.deleteOrderConfirmation,
+      title: language.deleteBookingConfirmation,
       positiveText: language.yes,
       negativeText: language.no,
     );
   }
 
-  Future<void> onCancelOrder() async {
+  Future<void> onCancelBooking() async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return CancelOrderBottomSheet(
-          orderId: widget.orderDetails.id.validate(),
+        return CancelBookingBottomSheet(
+          booking: widget.booking.id.validate().toInt(),
           callback: (text) {
             showConfirmDialogCustom(
               context,
               onAccept: (c) {
                 ifNotTester(() {
                   appStore.setLoading(true);
-                  cancelOrder(
-                          orderId: widget.orderDetails.id.validate(),
-                          note: text)
+                  cancelBooking(booking: widget.booking.id.validate().toInt())
                       .then((value) {
                     toast(language.orderCancelledSuccessfully);
-                    widget.orderDetails.status = OrderStatus.cancelled;
 
                     appStore.setLoading(false);
                     isChange = true;
                     setState(() {});
-                    //finish(context, true);
                   }).catchError((e) {
                     appStore.setLoading(false);
                     toast(e.toString(), print: true);
@@ -99,6 +101,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime dateS = DateTime.parse(widget.event.start.toString());
+    String start = DateFormat('dd-MM-yyyy').format(dateS);
+    DateTime dateE = DateTime.parse(widget.event.end.toString());
+    String end = DateFormat('dd-MM-yyyy').format(dateE);
+    DateTime dateB = DateTime.parse(widget.booking.bookDate.toString());
+    String bookdate = DateFormat('dd MMMM yyyy', 'fr_FR').format(dateB);
     return WillPopScope(
       onWillPop: () {
         finish(context, isChange);
@@ -113,7 +121,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             },
           ),
           titleSpacing: 0,
-          title: Text(language.orderDetails, style: boldTextStyle(size: 22)),
+          title:
+              Text('Détails de la Réservation', style: boldTextStyle(size: 22)),
           elevation: 0,
           centerTitle: true,
           actions: [
@@ -126,9 +135,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     borderRadius: BorderRadius.circular(commonRadius)),
                 onSelected: (val) async {
                   if (val == 1) {
-                    onDeleteOrder();
+                    onDeleteBooking();
                   } else {
-                    onCancelOrder();
+                    onCancelBooking();
                   }
                 },
                 icon: Icon(Icons.more_horiz),
@@ -143,20 +152,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             color: Colors.red,
                             fit: BoxFit.cover),
                         8.width,
-                        Text(language.deleteOrder, style: primaryTextStyle()),
+                        Text('Supprimer la réservation',
+                            style: primaryTextStyle()),
                       ],
                     ),
                   ),
-                  if (widget.orderDetails.status.validate() !=
-                          OrderStatus.cancelled &&
-                      widget.orderDetails.status.validate() !=
-                          OrderStatus.refunded &&
-                      widget.orderDetails.status.validate() !=
-                          OrderStatus.completed &&
-                      widget.orderDetails.status.validate() !=
-                          OrderStatus.trash &&
-                      widget.orderDetails.status.validate() !=
-                          OrderStatus.failed)
+                  if (widget.booking.status != OrderStatus.cancelled &&
+                      widget.booking.status != OrderStatus.refunded &&
+                      widget.booking.status != OrderStatus.completed &&
+                      widget.booking.status != OrderStatus.trash &&
+                      widget.booking.status != OrderStatus.failed)
                     PopupMenuItem(
                       value: 2,
                       child: Row(
@@ -167,7 +172,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               color: Colors.red,
                               fit: BoxFit.cover),
                           8.width,
-                          Text(language.cancelOrder, style: primaryTextStyle()),
+                          Text('Annuler la réservation',
+                              style: primaryTextStyle()),
                         ],
                       ),
                     ),
@@ -186,10 +192,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${language.orderStatus}:', style: boldTextStyle()),
+                      Text('Statut de la réservation', style: boldTextStyle()),
                       Text(
-                        Helpers.statusOrder(
-                                widget.orderDetails.status.validate())
+                        Helpers.statusOrder(widget.booking.status)
                             .capitalizeFirstLetter(),
                         style: boldTextStyle(
                             color: context.primaryColor, size: 18),
@@ -206,13 +211,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       children: [
                         Row(
                           children: [
-                            Text('${language.orderNumber}:',
+                            Text('Numéro de la Réservation:',
                                 style: primaryTextStyle(
                                     color: appStore.isDarkMode
                                         ? bodyDark
                                         : bodyWhite)),
                             8.width,
-                            Text(widget.orderDetails.id.validate().toString(),
+                            Text(widget.booking.id.validate().toString(),
                                     style: primaryTextStyle())
                                 .expand(),
                           ],
@@ -226,11 +231,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                         ? bodyDark
                                         : bodyWhite)),
                             8.width,
-                            Text(
-                                    formatDate(widget.orderDetails.dateCreated
-                                        .validate()
-                                        .toString()),
-                                    style: primaryTextStyle())
+                            Text(bookdate.toString(), style: primaryTextStyle())
                                 .expand(),
                           ],
                         ),
@@ -248,28 +249,26 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ],
                         ),
                         8.height,
-                        Row(
-                          children: [
-                            Text('${language.paymentMethod}:',
-                                style: primaryTextStyle(
-                                    color: appStore.isDarkMode
-                                        ? bodyDark
-                                        : bodyWhite)),
-                            8.width,
-                            Text(
-                                    widget.orderDetails.paymentMethodTitle
-                                        .validate(),
-                                    style: primaryTextStyle(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis)
-                                .expand(),
-                          ],
-                        ),
+                        // Row(
+                        //   children: [
+                        //     Text('${language.paymentMethod}:',
+                        //         style: primaryTextStyle(
+                        //             color: appStore.isDarkMode
+                        //                 ? bodyDark
+                        //                 : bodyWhite)),
+                        //     8.width,
+                        //     Text(widget.booking.paymentMethodTitle.validate(),
+                        //             style: primaryTextStyle(),
+                        //             maxLines: 1,
+                        //             overflow: TextOverflow.ellipsis)
+                        //         .expand(),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),
                   16.height,
-                  Text('${language.products}:', style: boldTextStyle()),
+                  Text('Évènement :', style: boldTextStyle()),
                   16.height,
                   Container(
                     decoration: BoxDecoration(
@@ -278,52 +277,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: widget.orderDetails.lineItems!.length,
-                          itemBuilder: (ctx, index) {
-                            return Row(
-                              children: [
-                                cachedImage(
-                                  widget
-                                      .orderDetails.lineItems![index].image!.src
-                                      .validate(),
-                                  height: 30,
-                                  width: 30,
-                                  fit: BoxFit.cover,
-                                ).cornerRadiusWithClipRRect(commonRadius),
-                                8.width,
-                                Text(
-                                  '${widget.orderDetails.lineItems![index].name.validate()} * ${widget.orderDetails.lineItems![index].quantity.validate()}',
-                                  style: primaryTextStyle(
-                                      color: appStore.isDarkMode
-                                          ? bodyDark
-                                          : bodyWhite),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ).expand(),
-                                PriceWidget(
-                                    price: widget
-                                        .orderDetails.lineItems![index].total
-                                        .validate()),
-                              ],
-                            ).paddingSymmetric(vertical: 6).onTap(() {
-                              ProductDetailScreen(
-                                      id: widget.orderDetails.lineItems![index]
-                                          .productId
-                                          .validate())
-                                  .launch(context);
-                            },
-                                splashColor: Colors.transparent,
-                                highlightColor: Colors.transparent);
-                          },
-                        ),
-                        10.height,
                         Row(
                           children: [
+                            cachedImage(
+                              widget.event.featuredImage!.full.validate(),
+                              height: 30,
+                              width: 30,
+                              fit: BoxFit.cover,
+                            ).cornerRadiusWithClipRRect(commonRadius),
+                            8.width,
                             Text(
-                              '${language.shippingCost}:',
+                              '${widget.event.title.validate()}',
                               style: primaryTextStyle(
                                   color: appStore.isDarkMode
                                       ? bodyDark
@@ -331,29 +295,36 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ).expand(),
-                            Wrap(
-                              children: widget.orderDetails.shippingLines
-                                  .validate()
-                                  .map((e) {
-                                return PriceWidget(price: e.total.validate());
-                              }).toList(),
-                            ),
                           ],
-                        ),
+                        ).paddingSymmetric(vertical: 6).onTap(() {
+                          EventDetailScreen(
+                                  id: widget.event.id.validate().toInt())
+                              .launch(context);
+                        }),
+                        10.height,
                         Divider(height: 32),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('${language.total}:', style: boldTextStyle()),
-                            PriceWidget(
-                                price: widget.orderDetails.total.validate()),
+                            Text('Début de l\'évènement:',
+                                style: boldTextStyle()),
+                            Text('Fin de l\'évènement:',
+                                style: boldTextStyle()),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(start, style: boldTextStyle()),
+                            Text(end, style: boldTextStyle()),
                           ],
                         ),
                       ],
                     ),
                   ),
                   16.height,
-                  Text('${language.billingAddress}:', style: boldTextStyle()),
+                  Text('Information de la Réservation :',
+                      style: boldTextStyle()),
                   16.height,
                   Container(
                     decoration: BoxDecoration(
@@ -372,9 +343,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                         : bodyWhite)),
                             8.width,
                             Text(
-                                widget.orderDetails.billing!.firstName
-                                    .validate()
-                                    .toString(),
+                                widget.booking.firstname.validate().toString() +
+                                    ' ' +
+                                    widget.booking.lastname
+                                        .validate()
+                                        .toString(),
                                 style: primaryTextStyle()),
                           ],
                         ),
@@ -382,16 +355,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.company}:',
+                            Text('Genre :',
                                 style: primaryTextStyle(
                                     color: appStore.isDarkMode
                                         ? bodyDark
                                         : bodyWhite)),
                             8.width,
                             Text(
-                                widget.orderDetails.billing!.company
-                                    .validate()
-                                    .toString(),
+                                widget.booking.sexe.validate().toString() == 'H'
+                                    ? 'Homme'
+                                    : 'Femme',
                                 style: primaryTextStyle()),
                           ],
                         ),
@@ -399,67 +372,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${language.address}:',
+                            Text('Index du Joueur :',
                                 style: primaryTextStyle(
                                     color: appStore.isDarkMode
                                         ? bodyDark
                                         : bodyWhite)),
                             8.width,
-                            Text('${widget.orderDetails.billing!.address_1.validate().toString()}, ${widget.orderDetails.billing!.address_2.validate().toString()}',
+                            Text('${widget.booking.indexPlayer.validate().toString()}',
                                     style: primaryTextStyle())
                                 .expand(),
-                          ],
-                        ),
-                        8.height,
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${language.city}:',
-                                style: primaryTextStyle(
-                                    color: appStore.isDarkMode
-                                        ? bodyDark
-                                        : bodyWhite)),
-                            8.width,
-                            Text(
-                                widget.orderDetails.billing!.city
-                                    .validate()
-                                    .toString()
-                                    .capitalizeFirstLetter(),
-                                style: primaryTextStyle()),
-                          ],
-                        ),
-                        8.height,
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${language.state}:',
-                                style: primaryTextStyle(
-                                    color: appStore.isDarkMode
-                                        ? bodyDark
-                                        : bodyWhite)),
-                            8.width,
-                            Text(
-                                widget.orderDetails.billing!.state
-                                    .validate()
-                                    .toString(),
-                                style: primaryTextStyle()),
-                          ],
-                        ),
-                        8.height,
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('${language.country}:',
-                                style: primaryTextStyle(
-                                    color: appStore.isDarkMode
-                                        ? bodyDark
-                                        : bodyWhite)),
-                            8.width,
-                            Text(
-                                widget.orderDetails.billing!.country
-                                    .validate()
-                                    .toString(),
-                                style: primaryTextStyle()),
                           ],
                         ),
                         8.height,
@@ -473,13 +394,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                         : bodyWhite)),
                             8.width,
                             Text(
-                                    widget.orderDetails.billing!.phone
-                                        .validate()
-                                        .toString(),
-                                    style: primaryTextStyle())
-                                .expand(),
+                                widget.booking.phone
+                                    .validate()
+                                    .toString()
+                                    .capitalizeFirstLetter(),
+                                style: primaryTextStyle()),
                           ],
                         ),
+                        8.height,
                       ],
                     ),
                   ),

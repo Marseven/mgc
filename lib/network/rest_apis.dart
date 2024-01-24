@@ -31,7 +31,10 @@ import 'package:socialv/models/groups/group_response.dart';
 import 'package:socialv/models/groups/reject_group_invite_response.dart';
 import 'package:socialv/models/groups/remove_group_member.dart';
 import 'package:socialv/models/login_response.dart';
+import 'package:socialv/models/mec/booking_model.dart';
+import 'package:socialv/models/mec/event_detail_model.dart';
 import 'package:socialv/models/mec/event_model.dart';
+import 'package:socialv/models/mec/price_model.dart';
 import 'package:socialv/models/members/friend_request_model.dart';
 import 'package:socialv/models/members/friendship_response_model.dart';
 import 'package:socialv/models/members/member_detail_model.dart';
@@ -139,7 +142,8 @@ Future<void> logout(BuildContext context, {bool setId = true}) async {
   if (setId) {
     Map req = {
       "player_id": getStringAsync(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID),
-      "add": 0
+      "add": 0,
+      "user_id": appStore.loginUserId,
     };
 
     await setPlayerId(req).then((value) {
@@ -1547,6 +1551,26 @@ Future<List<OrderModel>> getOrderList({String? status}) async {
   return it.map((e) => OrderModel.fromJson(e)).toList();
 }
 
+Future<List<BookingModel>> getBookingList({String? status}) async {
+  Iterable it = await handleResponse(await buildHttpResponse(
+      '${APIEndPoint.bookings}?customer_id=${appStore.loginUserId}&status=${status.toString()}',
+      method: HttpMethod.GET,
+      passParameters: false,
+      passToken: false));
+
+  return it.map((e) => BookingModel.fromJson(e)).toList();
+}
+
+Future<List<PriceModel>> getPriceList({int? eventId}) async {
+  Iterable it = await handleResponse(await buildHttpResponse(
+      '${APIEndPoint.prices}/$eventId',
+      method: HttpMethod.GET,
+      passParameters: false,
+      passToken: false));
+
+  return it.map((e) => PriceModel.fromJson(e)).toList();
+}
+
 Future<OrderModel> createOrder({required Map request}) async {
   return OrderModel.fromJson(await handleResponse(
     await buildHttpResponse('${APIEndPoint.orders}',
@@ -1587,6 +1611,28 @@ Future<OrderModel> cancelOrder(
 Future<OrderModel> deleteOrder({required int orderId}) async {
   return OrderModel.fromJson(await handleResponse(await buildHttpResponse(
       '${APIEndPoint.orders}/$orderId',
+      method: HttpMethod.DELETE,
+      requiredNonce: true,
+      passParameters: true,
+      passToken: false)));
+}
+
+Future<BookingModel> cancelBooking({required int booking}) async {
+  Map request = {"status": "cancelled"};
+
+  return BookingModel.fromJson(await handleResponse(await buildHttpResponse(
+    '${APIEndPoint.booking}/$booking',
+    method: HttpMethod.POST,
+    requiredNonce: true,
+    passParameters: true,
+    passToken: false,
+    request: request,
+  )));
+}
+
+Future<BookingModel> deleteBooking({required int booking}) async {
+  return BookingModel.fromJson(await handleResponse(await buildHttpResponse(
+      '${APIEndPoint.booking}/$booking',
       method: HttpMethod.DELETE,
       requiredNonce: true,
       passParameters: true,
@@ -1674,6 +1720,28 @@ Future<List<EventModel>> getEventList({int page = 1, String? keyword}) async {
   Iterable it = await handleResponse(
       await buildHttpResponse('${APIEndPoint.events}', method: HttpMethod.GET));
   return it.map((e) => EventModel.fromJson(e)).toList();
+}
+
+Future<EventDetailModel> getEventDetail({required int eventId}) async {
+  Map request = {"event_id": eventId};
+
+  Map<String, dynamic> responseData = await handleResponse(
+      await buildHttpResponse('${APIEndPoint.event}/$eventId',
+          method: HttpMethod.GET, request: request));
+  // Vérifiez que la clé 'ma' existe dans la réponse
+  final eventDetail = EventDetailModel.fromJson(responseData);
+  return eventDetail;
+}
+
+Future<BookingModel> getBooking({required int booking}) async {
+  Map request = {"booking_id": booking, "customer_id": appStore.loginUserId};
+
+  Map<String, dynamic> responseData = await handleResponse(
+      await buildHttpResponse('${APIEndPoint.booking}/$booking',
+          method: HttpMethod.GET, request: request));
+  // Vérifiez que la clé 'ma' existe dans la réponse
+  final book = BookingModel.fromJson(responseData);
+  return book;
 }
 
 // region forums

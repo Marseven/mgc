@@ -27,6 +27,9 @@ class EventModel {
   List<int> mecCategory;
   List<dynamic> acf;
   Links links;
+  DateTime start;
+  DateTime end;
+  String featureImage;
 
   EventModel({
     required this.id,
@@ -51,6 +54,9 @@ class EventModel {
     required this.mecCategory,
     required this.acf,
     required this.links,
+    required this.start,
+    required this.end,
+    required this.featureImage,
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
@@ -76,6 +82,9 @@ class EventModel {
         mecCategory: List<int>.from(json["mec_category"].map((x) => x)),
         acf: List<dynamic>.from(json["acf"].map((x) => x)),
         links: Links.fromJson(json["_links"]),
+        start: DateTime.parse(json["start"]),
+        end: DateTime.parse(json["end"]),
+        featureImage: json["feature_image"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -101,6 +110,11 @@ class EventModel {
         "mec_category": List<dynamic>.from(mecCategory.map((x) => x)),
         "acf": List<dynamic>.from(acf.map((x) => x)),
         "_links": links.toJson(),
+        "start":
+            "${start.year.toString().padLeft(4, '0')}-${start.month.toString().padLeft(2, '0')}-${start.day.toString().padLeft(2, '0')}",
+        "end":
+            "${end.year.toString().padLeft(4, '0')}-${end.month.toString().padLeft(2, '0')}-${end.day.toString().padLeft(2, '0')}",
+        "feature_image": featureImage,
       };
 }
 

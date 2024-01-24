@@ -42,8 +42,10 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
   Future<void> changeCountry() async {
     showCountryPicker(
       context: context,
-      countryListTheme: CountryListThemeData(textStyle: secondaryTextStyle(color: textSecondaryColorGlobal)),
-      showPhoneCode: true, // optional. Shows phone code before the country name.
+      countryListTheme: CountryListThemeData(
+          textStyle: secondaryTextStyle(color: textSecondaryColorGlobal)),
+      showPhoneCode:
+          true, // optional. Shows phone code before the country name.
       onSelect: (Country country) {
         selectedCountry = country;
         log(jsonEncode(selectedCountry.toJson()));
@@ -57,20 +59,27 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
 
     hideKeyboard(context);
 
-    await loginUser(request: req, isSocialLogin: isSocialLogin, setLoggedIn: false).then((value) async {
-      Map req = {"player_id": getStringAsync(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID), "add": 1};
-      await setPlayerId(req).then((value) {
-        //
-      }).catchError((e) {
-        log("Player id error : ${e.toString()}");
-      });
-
+    await loginUser(
+            request: req, isSocialLogin: isSocialLogin, setLoggedIn: false)
+        .then((value) async {
       if (value.isProfileUpdated.validate()) {
         appStore.setLoggedIn(true);
         getMemberById();
+        Map req = {
+          "player_id": getStringAsync(SharePreferencesKey.ONE_SIGNAL_PLAYER_ID),
+          "add": 1,
+          "user_id": appStore.loginUserId,
+        };
+        await setPlayerId(req).then((value) {
+          //
+        }).catchError((e) {
+          log("Player id error : ${e.toString()}");
+        });
       } else {
         appStore.setLoading(false);
-        CompleteProfileScreen(activityId: widget.activityId, contact: numberController.text).launch(context);
+        CompleteProfileScreen(
+                activityId: widget.activityId, contact: numberController.text)
+            .launch(context);
       }
     }).catchError((e) {
       appStore.setLoading(false);
@@ -115,9 +124,11 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
       appStore.setLoginFullName(value.name.validate());
       appStore.setLoading(false);
       if (widget.activityId != null) {
-        SinglePostScreen(postId: widget.activityId.validate()).launch(context, isNewTask: true);
+        SinglePostScreen(postId: widget.activityId.validate())
+            .launch(context, isNewTask: true);
       } else {
-        push(DashboardScreen(), isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
+        push(DashboardScreen(),
+            isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
       }
     }).catchError((e) {
       appStore.setLoading(false);
@@ -151,7 +162,10 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
           },
         ),
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle(statusBarIconBrightness: appStore.isDarkMode ? Brightness.light : Brightness.dark, statusBarColor: context.scaffoldBackgroundColor),
+        systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarIconBrightness:
+                appStore.isDarkMode ? Brightness.light : Brightness.dark,
+            statusBarColor: context.scaffoldBackgroundColor),
       ),
       body: Body(
         child: Container(
@@ -170,9 +184,11 @@ class _OTPLoginScreenState extends State<OTPLoginScreen> {
                   decoration: inputDecorationFilled(
                     context,
                     fillColor: context.cardColor,
-                    prefix: Text('+${selectedCountry.phoneCode}', style: primaryTextStyle()),
+                    prefix: Text('+${selectedCountry.phoneCode}',
+                        style: primaryTextStyle()),
                     hint: selectedCountry.example,
-                    hintStyle: primaryTextStyle(color: appStore.isDarkMode ? bodyDark : bodyWhite),
+                    hintStyle: primaryTextStyle(
+                        color: appStore.isDarkMode ? bodyDark : bodyWhite),
                   ),
                   autoFocus: true,
                   onFieldSubmitted: (s) {

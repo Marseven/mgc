@@ -29,6 +29,7 @@ dependencies:
   video_player: ^2.7.0
   youtube_player_flutter: ^8.1.2
   visibility_detector: ^0.3.3
+  pdf_render: ^1.4.0
 
   # APIs
   http: ^1.1.0

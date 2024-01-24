@@ -4,42 +4,40 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:provider/provider.dart';
-import 'package:socialv/components/loading_widget.dart';
 import 'package:socialv/main.dart';
 import 'package:socialv/models/cart_badge_model.dart';
-import 'package:socialv/models/woo_commerce/billing_address_model.dart';
-import 'package:socialv/models/woo_commerce/cart_item_model.dart';
+import 'package:socialv/models/mec/booking_model.dart';
+import 'package:socialv/models/mec/event_detail_model.dart';
 import 'package:socialv/models/woo_commerce/cart_model.dart';
 import 'package:socialv/models/woo_commerce/payment_model.dart';
 import 'package:socialv/network/rest_apis.dart';
+import 'package:socialv/screens/event/screens/booking_detail_screen.dart';
+import 'package:socialv/screens/event/screens/ebilling_screen.dart';
 import 'package:socialv/screens/settings/screens/edit_shop_details_screen.dart';
 import 'package:socialv/screens/shop/components/ebilling_component.dart';
-import 'package:socialv/screens/shop/components/price_widget.dart';
-import 'package:socialv/screens/shop/screens/ebilling_screen.dart';
-import 'package:socialv/screens/shop/screens/order_detail_screen.dart';
-import 'package:socialv/utils/app_constants.dart';
-import 'package:socialv/utils/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
 
-class VisaScreen extends StatefulWidget {
-  final CartModel cartDetails;
-  final bill_id;
-  final order;
+class VisaBookScreen extends StatefulWidget {
+  final String billId;
+  final BookingModel booking;
+  final EventDetailModel event;
 
-  VisaScreen(
-      {required this.cartDetails, required this.bill_id, required this.order});
+  VisaBookScreen({
+    required this.billId,
+    required this.booking,
+    required this.event,
+  });
 
   @override
-  State<VisaScreen> createState() => _VisaScreenState();
+  State<VisaBookScreen> createState() => _VisaBookScreenState();
 }
 
 enum Operator { airtelmoney, moovmoney, visamastercard }
 
-class _VisaScreenState extends State<VisaScreen> {
+class _VisaBookScreenState extends State<VisaBookScreen> {
   late CartModel cart;
 
   bool isError = false;
@@ -53,27 +51,22 @@ class _VisaScreenState extends State<VisaScreen> {
   final TextEditingController airtelmoney = TextEditingController();
   final TextEditingController moovmoney = TextEditingController();
 
-  bool _isLoading = false;
-  bool _retry = false;
-
-  var bill_id;
-  var order;
+  var billId;
+  var event;
+  var booking;
   var url = Uri.parse(Helpers.baseUrl + '/api/v1/merchant/e_bills');
   var username = "JOBS";
   var sharedkey = "6fb9b1b9-8119-4142-9cc1-96db5267631e";
-
-  Operator? _operator = Operator.airtelmoney;
 
   Timer? _check_timer;
   int _start = 300;
 
   @override
   void initState() {
-    cart = widget.cartDetails;
-    billingAddress = widget.cartDetails.billingAddress!;
-    bill_id = widget.bill_id;
-    order = widget.order;
-    print(bill_id);
+    event = widget.event;
+    billId = widget.billId;
+    booking = widget.booking;
+    print(billId);
     super.initState();
     init();
   }
@@ -112,12 +105,10 @@ class _VisaScreenState extends State<VisaScreen> {
   }
 
   void checkBilling() async {
-    var url =
-        Uri.parse(Helpers.baseUrl + '/api/v1/merchant/e_bills/' + bill_id);
+    var url = Uri.parse(Helpers.baseUrl + '/api/v1/merchant/e_bills/' + billId);
 
     var credentials = username + ':' + sharedkey;
     List<int> mydataint = utf8.encode(credentials);
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     var response = await http.get(url, headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Accept': 'application/json',
@@ -128,9 +119,6 @@ class _VisaScreenState extends State<VisaScreen> {
     print(result);
 
     if (result["state"] == "processed" || result["state"] == "paid") {
-      setState(() {
-        _isLoading = false;
-      });
       _check_timer!.cancel();
 
       cart.items!.forEach((element) {
@@ -149,20 +137,6 @@ class _VisaScreenState extends State<VisaScreen> {
         });
       });
 
-      await getOrderList(status: OrderStatus.any).then((value) {
-        value.forEach((element) {
-          if (element.id == order.id) {
-            setState(() {
-              order = element;
-            });
-          }
-        });
-      }).catchError((e) {
-        isError = true;
-        appStore.setLoading(false);
-        toast(e.toString(), print: true);
-      });
-
       cartBadge.updateCartCount(0);
       appStore.setWooCart(0);
 
@@ -170,7 +144,10 @@ class _VisaScreenState extends State<VisaScreen> {
       finish(context);
       finish(context);
 
-      OrderDetailScreen(orderDetails: order).launch(context);
+      BookingDetailScreen(
+        booking: booking,
+        event: event,
+      ).launch(context);
 
       //message
       toast('Commande payée avec succès.');
@@ -181,19 +158,13 @@ class _VisaScreenState extends State<VisaScreen> {
     if (_start == 0) {
       _check_timer!.cancel();
       setState(() {
-        _isLoading = false;
-        _retry = true;
         _start = 300;
       });
-      EbillingScreen(
-        cartDetails: cart!,
-        bill_id: bill_id,
-        order: order,
-      ).launch(context).then((value) async {
-        if (value ?? false) {
-          await getCart();
-        }
-      });
+      EbillingBookScreen(
+        event: event,
+        billId: billId,
+        booking: booking,
+      );
     }
   }
 
@@ -234,7 +205,7 @@ class _VisaScreenState extends State<VisaScreen> {
           onWebResourceError: (WebResourceError error) {},
           onNavigationRequest: (NavigationRequest request) {
             if (request.url.startsWith(
-                'https://test.billing-easy.net?invoice=$bill_id&operator=ORABANK_NG&redirect=1')) {
+                'https://staging.billing-easy.net?invoice=$billId&operator=ORABANK_NG&redirect=1')) {
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
@@ -242,7 +213,7 @@ class _VisaScreenState extends State<VisaScreen> {
         ),
       )
       ..loadRequest(Uri.parse(
-          'https://test.billing-easy.net?invoice=$bill_id&operator=ORABANK_NG&redirect=1'));
+          'https://staging.billing-easy.net?invoice=$billId&operator=ORABANK_NG&redirect=1'));
 
     return WillPopScope(
         onWillPop: () {
